@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
@@ -24,6 +24,7 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"]
   }
 }

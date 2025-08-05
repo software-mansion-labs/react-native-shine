@@ -69,6 +69,7 @@
     "@release-it/conventional-changelog": "^9.0.2",
     "@types/jest": "^29.5.5",
     "@types/react": "^19.0.12",
+    "@webgpu/types": "^0.1.64",
     "commitlint": "^19.6.1",
     "del-cli": "^5.1.0",
     "eslint": "^9.22.0",
@@ -80,11 +81,14 @@
     "react-native": "0.79.5",
     "react-native-builder-bob": "^0.40.13",
     "release-it": "^17.10.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "unplugin-typegpu": "^0.2.2"
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-wgpu": "^0.2.1",
+    "typegpu": "^0.7.0"
   },
   "workspaces": [
     "example"
@@ -150,5 +154,9 @@
     "languages": "js",
     "type": "library",
     "version": "0.52.0"
+  },
+  "dependencies": {
+    "react-native-wgpu": "^0.2.1",
+    "typegpu": "^0.7.0"
   }
 }
