@@ -80,7 +80,9 @@
     "react": "19.0.0",
     "react-native": "0.79.5",
     "react-native-builder-bob": "^0.40.13",
+    "react-native-wgpu": "^0.2.1",
     "release-it": "^17.10.0",
+    "typegpu": "^0.7.0",
     "typescript": "^5.8.3",
     "unplugin-typegpu": "^0.2.2"
   },
@@ -154,9 +156,5 @@
     "languages": "js",
     "type": "library",
     "version": "0.52.0"
-  },
-  "dependencies": {
-    "react-native-wgpu": "^0.2.1",
-    "typegpu": "^0.7.0"
   }
 }

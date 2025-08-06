@@ -10,6 +10,7 @@ module.exports = function (api) {
   return getConfig(
     {
       presets: ['babel-preset-expo'],
+      plugins: ['unplugin-typegpu/babel'],
     },
     { root, pkg }
   );
