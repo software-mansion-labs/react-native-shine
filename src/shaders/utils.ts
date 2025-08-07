@@ -1,4 +1,11 @@
-import { type TgpuRoot, type TgpuTexture } from 'typegpu';
+import {
+  type TgpuBuffer,
+  type TgpuRoot,
+  type TgpuTexture,
+  type UniformFlag,
+} from 'typegpu';
+import * as d from 'typegpu/data';
+import { rotationValuesBindGroupLayout } from './bindGroupLayouts';
 
 export const createTexture = async (
   root: TgpuRoot,
@@ -27,6 +34,34 @@ export const loadTexture = async (
     { texture: root.unwrap(texture) },
     [imageBitmap.width, imageBitmap.height]
   );
+};
+
+export const createRotationBuffer = (
+  root: TgpuRoot,
+  initValues?: { x: number; y: number; z: number }
+) => {
+  const init = initValues
+    ? d.vec3f(initValues.x, initValues.y, initValues.z)
+    : d.vec3f(0.0);
+  const rotationValuesBuffer = root
+    .createBuffer(d.vec3f, init)
+    .$usage('uniform');
+
+  return rotationValuesBuffer;
+};
+
+export const createRotationValuesBindGroup = (
+  root: TgpuRoot,
+  buffer: TgpuBuffer<d.Vec3f> & UniformFlag
+) => {
+  const rotationValuesBindGroup = root.createBindGroup(
+    rotationValuesBindGroupLayout,
+    {
+      vec: buffer,
+    }
+  );
+
+  return rotationValuesBindGroup;
 };
 
 //useSensors reanimated - gyroscope
