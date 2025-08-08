@@ -15,7 +15,7 @@ const mainFragment = tgpu['~unstable'].fragmentFn({
   const centeredCoords = std.sub(std.mul(uv, 2.0), 1); //-1 to 1
 
   const rot = rotationValuesBindGroupLayout.$.vec;
-  const center = std.add(d.vec2f(0.0), d.vec2f(rot.y, rot.x));
+  const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y));
 
   let color = std.textureSample(
     textureBindGroupLayout.$.texture,
