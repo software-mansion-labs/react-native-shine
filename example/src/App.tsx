@@ -1,9 +1,35 @@
+import { useEffect, useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { Shine } from 'react-native-shine';
+import {
+  getAngleFromDimensions,
+  Shine,
+  subscribeToOrientationChange,
+} from 'react-native-shine';
 
 export default function App() {
+  const [orientation, setOrientation] = useState<string>();
+
+  //TODO: add a function that gets the stateSetter and updates the value accordingly
+  //      so that the user doesn't have to write such basic logic
+  useEffect(() => {
+    let unsubscribe: (() => void) | null = null;
+
+    setOrientation(getAngleFromDimensions() === 0 ? 'PORTRAIT' : 'LANDSCAPE');
+    unsubscribe = subscribeToOrientationChange((angleDeg) => {
+      setOrientation(angleDeg === 0 ? 'PORTRAIT' : 'LANDSCAPE');
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
+
   return (
-    <View style={styles.container}>
+    <View
+      style={
+        orientation === 'PORTRAIT' ? styles.containerCol : styles.containerRow
+      }
+    >
       <Text>nice</Text>
       <Shine
         width={200}
@@ -24,8 +50,16 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  containerCol: {
     flex: 1,
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  containerRow: {
+    flex: 1,
+    flexDirection: 'row',
     width: '100%',
     height: '100%',
     alignItems: 'center',

@@ -9,6 +9,10 @@ import {
   createRotationValuesBindGroup,
   createTexture,
   loadTexture,
+  clamp,
+  rotate2D,
+  subscribeToOrientationChange,
+  getAngleFromDimensions,
 } from './shaders/utils';
 import type { TgpuTexture } from 'typegpu';
 import {
@@ -22,7 +26,6 @@ import {
   useSharedValue,
 } from 'react-native-reanimated';
 import * as d from 'typegpu/data';
-import * as std from 'typegpu/std';
 
 interface ShineProps {
   width?: number;
@@ -38,95 +41,126 @@ export function Shine({ width, height, imageURI }: ShineProps) {
   const frameRef = useRef<number | null>(null);
 
   const [imageTexture, setImageTexture] = useState<TgpuTexture | null>(null);
-  const rotationShared = useSharedValue<number[]>([0, 0, 0]);
 
-  const rotation = useAnimatedSensor(SensorType.ROTATION, {
-    interval: 20,
-  });
+  const orientationAngle = useSharedValue<number>(0); // degrees
+  const rotationShared = useSharedValue<[number, number, number]>([0, 0, 0]); // final GPU offsets
+
+  // Calibration shared values (UI thread)
+  const initialGravity = useSharedValue<[number, number, number]>([0, 0, 0]);
+  const calibSum = useSharedValue<[number, number, number]>([0, 0, 0]);
+  const calibCount = useSharedValue<number>(0);
+  const calibrated = useSharedValue<boolean>(false);
+
+  const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
+
+  // Subscribe to orientation changes and reset calibration on change
+  useEffect(() => {
+    let unsubscribe: (() => void) | null = null;
+
+    orientationAngle.value = getAngleFromDimensions();
+    unsubscribe = subscribeToOrientationChange((angleDeg) => {
+      orientationAngle.value = angleDeg;
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [orientationAngle]);
+
+  // Calibration & mapping logic
   useDerivedValue(() => {
-    const { qw, qx, qy, qz } = rotation.sensor.value;
-    const forward: [number, number, number] = [0, 0, -1];
+    'worklet';
 
-    // 2. Quaternion vector part
-    const q: [number, number, number] = [qx, qy, qz];
+    console.log(orientationAngle.value);
+    const v: any = gravitySensor.sensor?.value ??
+      gravitySensor.sensor.value ?? { x: 0, y: 0, z: 0 };
+    const gx = v.x ?? 0;
+    const gy = v.y ?? 0;
+    const gz = v.z ?? 0;
 
-    // STEP 1: q × v
-    const t: [number, number, number] = [
-      q[1] * forward[2] - q[2] * forward[1],
-      q[2] * forward[0] - q[0] * forward[2],
-      q[0] * forward[1] - q[1] * forward[0],
-    ];
+    const CALIBRATION_SAMPLES = 40;
+    const alpha = 0.15; // smoothing
+    const scale = 0.6;
 
-    // STEP 2: t2 = qw * forward + t
-    const t2: [number, number, number] = [
-      qw * forward[0] + t[0],
-      qw * forward[1] + t[1],
-      qw * forward[2] + t[2],
-    ];
+    if (!calibrated.value) {
+      // accumulate baseline in device coordinates
+      const s = calibSum.value;
+      const c = calibCount.value + 1;
+      calibSum.value = [s[0] + gx, s[1] + gy, s[2] + gz];
+      calibCount.value = c;
 
-    // STEP 3: rotated = forward + 2.0 * cross(q, t2)
-    const crossQT2: [number, number, number] = [
-      q[1] * t2[2] - q[2] * t2[1],
-      q[2] * t2[0] - q[0] * t2[2],
-      q[0] * t2[1] - q[1] * t2[0],
-    ];
+      if (c >= CALIBRATION_SAMPLES) {
+        const avg = calibSum.value;
+        initialGravity.value = [avg[0] / c, avg[1] / c, avg[2] / c];
+        calibrated.value = true;
+      }
 
-    const rotated: [number, number, number] = [
-      forward[0] + 2.0 * crossQT2[0],
-      forward[1] + 2.0 * crossQT2[1],
-      forward[2] + 2.0 * crossQT2[2],
-    ];
+      rotationShared.value = [0, 0, 0];
+      return;
+    }
 
-    // Extract X and Y for 2D glow offset.
-    let [offsetX, offsetY, offsetZ] = [rotated[0], rotated[1], rotated[2]];
-    offsetY = offsetY;
+    const init = initialGravity.value;
+    const dx = gx - init[0];
+    const dy = gy - init[1];
+    const dz = gz - init[2];
 
-    const clamp = (v: number, min = -1, max = 1) =>
-      Math.max(min, Math.min(max, v));
-    const scale = 0.5;
+    // Rotate into screen coordinates so offsets auto-swap with orientation
+    const [mx, my] = rotate2D([dx, dy], -orientationAngle.value);
+    const screenX = mx;
+    const screenY = -my;
 
-    offsetX = clamp(offsetX * scale);
-    offsetY = clamp(offsetY * scale);
+    const prev = rotationShared.value;
+    const smoothX = prev[0] * (1 - alpha) + screenX * alpha;
+    const smoothY = prev[1] * (1 - alpha) + screenY * alpha;
+    const smoothZ = prev[2] * (1 - alpha) + dz * alpha;
 
-    rotationShared.set([offsetX, offsetY, offsetZ]);
+    if (orientationAngle.value === 90) {
+      rotationShared.value = [
+        clamp(smoothY * scale, -1, 1),
+        clamp(-smoothX * scale, -1, 1),
+        clamp(smoothZ * scale, -1, 1),
+      ];
+    } else {
+      rotationShared.value = [
+        clamp(smoothX * scale, -1, 1),
+        clamp(smoothY * scale, -1, 1),
+        clamp(smoothZ * scale, -1, 1),
+      ];
+    }
   });
 
+  // Resource setup
   useEffect(() => {
     if (!root || !device || !context) return;
-
-    console.log('RESOURCE SETUP');
     (async () => {
-      console.log('---------------------------------------LOADING BITMAP');
       const bitmap = await getBitmapFromURI(imageURI);
-      console.log('---------------------------------------DONE');
-
       const texture = await createTexture(root, bitmap);
       setImageTexture(texture);
       await loadTexture(root, bitmap, texture);
     })();
   }, [root, device, context, imageURI]);
 
+  // Render loop
   useEffect(() => {
     if (!root || !device || !context || !imageTexture) return;
 
     context.configure({
-      device: device,
+      device,
       format: presentationFormat,
       alphaMode: 'premultiplied',
     });
 
-    const imageSampler = device.createSampler({
+    const sampler = device.createSampler({
       magFilter: 'linear',
       minFilter: 'linear',
     });
-
     const textureBindGroup = root.createBindGroup(textureBindGroupLayout, {
       texture: root.unwrap(imageTexture).createView(),
-      sampler: imageSampler,
+      sampler,
     });
 
     const rotationBuffer = createRotationBuffer(root);
-    const rotationValuesBindGroup = createRotationValuesBindGroup(
+    const rotationBindGroup = createRotationValuesBindGroup(
       root,
       rotationBuffer
     );
@@ -136,11 +170,10 @@ export function Shine({ width, height, imageURI }: ShineProps) {
       .withFragment(mainFragment, { format: presentationFormat })
       .createPipeline()
       .with(textureBindGroupLayout, textureBindGroup)
-      .with(rotationValuesBindGroupLayout, rotationValuesBindGroup);
+      .with(rotationValuesBindGroupLayout, rotationBindGroup);
 
     const render = () => {
-      console.log(rotationShared.get());
-      const rot = rotationShared.get();
+      const rot = rotationShared.value; // final, UI-thread-computed values
       rotationBuffer.write(d.vec3f(rot[0]!, rot[1]!, rot[2]!));
 
       pipeline
@@ -155,15 +188,14 @@ export function Shine({ width, height, imageURI }: ShineProps) {
       context.present();
       frameRef.current = requestAnimationFrame(render);
     };
-
     frameRef.current = requestAnimationFrame(render);
+
     return () => {
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-        frameRef.current = null;
-      }
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
   }, [device, context, root, presentationFormat, imageTexture, rotationShared]);
 
-  return <Canvas ref={ref} style={{ width: width, height: height }} />;
+  return <Canvas ref={ref} style={{ width, height }} />;
 }
+
+export { subscribeToOrientationChange, getAngleFromDimensions };
