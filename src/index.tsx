@@ -28,8 +28,8 @@ import {
 import * as d from 'typegpu/data';
 
 interface ShineProps {
-  width?: number;
-  height?: number;
+  width: number;
+  height: number;
   imageURI: string;
 }
 
@@ -53,6 +53,7 @@ export function Shine({ width, height, imageURI }: ShineProps) {
 
   const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
 
+  console.log(width, height, 'aaaa');
   // Subscribe to orientation changes and reset calibration on change
   useEffect(() => {
     let unsubscribe: (() => void) | null = null;
@@ -71,7 +72,7 @@ export function Shine({ width, height, imageURI }: ShineProps) {
   useDerivedValue(() => {
     'worklet';
 
-    console.log(orientationAngle.value);
+    // console.log(orientationAngle.value);
     const v: any = gravitySensor.sensor?.value ??
       gravitySensor.sensor.value ?? { x: 0, y: 0, z: 0 };
     const gx = v.x ?? 0;
@@ -167,7 +168,21 @@ export function Shine({ width, height, imageURI }: ShineProps) {
 
     const pipeline = root['~unstable']
       .withVertex(mainVertex, {})
-      .withFragment(mainFragment, { format: presentationFormat })
+      .withFragment(mainFragment, {
+        format: presentationFormat,
+        blend: {
+          color: {
+            srcFactor: 'src-alpha',
+            dstFactor: 'one-minus-src-alpha',
+            operation: 'add',
+          },
+          alpha: {
+            srcFactor: 'one',
+            dstFactor: 'one-minus-src-alpha',
+            operation: 'add',
+          },
+        },
+      })
       .createPipeline()
       .with(textureBindGroupLayout, textureBindGroup)
       .with(rotationValuesBindGroupLayout, rotationBindGroup);
@@ -195,7 +210,13 @@ export function Shine({ width, height, imageURI }: ShineProps) {
     };
   }, [device, context, root, presentationFormat, imageTexture, rotationShared]);
 
-  return <Canvas ref={ref} style={{ width, height }} />;
+  return (
+    <Canvas
+      ref={ref}
+      style={{ width, height, aspectRatio: width / height }}
+      transparent
+    />
+  );
 }
 
 export { subscribeToOrientationChange, getAngleFromDimensions };

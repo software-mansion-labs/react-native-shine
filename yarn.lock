@@ -11070,7 +11070,7 @@ __metadata:
     react-native-builder-bob: ^0.40.13
     react-native-monorepo-config: ^0.1.9
     react-native-reanimated: ^4.0.1
-    react-native-wgpu: ^0.2.1
+    react-native-wgpu: ^0.2.0
     react-native-worklets: ^0.4.1
     typegpu: ^0.7.0
   languageName: unknown
@@ -11116,7 +11116,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"react-native-wgpu@npm:^0.2.1":
+"react-native-wgpu@npm:^0.2.0, react-native-wgpu@npm:^0.2.1":
   version: 0.2.1
   resolution: "react-native-wgpu@npm:0.2.1"
   peerDependencies:

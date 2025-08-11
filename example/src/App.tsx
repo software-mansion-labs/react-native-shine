@@ -5,6 +5,7 @@ import {
   Shine,
   subscribeToOrientationChange,
 } from 'react-native-shine';
+import { charmander, pokemon } from './img';
 
 export default function App() {
   const [orientation, setOrientation] = useState<string>();
@@ -26,16 +27,19 @@ export default function App() {
 
   return (
     <View
-      style={
-        orientation === 'PORTRAIT' ? styles.containerCol : styles.containerRow
-      }
+      style={[
+        orientation === 'PORTRAIT' ? styles.containerCol : styles.containerRow,
+        styles.containerColor,
+      ]}
     >
       <Text>nice</Text>
       <Shine
         width={200}
         height={267}
         imageURI={
-          'https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/sm115/sm115-007.png?signature=d614178b139f5ebebe4d0009310f1b76678b6d3924c7218e28bf61d139097482'
+          pokemon
+          // charmander
+          // 'https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/sm115/sm115-007.png?signature=d614178b139f5ebebe4d0009310f1b76678b6d3924c7218e28bf61d139097482'
         }
       />
       <Shine
@@ -64,5 +68,8 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  containerColor: {
+    backgroundColor: '#ae78aeff',
   },
 });
