@@ -5,6 +5,7 @@ import {
   rotationValuesBindGroupLayout,
   textureBindGroupLayout,
 } from '../bindGroupLayouts';
+import { hueShift } from '../tgpuUtils';
 
 const mainFragment = tgpu['~unstable'].fragmentFn({
   in: { uv: d.vec2f },
@@ -17,18 +18,26 @@ const mainFragment = tgpu['~unstable'].fragmentFn({
   const rot = rotationValuesBindGroupLayout.$.vec;
   const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y));
 
-  let color = std.textureSample(
+  const color = std.textureSample(
     textureBindGroupLayout.$.texture,
     textureBindGroupLayout.$.sampler,
     texcoord
   );
 
   const glowPower = d.f32(1.0);
-  let glow = d.vec4f(std.sub(1.5, std.distance(center, centeredCoords)));
-  glow = std.mul(glow, glowPower);
+  const hueAngle = d.f32(0.2);
+  const dist = std.distance(center, centeredCoords);
+  let glowSize = std.clamp(
+    d.vec4f(std.sub(1.5, dist)),
+    d.vec4f(0.0),
+    d.vec4f(1.0)
+  );
+  glowSize = std.mul(glowSize, glowPower * color.w);
 
-  color = std.add(color, glow);
-  return color;
+  const shiftedRBG = hueShift(color.xyz, hueAngle);
+  const finalRGB = std.mix(color.xyz, shiftedRBG, glowSize.xyz);
+
+  return d.vec4f(finalRGB, color.w);
 });
 
 export default mainFragment;
