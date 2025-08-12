@@ -4,10 +4,11 @@ import * as std from 'typegpu/std';
 import {
   rotationValuesBindGroupLayout,
   textureBindGroupLayout,
+  bloomOptionsBindGroupLayout,
 } from '../bindGroupLayouts';
 import { bloomColorShift, hueShift, overlayChannels } from '../tgpuUtils';
 
-const mainFragment = tgpu['~unstable'].fragmentFn({
+const bloomFragment = tgpu['~unstable'].fragmentFn({
   in: { uv: d.vec2f },
   out: d.vec4f,
 })((input) => {
@@ -18,34 +19,52 @@ const mainFragment = tgpu['~unstable'].fragmentFn({
   const rot = rotationValuesBindGroupLayout.$.vec;
   const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y));
 
+  const bloomOptions = bloomOptionsBindGroupLayout.$.bloomOptions;
+  const bloomIntensity = bloomOptions.bloomIntensity;
+  const glowPower = bloomOptions.glowPower;
+  const hueBlendPower = bloomOptions.hueBlendPower;
+  const hueShiftAngleMax = bloomOptions.hueShiftAngleMax;
+  const hueShiftAngleMin = bloomOptions.hueShiftAngleMin;
+  const lightIntensity = bloomOptions.lightIntensity;
+
   let color = std.textureSample(
     textureBindGroupLayout.$.texture,
     textureBindGroupLayout.$.sampler,
     texcoord
   );
 
-  const glowPower = d.f32(1.0);
-  const dst = std.exp(-std.distance(center, centeredCoords) + 0.1);
-  const distToCenter = std.smoothstep(0.0, 1.0, dst);
+  const dst = std.exp(-std.distance(center, centeredCoords));
 
+  //bloomIntensity
+  const distToCenter = std.smoothstep(0.0, 1 / bloomIntensity, dst);
+
+  //glowPower
   let glow = d.vec3f(distToCenter);
   glow = std.mul(glow, glowPower * color.w);
 
-  const hueShiftAngle = distToCenter;
-  let shiftedRGB = bloomColorShift(color.xyz, dst / 10);
+  //hueBlend
+  const hueBlend = (d.f32(hueBlendPower) * dst) / 10.0;
+
+  //lightIntensity
+  glow = std.add(glow, lightIntensity / 10.0);
+  let shiftedRGB = bloomColorShift(color.xyz, dst / (lightIntensity * 2));
+
+  //hueShiftAngleMin/Max
+  const hueShiftAngle = std.smoothstep(
+    hueShiftAngleMin,
+    hueShiftAngleMax,
+    distToCenter
+  );
   const shiftedHue = hueShift(shiftedRGB, hueShiftAngle);
   shiftedRGB = overlayChannels(shiftedRGB, shiftedHue);
 
-  color = d.vec4f(std.mix(color.xyz, shiftedRGB, glow), color.w);
-
+  color = d.vec4f(std.mix(color.xyz, shiftedRGB, hueBlend), color.w);
   const baseColor = color;
   const blendColor = glow;
 
   const combined = overlayChannels(baseColor.xyz, blendColor);
-
-  // color = d.vec4f(std.add(color.xyz, glow / 10), color.w);
   color = d.vec4f(std.mix(color.xyz, combined, glow), color.w);
   return color;
 });
 
-export default mainFragment;
+export default bloomFragment;

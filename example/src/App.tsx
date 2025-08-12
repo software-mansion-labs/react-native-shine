@@ -5,7 +5,7 @@ import {
   Shine,
   subscribeToOrientationChange,
 } from 'react-native-shine';
-import { charmander, pokemon } from './img';
+import { pokemon } from './img';
 
 export default function App() {
   const [orientation, setOrientation] = useState<string>();
@@ -48,6 +48,14 @@ export default function App() {
         imageURI={
           'https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/sm115/sm115-007.png?signature=d614178b139f5ebebe4d0009310f1b76678b6d3924c7218e28bf61d139097482'
         }
+        bloomOptions={{
+          glowPower: 1,
+          bloomIntensity: 1,
+          lightIntensity: 1,
+          hueBlendPower: 1,
+          hueShiftAngleMax: 1,
+          hueShiftAngleMin: 0,
+        }}
       />
     </View>
   );
