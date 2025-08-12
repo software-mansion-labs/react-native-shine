@@ -2,11 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Canvas, useDevice, useGPUContext } from 'react-native-wgpu';
 import { getOrInitRoot } from './roots';
 import mainVertex from './shaders/vertexShaders/mainVertex';
-import mainFragment from './shaders/fragmentShaders/mainFragment';
 import getBitmapFromURI from './shaders/resourceManagement';
 import {
-  createRotationBuffer,
-  createRotationValuesBindGroup,
   createTexture,
   loadTexture,
   clamp,
@@ -16,6 +13,7 @@ import {
 } from './shaders/utils';
 import type { TgpuTexture } from 'typegpu';
 import {
+  bloomOptionsBindGroupLayout,
   rotationValuesBindGroupLayout,
   textureBindGroupLayout,
 } from './shaders/bindGroupLayouts';
@@ -27,14 +25,24 @@ import {
 } from 'react-native-reanimated';
 import * as d from 'typegpu/data';
 import { Platform } from 'react-native';
+import bloomFragment from './shaders/fragmentShaders/mainFragment';
+import {
+  createBloomOptionsBindGroup,
+  createBloomOptionsBuffer,
+  createRotationBuffer,
+  createRotationValuesBindGroup,
+} from './shaders/bindGroupUtils';
+import { createBloomOptions } from './types/typesUtils';
+import type { bloomOptionsPartial } from './types/types';
 
 interface ShineProps {
   width: number;
   height: number;
   imageURI: string;
+  bloomOptions?: bloomOptionsPartial;
 }
 
-export function Shine({ width, height, imageURI }: ShineProps) {
+export function Shine({ width, height, imageURI, bloomOptions }: ShineProps) {
   const { device = null } = useDevice();
   const root = device ? getOrInitRoot(device) : null;
   const { ref, context } = useGPUContext();
@@ -167,9 +175,18 @@ export function Shine({ width, height, imageURI }: ShineProps) {
       rotationBuffer
     );
 
+    const bloomOptionsBuffer = createBloomOptionsBuffer(
+      root,
+      createBloomOptions(bloomOptions ?? {})
+    );
+    const bloomOptionsBindGroup = createBloomOptionsBindGroup(
+      root,
+      bloomOptionsBuffer
+    );
+
     const pipeline = root['~unstable']
       .withVertex(mainVertex, {})
-      .withFragment(mainFragment, {
+      .withFragment(bloomFragment, {
         format: presentationFormat,
         blend: {
           color: {
@@ -186,7 +203,8 @@ export function Shine({ width, height, imageURI }: ShineProps) {
       })
       .createPipeline()
       .with(textureBindGroupLayout, textureBindGroup)
-      .with(rotationValuesBindGroupLayout, rotationBindGroup);
+      .with(rotationValuesBindGroupLayout, rotationBindGroup)
+      .with(bloomOptionsBindGroupLayout, bloomOptionsBindGroup);
 
     const render = () => {
       const rot = rotationShared.value; // final, UI-thread-computed values
@@ -209,7 +227,15 @@ export function Shine({ width, height, imageURI }: ShineProps) {
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
-  }, [device, context, root, presentationFormat, imageTexture, rotationShared]);
+  }, [
+    device,
+    context,
+    root,
+    presentationFormat,
+    imageTexture,
+    rotationShared,
+    bloomOptions,
+  ]);
 
   return (
     <Canvas
