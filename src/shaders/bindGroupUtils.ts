@@ -3,10 +3,21 @@ import * as d from 'typegpu/data';
 import {
   bloomOptionsBindGroupLayout,
   bloomOptionsSchema,
+  colorMaskBindGroupLayout,
+  colorMaskSchema,
   rotationValuesBindGroupLayout,
 } from './bindGroupLayouts';
-import type { bloomOptions, bloomOptionsPartial } from '../types/types';
-import { createBloomOptions, mapToF32 } from '../types/typesUtils';
+import type {
+  BloomOptions,
+  ColorMask,
+  PartiallyOptional,
+} from '../types/types';
+import {
+  colorMaskToTyped,
+  createBloomOptions,
+  createColorMask,
+  mapToF32,
+} from '../types/typesUtils';
 
 export const createRotationBuffer = (
   root: TgpuRoot,
@@ -38,9 +49,9 @@ export const createRotationValuesBindGroup = (
 
 export const createBloomOptionsBuffer = (
   root: TgpuRoot,
-  initValues?: bloomOptionsPartial
+  initValues?: Partial<BloomOptions>
 ) => {
-  const bloomOptions: bloomOptions = createBloomOptions({ ...initValues });
+  const bloomOptions: BloomOptions = createBloomOptions({ ...initValues });
   const bloomOptionsTyped = mapToF32(bloomOptions);
 
   const bloomOptionsBuffer = root
@@ -62,4 +73,32 @@ export const createBloomOptionsBindGroup = (
   );
 
   return bloomOptionsBindGroup;
+};
+
+export const createColorMaskBuffer = (
+  root: TgpuRoot,
+  initValues: PartiallyOptional<ColorMask, 'baseColor'>
+) => {
+  const colorMask: ColorMask = createColorMask({ ...initValues });
+  const colorMaskTyped = colorMaskToTyped(colorMask);
+
+  console.log(colorMask, colorMaskTyped);
+
+  const colorMaskBuffer = root
+    .createBuffer(colorMaskSchema, colorMaskTyped)
+    .$usage('uniform');
+
+  console.log('sus');
+  return colorMaskBuffer;
+};
+
+export const createColorMaskBindGroup = (
+  root: TgpuRoot,
+  buffer: TgpuBuffer<colorMaskSchema> & UniformFlag
+) => {
+  const colorMaskBindGroup = root.createBindGroup(colorMaskBindGroupLayout, {
+    mask: buffer,
+  });
+
+  return colorMaskBindGroup;
 };

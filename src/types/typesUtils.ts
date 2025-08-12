@@ -1,9 +1,10 @@
-import { f32 } from 'typegpu/data';
-import type { bloomOptions, bloomOptionsPartial } from './types';
+import { f32, vec2f, vec3f, vec4f } from 'typegpu/data';
+import type { BloomOptions, ColorMask, PartiallyOptional, vec3 } from './types';
+import { div } from 'typegpu/std';
 
 export const createBloomOptions = (
-  options: bloomOptionsPartial
-): bloomOptions => {
+  options: Partial<BloomOptions>
+): BloomOptions => {
   const {
     glowPower,
     hueShiftAngleMax,
@@ -36,4 +37,52 @@ export const mapToF32 = <T extends Record<string, number>>(
   }
 
   return result;
+};
+
+export const createColorMask = (
+  colorMask: PartiallyOptional<ColorMask, 'baseColor'>
+) => {
+  const { baseColor, rgbToleranceRange } = colorMask;
+  const baseTolerance = {
+    upper: [20, 20, 20] as vec3,
+    lower: [20, 20, 20] as vec3,
+  };
+
+  const mask: ColorMask = {
+    baseColor: baseColor,
+    rgbToleranceRange: rgbToleranceRange || baseTolerance,
+  };
+
+  return mask;
+};
+
+export const colorMaskToTyped = (colorMask: ColorMask) => {
+  const result = {
+    baseColor: div(numberArrToTyped(colorMask.baseColor), 255),
+    rgbToleranceRange: {
+      upper: div(numberArrToTyped(colorMask.rgbToleranceRange.upper), 255),
+      lower: div(numberArrToTyped(colorMask.rgbToleranceRange.lower), 255),
+    },
+  };
+  return result;
+};
+
+const numberArrToTyped = (vec: number[]) => {
+  let convFn: ((...args: number[]) => any) | null = null;
+  switch (vec.length) {
+    case 2:
+      convFn = vec2f;
+      break;
+    case 3:
+      convFn = vec3f;
+      break;
+    case 4:
+      convFn = vec4f;
+      break;
+    default:
+      throw new Error('numberArrToTyped: Vector must be of length [2-4]');
+  }
+
+  const typed = convFn(...vec);
+  return typed;
 };
