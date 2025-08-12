@@ -5,7 +5,7 @@ import {
   rotationValuesBindGroupLayout,
   textureBindGroupLayout,
 } from '../bindGroupLayouts';
-import { hueShift } from '../tgpuUtils';
+import { bloomColorShift, hueShift, overlayChannels } from '../tgpuUtils';
 
 const mainFragment = tgpu['~unstable'].fragmentFn({
   in: { uv: d.vec2f },
@@ -18,26 +18,34 @@ const mainFragment = tgpu['~unstable'].fragmentFn({
   const rot = rotationValuesBindGroupLayout.$.vec;
   const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y));
 
-  const color = std.textureSample(
+  let color = std.textureSample(
     textureBindGroupLayout.$.texture,
     textureBindGroupLayout.$.sampler,
     texcoord
   );
 
   const glowPower = d.f32(1.0);
-  const hueAngle = d.f32(0.2);
-  const dist = std.distance(center, centeredCoords);
-  let glowSize = std.clamp(
-    d.vec4f(std.sub(1.5, dist)),
-    d.vec4f(0.0),
-    d.vec4f(1.0)
-  );
-  glowSize = std.mul(glowSize, glowPower * color.w);
+  const dst = std.exp(-std.distance(center, centeredCoords) + 0.1);
+  const distToCenter = std.smoothstep(0.0, 1.0, dst);
 
-  const shiftedRBG = hueShift(color.xyz, hueAngle);
-  const finalRGB = std.mix(color.xyz, shiftedRBG, glowSize.xyz);
+  let glow = d.vec3f(distToCenter);
+  glow = std.mul(glow, glowPower * color.w);
 
-  return d.vec4f(finalRGB, color.w);
+  const hueShiftAngle = distToCenter;
+  let shiftedRGB = bloomColorShift(color.xyz, dst / 10);
+  const shiftedHue = hueShift(shiftedRGB, hueShiftAngle);
+  shiftedRGB = overlayChannels(shiftedRGB, shiftedHue);
+
+  color = d.vec4f(std.mix(color.xyz, shiftedRGB, glow), color.w);
+
+  const baseColor = color;
+  const blendColor = glow;
+
+  const combined = overlayChannels(baseColor.xyz, blendColor);
+
+  // color = d.vec4f(std.add(color.xyz, glow / 10), color.w);
+  color = d.vec4f(std.mix(color.xyz, combined, glow), color.w);
+  return color;
 });
 
 export default mainFragment;

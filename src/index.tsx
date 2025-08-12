@@ -26,6 +26,7 @@ import {
   useSharedValue,
 } from 'react-native-reanimated';
 import * as d from 'typegpu/data';
+import { Platform } from 'react-native';
 
 interface ShineProps {
   width: number;
@@ -214,7 +215,7 @@ export function Shine({ width, height, imageURI }: ShineProps) {
     <Canvas
       ref={ref}
       style={{ width, height, aspectRatio: width / height }}
-      transparent
+      transparent={Platform.OS === 'ios'}
     />
   );
 }
