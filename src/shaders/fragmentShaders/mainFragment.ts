@@ -5,6 +5,7 @@ import {
   rotationValuesBindGroupLayout,
   textureBindGroupLayout,
   bloomOptionsBindGroupLayout,
+  colorMaskBindGroupLayout,
 } from '../bindGroupLayouts';
 import { bloomColorShift, hueShift, overlayChannels } from '../tgpuUtils';
 
@@ -27,15 +28,26 @@ const bloomFragment = tgpu['~unstable'].fragmentFn({
   const hueShiftAngleMin = bloomOptions.hueShiftAngleMin;
   const lightIntensity = bloomOptions.lightIntensity;
 
+  const mask = colorMaskBindGroupLayout.$.mask;
+  const maskedColor = mask.baseColor;
+  const rgbToleranceRange = mask.rgbToleranceRange;
+
   let color = std.textureSample(
     textureBindGroupLayout.$.texture,
     textureBindGroupLayout.$.sampler,
     texcoord
   );
 
-  const dst = std.exp(-std.distance(center, centeredCoords));
+  const maskedColorLower = std.sub(maskedColor, rgbToleranceRange.lower);
+  const maskedColorUpper = std.add(maskedColor, rgbToleranceRange.upper);
+  const upperCheck = std.all(std.le(color.xyz, maskedColorUpper));
+  const lowerCheck = std.all(std.ge(color.xyz, maskedColorLower));
+  if (upperCheck && lowerCheck) {
+    return color;
+  }
 
   //bloomIntensity
+  const dst = std.exp(-std.distance(center, centeredCoords));
   const distToCenter = std.smoothstep(0.0, 1 / bloomIntensity, dst);
 
   //glowPower
@@ -64,6 +76,7 @@ const bloomFragment = tgpu['~unstable'].fragmentFn({
 
   const combined = overlayChannels(baseColor.xyz, blendColor);
   color = d.vec4f(std.mix(color.xyz, combined, glow), color.w);
+
   return color;
 });
 

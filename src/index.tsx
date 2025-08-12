@@ -14,6 +14,7 @@ import {
 import type { TgpuTexture } from 'typegpu';
 import {
   bloomOptionsBindGroupLayout,
+  colorMaskBindGroupLayout,
   rotationValuesBindGroupLayout,
   textureBindGroupLayout,
 } from './shaders/bindGroupLayouts';
@@ -29,17 +30,19 @@ import bloomFragment from './shaders/fragmentShaders/mainFragment';
 import {
   createBloomOptionsBindGroup,
   createBloomOptionsBuffer,
+  createColorMaskBindGroup,
+  createColorMaskBuffer,
   createRotationBuffer,
   createRotationValuesBindGroup,
 } from './shaders/bindGroupUtils';
-import { createBloomOptions } from './types/typesUtils';
-import type { bloomOptionsPartial } from './types/types';
+import { createBloomOptions, createColorMask } from './types/typesUtils';
+import type { BloomOptions } from './types/types';
 
 interface ShineProps {
   width: number;
   height: number;
   imageURI: string;
-  bloomOptions?: bloomOptionsPartial;
+  bloomOptions?: Partial<BloomOptions>;
 }
 
 export function Shine({ width, height, imageURI, bloomOptions }: ShineProps) {
@@ -62,7 +65,6 @@ export function Shine({ width, height, imageURI, bloomOptions }: ShineProps) {
 
   const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
 
-  console.log(width, height, 'aaaa');
   // Subscribe to orientation changes and reset calibration on change
   useEffect(() => {
     let unsubscribe: (() => void) | null = null;
@@ -184,6 +186,15 @@ export function Shine({ width, height, imageURI, bloomOptions }: ShineProps) {
       bloomOptionsBuffer
     );
 
+    const colorMaskBuffer = createColorMaskBuffer(
+      root,
+      createColorMask({
+        baseColor: [0, 0, 0],
+        rgbToleranceRange: { upper: [30, 30, 30], lower: [30, 30, 30] },
+      })
+    );
+    const colorMaskBindGroup = createColorMaskBindGroup(root, colorMaskBuffer);
+
     const pipeline = root['~unstable']
       .withVertex(mainVertex, {})
       .withFragment(bloomFragment, {
@@ -204,10 +215,11 @@ export function Shine({ width, height, imageURI, bloomOptions }: ShineProps) {
       .createPipeline()
       .with(textureBindGroupLayout, textureBindGroup)
       .with(rotationValuesBindGroupLayout, rotationBindGroup)
-      .with(bloomOptionsBindGroupLayout, bloomOptionsBindGroup);
+      .with(bloomOptionsBindGroupLayout, bloomOptionsBindGroup)
+      .with(colorMaskBindGroupLayout, colorMaskBindGroup);
 
     const render = () => {
-      const rot = rotationShared.value; // final, UI-thread-computed values
+      const rot = rotationShared.value;
       rotationBuffer.write(d.vec3f(rot[0]!, rot[1]!, rot[2]!));
 
       pipeline

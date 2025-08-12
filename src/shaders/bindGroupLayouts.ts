@@ -24,3 +24,17 @@ export type bloomOptionsSchema = typeof bloomOptionsSchema;
 export const bloomOptionsBindGroupLayout = tgpu.bindGroupLayout({
   bloomOptions: { uniform: bloomOptionsSchema },
 });
+
+export const colorMaskSchema = d.struct({
+  baseColor: d.vec3f,
+  rgbToleranceRange: d.struct({
+    upper: d.vec3f,
+    lower: d.vec3f,
+  }),
+});
+
+export type colorMaskSchema = typeof colorMaskSchema;
+
+export const colorMaskBindGroupLayout = tgpu.bindGroupLayout({
+  mask: { uniform: colorMaskSchema },
+});
