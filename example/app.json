@@ -23,6 +23,9 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "shine.example"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     }
   }
 }
