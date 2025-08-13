@@ -17,7 +17,7 @@ import {
   createBloomOptions,
   createColorMask,
   mapToF32,
-} from '../types/typesUtils';
+} from '../types/typeUtils';
 
 export const createRotationBuffer = (
   root: TgpuRoot,
@@ -82,13 +82,10 @@ export const createColorMaskBuffer = (
   const colorMask: ColorMask = createColorMask({ ...initValues });
   const colorMaskTyped = colorMaskToTyped(colorMask);
 
-  console.log(colorMask, colorMaskTyped);
-
   const colorMaskBuffer = root
     .createBuffer(colorMaskSchema, colorMaskTyped)
     .$usage('uniform');
 
-  console.log('sus');
   return colorMaskBuffer;
 };
 

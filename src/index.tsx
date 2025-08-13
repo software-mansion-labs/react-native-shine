@@ -26,7 +26,7 @@ import {
 } from 'react-native-reanimated';
 import * as d from 'typegpu/data';
 import { Platform } from 'react-native';
-import bloomFragment from './shaders/fragmentShaders/mainFragment';
+import bloomFragment from './shaders/fragmentShaders/bloomFragment';
 import {
   createBloomOptionsBindGroup,
   createBloomOptionsBuffer,
@@ -35,17 +35,34 @@ import {
   createRotationBuffer,
   createRotationValuesBindGroup,
 } from './shaders/bindGroupUtils';
-import { createBloomOptions, createColorMask } from './types/typesUtils';
-import type { BloomOptions } from './types/types';
-
+import {
+  createBindGroupPairs,
+  createBloomOptions,
+  createColorMask,
+} from './types/typeUtils';
+import type {
+  BindGroupPair,
+  BloomOptions,
+  ColorMask,
+  DeepPartiallyOptional,
+} from './types/types';
+import { attachBindGroups, getDefaultTarget } from './shaders/pipelineSetups';
+import colorMaskFragment from './shaders/fragmentShaders/colorMaskFragment';
 interface ShineProps {
   width: number;
   height: number;
   imageURI: string;
   bloomOptions?: Partial<BloomOptions>;
+  colorMaskOptions?: DeepPartiallyOptional<ColorMask, 'baseColor'>;
 }
 
-export function Shine({ width, height, imageURI, bloomOptions }: ShineProps) {
+export function Shine({
+  width,
+  height,
+  imageURI,
+  bloomOptions,
+  colorMaskOptions,
+}: ShineProps) {
   const { device = null } = useDevice();
   const root = device ? getOrInitRoot(device) : null;
   const { ref, context } = useGPUContext();
@@ -67,16 +84,12 @@ export function Shine({ width, height, imageURI, bloomOptions }: ShineProps) {
 
   // Subscribe to orientation changes and reset calibration on change
   useEffect(() => {
-    let unsubscribe: (() => void) | null = null;
-
     orientationAngle.value = getAngleFromDimensions();
-    unsubscribe = subscribeToOrientationChange((angleDeg) => {
+    const unsubscribe = subscribeToOrientationChange((angleDeg) => {
       orientationAngle.value = angleDeg;
     });
 
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+    return () => unsubscribe();
   }, [orientationAngle]);
 
   // Calibration & mapping logic
@@ -188,45 +201,59 @@ export function Shine({ width, height, imageURI, bloomOptions }: ShineProps) {
 
     const colorMaskBuffer = createColorMaskBuffer(
       root,
-      createColorMask({
-        baseColor: [0, 0, 0],
-        rgbToleranceRange: { upper: [30, 30, 30], lower: [30, 30, 30] },
-      })
+      createColorMask(colorMaskOptions ?? { baseColor: [-20, -20, -20] })
     );
     const colorMaskBindGroup = createColorMaskBindGroup(root, colorMaskBuffer);
 
-    const pipeline = root['~unstable']
+    const bloomBGP: BindGroupPair[] = createBindGroupPairs(
+      [
+        textureBindGroupLayout,
+        rotationValuesBindGroupLayout,
+        bloomOptionsBindGroupLayout,
+        colorMaskBindGroupLayout,
+      ],
+      [
+        textureBindGroup,
+        rotationBindGroup,
+        bloomOptionsBindGroup,
+        colorMaskBindGroup,
+      ]
+    );
+
+    const maskBGP: BindGroupPair[] = createBindGroupPairs(
+      [textureBindGroupLayout, colorMaskBindGroupLayout],
+      [textureBindGroup, colorMaskBindGroup]
+    );
+
+    let bloomPipeline = root['~unstable']
       .withVertex(mainVertex, {})
-      .withFragment(bloomFragment, {
-        format: presentationFormat,
-        blend: {
-          color: {
-            srcFactor: 'src-alpha',
-            dstFactor: 'one-minus-src-alpha',
-            operation: 'add',
-          },
-          alpha: {
-            srcFactor: 'one',
-            dstFactor: 'one-minus-src-alpha',
-            operation: 'add',
-          },
-        },
-      })
-      .createPipeline()
-      .with(textureBindGroupLayout, textureBindGroup)
-      .with(rotationValuesBindGroupLayout, rotationBindGroup)
-      .with(bloomOptionsBindGroupLayout, bloomOptionsBindGroup)
-      .with(colorMaskBindGroupLayout, colorMaskBindGroup);
+      .withFragment(bloomFragment, getDefaultTarget(presentationFormat))
+      .createPipeline();
+    bloomPipeline = attachBindGroups(bloomPipeline, bloomBGP);
+
+    let maskPipeline = root['~unstable']
+      .withVertex(mainVertex, {})
+      .withFragment(colorMaskFragment, getDefaultTarget(presentationFormat))
+      .createPipeline();
+    maskPipeline = attachBindGroups(maskPipeline, maskBGP);
 
     const render = () => {
       const rot = rotationShared.value;
       rotationBuffer.write(d.vec3f(rot[0]!, rot[1]!, rot[2]!));
 
-      pipeline
+      bloomPipeline
         .withColorAttachment({
           view: context.getCurrentTexture().createView(),
           clearValue: [0, 0, 0, 0],
           loadOp: 'clear',
+          storeOp: 'store',
+        })
+        .draw(6);
+
+      maskPipeline
+        .withColorAttachment({
+          view: context.getCurrentTexture().createView(),
+          loadOp: 'load',
           storeOp: 'store',
         })
         .draw(6);
@@ -247,6 +274,7 @@ export function Shine({ width, height, imageURI, bloomOptions }: ShineProps) {
     imageTexture,
     rotationShared,
     bloomOptions,
+    colorMaskOptions,
   ]);
 
   return (

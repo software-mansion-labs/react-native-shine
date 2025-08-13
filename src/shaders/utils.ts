@@ -81,31 +81,6 @@ export const rotate2D = (
   return [x * c - y * s, x * s + y * c];
 };
 
-/* ---------- Orientation helpers ---------- */
-let ScreenOrientation: any = null;
-try {
-  ScreenOrientation = require('expo-screen-orientation');
-} catch {
-  ScreenOrientation = null;
-}
-
-export function expoOrientationToAngle(orientation: number) {
-  if (!ScreenOrientation) return 0;
-  const OR = ScreenOrientation.Orientation;
-  switch (orientation) {
-    case OR.PORTRAIT_UP:
-      return 0;
-    case OR.LANDSCAPE_LEFT:
-      return 270;
-    case OR.PORTRAIT_DOWN:
-      return 180;
-    case OR.LANDSCAPE_RIGHT:
-      return 90;
-    default:
-      return 0;
-  }
-}
-
 // Simple helper to get angle from dimensions (0 or 90)
 export function getAngleFromDimensions() {
   const { width, height } = Dimensions.get('window');
@@ -117,14 +92,12 @@ export function subscribeToOrientationChange(
   callback: (angleDeg: number) => void
 ) {
   callback(getAngleFromDimensions());
-
   const handler = () => {
     callback(getAngleFromDimensions());
   };
 
   const dimSub = Dimensions.addEventListener('change', handler);
-
   return () => {
-    dimSub?.remove();
+    dimSub.remove();
   };
 }
