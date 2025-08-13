@@ -1,1 +1,5 @@
-// it.todo('write a test');
+describe('example test suite', () => {
+  it('should pass', () => {
+    expect(true).toBe(true);
+  });
+});
