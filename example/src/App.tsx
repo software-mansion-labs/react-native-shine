@@ -53,7 +53,7 @@ export default function App() {
           glowPower: 1,
           bloomIntensity: 1,
           lightIntensity: 1,
-          hueBlendPower: 3,
+          hueBlendPower: 5,
           hueShiftAngleMax: 1,
           hueShiftAngleMin: 0,
         }}

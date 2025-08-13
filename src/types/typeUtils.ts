@@ -75,7 +75,7 @@ export const colorMaskToTyped = (colorMask: ColorMask) => {
   return result;
 };
 
-const numberArrToTyped = (vec: number[]) => {
+export const numberArrToTyped = (vec: number[]) => {
   let convFn: ((...args: number[]) => any) | null = null;
   switch (vec.length) {
     case 2:
