@@ -90,7 +90,8 @@
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-web": "^0.21.0"
   },
   "workspaces": [
     "example"
