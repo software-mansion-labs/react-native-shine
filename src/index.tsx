@@ -39,6 +39,7 @@ import {
   createBindGroupPairs,
   createBloomOptions,
   createColorMask,
+  numberArrToTyped,
 } from './types/typeUtils';
 import type {
   BindGroupPair,
@@ -46,7 +47,11 @@ import type {
   ColorMask,
   DeepPartiallyOptional,
 } from './types/types';
-import { attachBindGroups, getDefaultTarget } from './shaders/pipelineSetups';
+import {
+  attachBindGroups,
+  attachBindGroupsToPass,
+  getDefaultTarget,
+} from './shaders/pipelineSetups';
 import colorMaskFragment from './shaders/fragmentShaders/colorMaskFragment';
 interface ShineProps {
   width: number;
@@ -82,6 +87,8 @@ export function Shine({
 
   const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
 
+  console.log('render');
+
   // Subscribe to orientation changes and reset calibration on change
   useEffect(() => {
     orientationAngle.value = getAngleFromDimensions();
@@ -90,7 +97,7 @@ export function Shine({
     });
 
     return () => unsubscribe();
-  }, [orientationAngle]);
+  }, []);
 
   // Calibration & mapping logic
   useDerivedValue(() => {
@@ -231,32 +238,65 @@ export function Shine({
       .createPipeline();
     bloomPipeline = attachBindGroups(bloomPipeline, bloomBGP);
 
-    let maskPipeline = root['~unstable']
+    let colorMaskPipeline = root['~unstable']
       .withVertex(mainVertex, {})
       .withFragment(colorMaskFragment, getDefaultTarget(presentationFormat))
       .createPipeline();
-    maskPipeline = attachBindGroups(maskPipeline, maskBGP);
+    colorMaskPipeline = attachBindGroups(colorMaskPipeline, maskBGP);
 
+    const rot = d.vec3f(0.0);
+    let view: GPUTextureView;
+    let bloomAttachment;
+    let colorMaskAttachment;
     const render = () => {
-      const rot = rotationShared.value;
-      rotationBuffer.write(d.vec3f(rot[0]!, rot[1]!, rot[2]!));
+      rot[0] = rotationShared.value[0];
+      rot[1] = rotationShared.value[0];
+      rot[2] = rotationShared.value[0];
+      rotationBuffer.write(rot);
 
-      bloomPipeline
-        .withColorAttachment({
-          view: context.getCurrentTexture().createView(),
-          clearValue: [0, 0, 0, 0],
-          loadOp: 'clear',
-          storeOp: 'store',
-        })
-        .draw(6);
+      view = context.getCurrentTexture().createView();
+      // bloomAttachment = {
+      //   view: view,
+      //   clearValue: [0, 0, 0, 0],
+      //   loadOp: 'clear' as GPULoadOp,
+      //   storeOp: 'store' as GPUStoreOp,
+      // };
 
-      maskPipeline
-        .withColorAttachment({
-          view: context.getCurrentTexture().createView(),
-          loadOp: 'load',
-          storeOp: 'store',
-        })
-        .draw(6);
+      // colorMaskAttachment = {
+      //   view: view,
+      //   loadOp: 'load' as GPULoadOp,
+      //   storeOp: 'store' as GPUStoreOp,
+      // };
+
+      root['~unstable'].beginRenderPass(
+        {
+          colorAttachments: [
+            {
+              view,
+              clearValue: [0, 0, 0, 0],
+              loadOp: 'clear',
+              storeOp: 'store',
+            },
+          ],
+        },
+        (pass) => {
+          pass.setPipeline(bloomPipeline);
+          // pass = attachBindGroupsToPass(pass, bloomBGP);
+          pass.setBindGroup(textureBindGroupLayout, textureBindGroup);
+          pass.setBindGroup(rotationValuesBindGroupLayout, rotationBindGroup);
+          pass.setBindGroup(bloomOptionsBindGroupLayout, bloomOptionsBindGroup);
+          pass.setBindGroup(colorMaskBindGroupLayout, colorMaskBindGroup);
+          pass.draw(6);
+
+          // Mask draw
+          pass.setPipeline(colorMaskPipeline);
+          pass.setBindGroup(textureBindGroupLayout, textureBindGroup);
+          pass.setBindGroup(colorMaskBindGroupLayout, colorMaskBindGroup);
+        }
+      );
+
+      // bloomPipeline.withColorAttachment(bloomAttachment).draw(6);
+      // colorMaskPipeline.withColorAttachment(colorMaskAttachment).draw(6);
 
       context.present();
       frameRef.current = requestAnimationFrame(render);

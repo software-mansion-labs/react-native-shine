@@ -31,3 +31,14 @@ export const getDefaultTarget = (
     },
   };
 };
+
+export const attachBindGroupsToPass = (
+  pass: any,
+  bindGroupPairs: BindGroupPair[]
+) => {
+  for (const pair of bindGroupPairs) {
+    pass = pass.setBindGroup(pair.layout, pair.group);
+  }
+
+  return pass;
+};
