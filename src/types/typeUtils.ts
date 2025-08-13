@@ -1,6 +1,13 @@
 import { f32, vec2f, vec3f, vec4f } from 'typegpu/data';
-import type { BloomOptions, ColorMask, PartiallyOptional, vec3 } from './types';
+import type {
+  BindGroupPair,
+  BloomOptions,
+  ColorMask,
+  DeepPartiallyOptional,
+  vec3,
+} from './types';
 import { div } from 'typegpu/std';
+import type { TgpuBindGroup, TgpuBindGroupLayout } from 'typegpu';
 
 export const createBloomOptions = (
   options: Partial<BloomOptions>
@@ -40,17 +47,18 @@ export const mapToF32 = <T extends Record<string, number>>(
 };
 
 export const createColorMask = (
-  colorMask: PartiallyOptional<ColorMask, 'baseColor'>
-) => {
+  colorMask: DeepPartiallyOptional<ColorMask, 'baseColor'>
+): ColorMask => {
   const { baseColor, rgbToleranceRange } = colorMask;
   const baseTolerance = {
     upper: [20, 20, 20] as vec3,
     lower: [20, 20, 20] as vec3,
   };
+  const tolerance = { ...baseTolerance, ...rgbToleranceRange };
 
   const mask: ColorMask = {
     baseColor: baseColor,
-    rgbToleranceRange: rgbToleranceRange || baseTolerance,
+    rgbToleranceRange: tolerance,
   };
 
   return mask;
@@ -85,4 +93,30 @@ const numberArrToTyped = (vec: number[]) => {
 
   const typed = convFn(...vec);
   return typed;
+};
+
+export const createBindGroupPair = (
+  bindGroupLayout: TgpuBindGroupLayout,
+  bindGroup: TgpuBindGroup
+): BindGroupPair => {
+  return { layout: bindGroupLayout, group: bindGroup };
+};
+
+export const createBindGroupPairs = (
+  bindGroupLayouts: TgpuBindGroupLayout[],
+  bindGroups: TgpuBindGroup[]
+): BindGroupPair[] => {
+  if (
+    bindGroupLayouts.length > 0 &&
+    bindGroupLayouts.length !== bindGroups.length
+  )
+    throw new Error(
+      'createBindGroups: bindGroupLayout and bindGroup arrrays must be of the same length'
+    );
+  const pairs: BindGroupPair[] = [];
+  for (let i = 0; i < bindGroupLayouts.length; i++) {
+    pairs.push(createBindGroupPair(bindGroupLayouts[i]!, bindGroups[i]!));
+  }
+
+  return pairs;
 };
