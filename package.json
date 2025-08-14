@@ -38,7 +38,9 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli lib",
     "prepare": "bob build",
-    "release": "release-it --only-version"
+    "release": "release-it --only-version",
+    "postinstall": "node ./scripts/postinstall.js",
+    "install-peers": "node ./scripts/install-peers.js"
   },
   "keywords": [
     "react-native",
@@ -91,7 +93,10 @@
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
-    "react-native-web": "^0.21.0"
+    "react-native-reanimated": "^4.0.1",
+    "react-native-wgpu": "^0.2.0",
+    "react-native-worklets": "^0.4.1",
+    "typegpu": "^0.7.0"
   },
   "workspaces": [
     "example"
@@ -161,9 +166,6 @@
   "dependencies": {
     "expo-asset": "^11.1.7",
     "react-native-orientation-locker": "^1.7.0",
-    "react-native-reanimated": "^4.0.1",
-    "react-native-wgpu": "^0.2.0",
-    "react-native-worklets": "^0.4.1",
-    "typegpu": "^0.7.0"
+    "unplugin-typegpu": "^0.2.2"
   }
 }
