@@ -39,7 +39,6 @@ import {
   createBindGroupPairs,
   createBloomOptions,
   createColorMask,
-  numberArrToTyped,
 } from './types/typeUtils';
 import type {
   BindGroupPair,
@@ -47,11 +46,7 @@ import type {
   ColorMask,
   DeepPartiallyOptional,
 } from './types/types';
-import {
-  attachBindGroups,
-  attachBindGroupsToPass,
-  getDefaultTarget,
-} from './shaders/pipelineSetups';
+import { attachBindGroups, getDefaultTarget } from './shaders/pipelineSetups';
 import colorMaskFragment from './shaders/fragmentShaders/colorMaskFragment';
 interface ShineProps {
   width: number;
@@ -97,7 +92,7 @@ export function Shine({
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [orientationAngle]);
 
   // Calibration & mapping logic
   useDerivedValue(() => {
@@ -246,12 +241,12 @@ export function Shine({
 
     const rot = d.vec3f(0.0);
     let view: GPUTextureView;
-    let bloomAttachment;
-    let colorMaskAttachment;
+    // let bloomAttachment;
+    // let colorMaskAttachment;
     const render = () => {
       rot[0] = rotationShared.value[0];
-      rot[1] = rotationShared.value[0];
-      rot[2] = rotationShared.value[0];
+      rot[1] = rotationShared.value[1];
+      rot[2] = rotationShared.value[2];
       rotationBuffer.write(rot);
 
       view = context.getCurrentTexture().createView();
@@ -292,8 +287,10 @@ export function Shine({
           pass.setPipeline(colorMaskPipeline);
           pass.setBindGroup(textureBindGroupLayout, textureBindGroup);
           pass.setBindGroup(colorMaskBindGroupLayout, colorMaskBindGroup);
+          pass.draw(6);
         }
       );
+      root['~unstable'].flush();
 
       // bloomPipeline.withColorAttachment(bloomAttachment).draw(6);
       // colorMaskPipeline.withColorAttachment(colorMaskAttachment).draw(6);

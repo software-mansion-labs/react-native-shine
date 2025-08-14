@@ -37,7 +37,7 @@ export const attachBindGroupsToPass = (
   bindGroupPairs: BindGroupPair[]
 ) => {
   for (const pair of bindGroupPairs) {
-    pass = pass.setBindGroup(pair.layout, pair.group);
+    pass.setBindGroup(pair.layout, pair.group);
   }
 
   return pass;
