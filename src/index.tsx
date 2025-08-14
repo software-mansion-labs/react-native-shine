@@ -241,8 +241,8 @@ export function Shine({
 
     const rot = d.vec3f(0.0);
     let view: GPUTextureView;
-    // let bloomAttachment;
-    // let colorMaskAttachment;
+    let bloomAttachment;
+    let colorMaskAttachment;
     const render = () => {
       rot[0] = rotationShared.value[0];
       rot[1] = rotationShared.value[1];
@@ -250,50 +250,50 @@ export function Shine({
       rotationBuffer.write(rot);
 
       view = context.getCurrentTexture().createView();
-      // bloomAttachment = {
-      //   view: view,
-      //   clearValue: [0, 0, 0, 0],
-      //   loadOp: 'clear' as GPULoadOp,
-      //   storeOp: 'store' as GPUStoreOp,
-      // };
+      bloomAttachment = {
+        view: view,
+        clearValue: [0, 0, 0, 0],
+        loadOp: 'clear' as GPULoadOp,
+        storeOp: 'store' as GPUStoreOp,
+      };
 
-      // colorMaskAttachment = {
-      //   view: view,
-      //   loadOp: 'load' as GPULoadOp,
-      //   storeOp: 'store' as GPUStoreOp,
-      // };
+      colorMaskAttachment = {
+        view: view,
+        loadOp: 'load' as GPULoadOp,
+        storeOp: 'store' as GPUStoreOp,
+      };
 
-      root['~unstable'].beginRenderPass(
-        {
-          colorAttachments: [
-            {
-              view,
-              clearValue: [0, 0, 0, 0],
-              loadOp: 'clear',
-              storeOp: 'store',
-            },
-          ],
-        },
-        (pass) => {
-          pass.setPipeline(bloomPipeline);
-          // pass = attachBindGroupsToPass(pass, bloomBGP);
-          pass.setBindGroup(textureBindGroupLayout, textureBindGroup);
-          pass.setBindGroup(rotationValuesBindGroupLayout, rotationBindGroup);
-          pass.setBindGroup(bloomOptionsBindGroupLayout, bloomOptionsBindGroup);
-          pass.setBindGroup(colorMaskBindGroupLayout, colorMaskBindGroup);
-          pass.draw(6);
+      // root['~unstable'].beginRenderPass(
+      //   {
+      //     colorAttachments: [
+      //       {
+      //         view,
+      //         clearValue: [0, 0, 0, 0],
+      //         loadOp: 'clear',
+      //         storeOp: 'store',
+      //       },
+      //     ],
+      //   },
+      //   (pass) => {
+      //     pass.setPipeline(bloomPipeline);
+      //     // pass = attachBindGroupsToPass(pass, bloomBGP);
+      //     pass.setBindGroup(textureBindGroupLayout, textureBindGroup);
+      //     pass.setBindGroup(rotationValuesBindGroupLayout, rotationBindGroup);
+      //     pass.setBindGroup(bloomOptionsBindGroupLayout, bloomOptionsBindGroup);
+      //     pass.setBindGroup(colorMaskBindGroupLayout, colorMaskBindGroup);
+      //     pass.draw(6);
 
-          // Mask draw
-          pass.setPipeline(colorMaskPipeline);
-          pass.setBindGroup(textureBindGroupLayout, textureBindGroup);
-          pass.setBindGroup(colorMaskBindGroupLayout, colorMaskBindGroup);
-          pass.draw(6);
-        }
-      );
-      root['~unstable'].flush();
+      //     // Mask draw
+      //     pass.setPipeline(colorMaskPipeline);
+      //     pass.setBindGroup(textureBindGroupLayout, textureBindGroup);
+      //     pass.setBindGroup(colorMaskBindGroupLayout, colorMaskBindGroup);
+      //     pass.draw(6);
+      //   }
+      // );
+      // root['~unstable'].flush();
 
-      // bloomPipeline.withColorAttachment(bloomAttachment).draw(6);
-      // colorMaskPipeline.withColorAttachment(colorMaskAttachment).draw(6);
+      bloomPipeline.withColorAttachment(bloomAttachment).draw(6);
+      colorMaskPipeline.withColorAttachment(colorMaskAttachment).draw(6);
 
       context.present();
       frameRef.current = requestAnimationFrame(render);
