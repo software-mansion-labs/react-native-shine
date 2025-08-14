@@ -1,6 +1,6 @@
 {
   "name": "react-native-shine",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Fast and efficient way of adding interactive effects that are run entirely on shaders using typeGPU.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
