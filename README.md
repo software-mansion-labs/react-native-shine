@@ -1,8 +1,8 @@
 # react-native-shine
 
-Fast and efficient way to add interactive GPU-based shader effects to your React Native apps using [typeGPU](https://github.com/type-gpu/type-gpu) and [WebGPU](https://github.com/wojtus7/react-native-wgpu).
+Fast and efficient way to add interactive GPU-based shader effects to your React Native apps using [TypeGPU](https://github.com/type-gpu/type-gpu) and [WebGPU](https://github.com/wojtus7/react-native-wgpu).
 
-react-native-shine leverages powerful GPU execution via native bindings, delivering lovely, fancy and **shiny** effects - ideal for UIs or creative interactions.
+`react-native-shine` leverages powerful GPU execution via native bindings, delivering lovely, fancy and **shiny** effects—ideal for UIs or creative interactions.
 
 ---
 
@@ -42,24 +42,37 @@ You can also use our helper script to install all peer deps automatically:
 yarn run install-peers
 ```
 
-Or use install-peerdeps:
+Or use `install-peerdeps`:
 
 ```sh
 npx install-peerdeps react-native-shine
 ```
 
-> Note: install-peerdeps reads the `peerDependencies` section of the package and installs them at the root level of your project.
+> Note: `install-peerdeps` reads the `peerDependencies` section of the package and installs them at the root level of your project.
+
+---
+
+### Update Your `babel.config.js`
+
+For this library to work, you need to add the `unplugin-typegpu/babel` plugin. It comes bundled as a dependency, so you just need to add it in your Babel config.
+
+```js
+plugins: ['unplugin-typegpu/babel'];
+```
+
+For additional instructions, please follow the [TypeGPU Unplugin docs](https://docs.swmansion.com/TypeGPU/tooling/unplugin-typegpu/).
 
 ---
 
 ## 📋 Requirements
 
 - React Native ≥ 0.71
-- react-native-reanimated ≥ 4.0.0
-- react-native-webgpu ≥ 0.2.0
+- `react-native-reanimated` ≥ 4.0.0
+- `react-native-webgpu` ≥ 0.2.0
 - WebGPU-compatible device/emulator
 
-> ℹ️ If you're using Expo, you’ll need to use the bare workflow (custom dev client or prebuild) to support native modules.
+> [!NOTE]
+> If you’re using Expo, you’ll need to use the bare workflow (custom dev client or prebuild) to support native modules.
 
 ---
 
@@ -90,7 +103,7 @@ export default function Index() {
 }
 ```
 
-Coming soon: docs and examples
+Coming soon: docs and examples.
 
 ---
 
@@ -98,40 +111,40 @@ Coming soon: docs and examples
 
 If you encounter runtime or build issues:
 
-- Make sure all peer dependencies are installed
+- Make sure all peer dependencies are installed.
 - Rebuild your app after installing native modules:
 
-```sh
-# iOS
-cd ios && xcodebuild clean && cd ..
-npx react-native run-ios
+  ```sh
+  # iOS
+  cd ios && xcodebuild clean && cd ..
+  npx react-native run-ios
 
-# Android
-cd android && ./gradlew clean && cd ..
-npx react-native run-android
-```
+  # Android
+  cd android && ./gradlew clean && cd ..
+  npx react-native run-android
+  ```
 
-```sh
-# Expo
+  ```sh
+  # Expo
 
-# iOS
-npx expo prebuild
-npx expo run:ios
+  # iOS
+  npx expo prebuild
+  npx expo run:ios
 
-# Android
-npx expo prebuild
-npx expo run:android
-```
+  # Android
+  npx expo prebuild
+  npx expo run:android
+  ```
 
-- Clear bundler cache (helps with Metro native linking issues):
+- Clear bundler cache (helps with Metro native linking issues).
 
 ---
 
 ## 🧑‍💻 Contributing
 
-Want to help improve react-native-shine?
+Want to help improve `react-native-shine`?
 
-Check out the [CONTRIBUTING.md](CONTRIBUTING.md) guide for instructions on how to build, test and submit PRs.
+Check out the [`CONTRIBUTING.md`](CONTRIBUTING.md) guide for instructions on how to build, test, and submit PRs.
 
 We welcome shaders, GPU visual effects, demos, and bug fixes!
 
