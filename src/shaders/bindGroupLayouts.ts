@@ -6,6 +6,11 @@ export const textureBindGroupLayout = tgpu.bindGroupLayout({
   sampler: { sampler: 'filtering' },
 });
 
+export const maskTextureBindGroupLayout = tgpu.bindGroupLayout({
+  texture: { texture: 'float', dimension: '2d', sampleType: 'float' },
+  sampler: { sampler: 'filtering' },
+});
+
 export const rotationValuesBindGroupLayout = tgpu.bindGroupLayout({
   vec: { uniform: d.vec3f },
 });

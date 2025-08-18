@@ -1,6 +1,6 @@
 # react-native-shine
 
-Fast and efficient way to add interactive GPU-based shader effects to your React Native apps using [TypeGPU](https://github.com/type-gpu/type-gpu) and [WebGPU](https://github.com/wojtus7/react-native-wgpu).
+Fast and efficient way to add interactive GPU-based shader effects to your React Native apps using [TypeGPU](https://github.com/software-mansion/TypeGPU) and [WebGPU](https://github.com/wcandillon/react-native-webgpu).
 
 `react-native-shine` leverages powerful GPU execution via native bindings, delivering lovely, fancy and **shiny** effects—ideal for UIs or creative interactions.
 
