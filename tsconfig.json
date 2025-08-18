@@ -2,14 +2,19 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "react-native-shine": ["./src/index"]
+      "react-native-shine": [
+        "./src/index"
+      ]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "lib": ["ESNext", "DOM"],
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
@@ -25,6 +30,10 @@
     "strict": true,
     "target": "ESNext",
     "verbatimModuleSyntax": true,
-    "typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"]
-  }
+    "typeRoots": [
+      "./node_modules/@webgpu/types",
+      "./node_modules/@types"
+    ]
+  },
+  "extends": "expo/tsconfig.base"
 }
