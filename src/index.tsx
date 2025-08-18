@@ -91,8 +91,6 @@ export function Shine({
 
   const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
 
-  console.log('render');
-
   // Subscribe to orientation changes and reset calibration on change
   useEffect(() => {
     orientationAngle.value = getAngleFromDimensions();
@@ -267,68 +265,34 @@ export function Shine({
 
     const rot = d.vec3f(0.0);
     let view: GPUTextureView;
-    let bloomAttachment;
-    let colorMaskAttachment;
+    // let bloomAttachment;
+    // let colorMaskAttachment;
+    view = context.getCurrentTexture().createView();
     const render = () => {
       rot[0] = rotationShared.value[0];
       rot[1] = rotationShared.value[1];
       rot[2] = rotationShared.value[2];
       rotationBuffer.write(rot);
 
-      view = context.getCurrentTexture().createView();
-      bloomAttachment = {
-        view: view,
-        clearValue: [0, 0, 0, 0],
-        loadOp: 'clear' as GPULoadOp,
-        storeOp: 'store' as GPUStoreOp,
-      };
-
-      colorMaskAttachment = {
-        view: view,
-        loadOp: 'load' as GPULoadOp,
-        storeOp: 'store' as GPUStoreOp,
-      };
-      const attachments = [
-        bloomAttachment,
-        colorMaskAttachment,
-        colorMaskAttachment,
-      ];
-
-      // root['~unstable'].beginRenderPass(
-      //   {
-      //     colorAttachments: [
-      //       {
-      //         view,
-      //         clearValue: [0, 0, 0, 0],
-      //         loadOp: 'clear',
-      //         storeOp: 'store',
-      //       },
-      //     ],
-      //   },
-      //   (pass) => {
-      //     pass.setPipeline(bloomPipeline);
-      //     // pass = attachBindGroupsToPass(pass, bloomBGP);
-      //     pass.setBindGroup(textureBindGroupLayout, imageTextureBindGroup);
-      //     pass.setBindGroup(rotationValuesBindGroupLayout, rotationBindGroup);
-      //     pass.setBindGroup(bloomOptionsBindGroupLayout, bloomOptionsBindGroup);
-      //     pass.setBindGroup(colorMaskBindGroupLayout, colorMaskBindGroup);
-      //     pass.draw(6);
-
-      //     // Mask draw
-      //     pass.setPipeline(colorMaskPipeline);
-      //     pass.setBindGroup(textureBindGroupLayout, imageTextureBindGroup);
-      //     pass.setBindGroup(colorMaskBindGroupLayout, colorMaskBindGroup);
-      //     pass.draw(6);
-      //   }
-      // );
-      // root['~unstable'].flush();
-
-      for (let i = 0; i < pipelines.length; i++) {
-        pipelines[i]!.withColorAttachment(attachments[i]!).draw(6);
-      }
-      // bloomPipeline.withColorAttachment(bloomAttachment).draw(6);
-      // colorMaskPipeline.withColorAttachment(colorMaskAttachment).draw(6);
-      // maskPipeline.withColorAttachment(colorMaskAttachment).draw(6);
+      root['~unstable'].beginRenderPass(
+        {
+          colorAttachments: [
+            {
+              view: view,
+              clearValue: [0, 0, 0, 0],
+              loadOp: 'clear',
+              storeOp: 'store',
+            },
+          ],
+        },
+        (pass) => {
+          for (let i = 0; i < pipelines.length; i++) {
+            pass.setPipeline(pipelines[i]!);
+            pass.draw(6);
+          }
+        }
+      );
+      root['~unstable'].flush();
 
       context.present();
       frameRef.current = requestAnimationFrame(render);

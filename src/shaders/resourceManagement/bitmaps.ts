@@ -13,6 +13,7 @@ const getBitmapFromURI = async (uri: string): Promise<ImageBitmap> => {
   const blob = await response.blob();
   const imageBitmap = await createImageBitmap(blob);
 
+  console.log('bitmap size: ', imageBitmap);
   uriToBitmapMap.set(uri, imageBitmap);
   return imageBitmap;
 };
