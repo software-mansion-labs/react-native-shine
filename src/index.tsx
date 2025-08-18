@@ -2,16 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Canvas, useDevice, useGPUContext } from 'react-native-wgpu';
 import { getOrInitRoot } from './roots';
 import mainVertex from './shaders/vertexShaders/mainVertex';
-import getBitmapFromURI from './shaders/resourceManagement';
+import getBitmapFromURI from './shaders/resourceManagement/bitmaps';
 import {
-  createTexture,
-  loadTexture,
   clamp,
   rotate2D,
   subscribeToOrientationChange,
   getAngleFromDimensions,
 } from './shaders/utils';
-import type { TgpuTexture } from 'typegpu';
+import type { TgpuRenderPipeline, TgpuTexture } from 'typegpu';
 import {
   bloomOptionsBindGroupLayout,
   colorMaskBindGroupLayout,
@@ -46,14 +44,23 @@ import type {
   ColorMask,
   DeepPartiallyOptional,
 } from './types/types';
-import { attachBindGroups, getDefaultTarget } from './shaders/pipelineSetups';
+import {
+  attachBindGroups,
+  createMaskPipeline,
+  getDefaultTarget,
+} from './shaders/pipelineSetups';
 import colorMaskFragment from './shaders/fragmentShaders/colorMaskFragment';
+import {
+  createTexture,
+  loadTexture,
+} from './shaders/resourceManagement/textures';
 interface ShineProps {
   width: number;
   height: number;
   imageURI: string;
   bloomOptions?: Partial<BloomOptions>;
   colorMaskOptions?: DeepPartiallyOptional<ColorMask, 'baseColor'>;
+  maskURI?: string;
 }
 
 export function Shine({
@@ -62,6 +69,7 @@ export function Shine({
   imageURI,
   bloomOptions,
   colorMaskOptions,
+  maskURI,
 }: ShineProps) {
   const { device = null } = useDevice();
   const root = device ? getOrInitRoot(device) : null;
@@ -70,6 +78,7 @@ export function Shine({
   const frameRef = useRef<number | null>(null);
 
   const [imageTexture, setImageTexture] = useState<TgpuTexture | null>(null);
+  const [maskTexture, setMaskTexture] = useState<TgpuTexture | null>(null);
 
   const orientationAngle = useSharedValue<number>(0); // degrees
   const rotationShared = useSharedValue<[number, number, number]>([0, 0, 0]); // final GPU offsets
@@ -164,8 +173,14 @@ export function Shine({
       const texture = await createTexture(root, bitmap);
       setImageTexture(texture);
       await loadTexture(root, bitmap, texture);
+
+      if (!maskURI) return;
+      const maskBitmap = await getBitmapFromURI(maskURI);
+      const maskTex = await createTexture(root, maskBitmap);
+      setMaskTexture(maskTex);
+      await loadTexture(root, maskBitmap, maskTex);
     })();
-  }, [root, device, context, imageURI]);
+  }, [root, device, context, imageURI, maskURI]);
 
   // Render loop
   useEffect(() => {
@@ -181,7 +196,7 @@ export function Shine({
       magFilter: 'linear',
       minFilter: 'linear',
     });
-    const textureBindGroup = root.createBindGroup(textureBindGroupLayout, {
+    const imageTextureBindGroup = root.createBindGroup(textureBindGroupLayout, {
       texture: root.unwrap(imageTexture).createView(),
       sampler,
     });
@@ -215,16 +230,16 @@ export function Shine({
         colorMaskBindGroupLayout,
       ],
       [
-        textureBindGroup,
+        imageTextureBindGroup,
         rotationBindGroup,
         bloomOptionsBindGroup,
         colorMaskBindGroup,
       ]
     );
 
-    const maskBGP: BindGroupPair[] = createBindGroupPairs(
+    const colorMaskBGP: BindGroupPair[] = createBindGroupPairs(
       [textureBindGroupLayout, colorMaskBindGroupLayout],
-      [textureBindGroup, colorMaskBindGroup]
+      [imageTextureBindGroup, colorMaskBindGroup]
     );
 
     let bloomPipeline = root['~unstable']
@@ -237,7 +252,18 @@ export function Shine({
       .withVertex(mainVertex, {})
       .withFragment(colorMaskFragment, getDefaultTarget(presentationFormat))
       .createPipeline();
-    colorMaskPipeline = attachBindGroups(colorMaskPipeline, maskBGP);
+    colorMaskPipeline = attachBindGroups(colorMaskPipeline, colorMaskBGP);
+
+    //optional pipeline - mask
+    const maskPipeline = createMaskPipeline(
+      root,
+      maskTexture,
+      sampler,
+      presentationFormat
+    );
+
+    const pipelines: TgpuRenderPipeline[] = [bloomPipeline, colorMaskPipeline];
+    if (maskPipeline) pipelines.push(maskPipeline);
 
     const rot = d.vec3f(0.0);
     let view: GPUTextureView;
@@ -262,6 +288,11 @@ export function Shine({
         loadOp: 'load' as GPULoadOp,
         storeOp: 'store' as GPUStoreOp,
       };
+      const attachments = [
+        bloomAttachment,
+        colorMaskAttachment,
+        colorMaskAttachment,
+      ];
 
       // root['~unstable'].beginRenderPass(
       //   {
@@ -277,7 +308,7 @@ export function Shine({
       //   (pass) => {
       //     pass.setPipeline(bloomPipeline);
       //     // pass = attachBindGroupsToPass(pass, bloomBGP);
-      //     pass.setBindGroup(textureBindGroupLayout, textureBindGroup);
+      //     pass.setBindGroup(textureBindGroupLayout, imageTextureBindGroup);
       //     pass.setBindGroup(rotationValuesBindGroupLayout, rotationBindGroup);
       //     pass.setBindGroup(bloomOptionsBindGroupLayout, bloomOptionsBindGroup);
       //     pass.setBindGroup(colorMaskBindGroupLayout, colorMaskBindGroup);
@@ -285,15 +316,19 @@ export function Shine({
 
       //     // Mask draw
       //     pass.setPipeline(colorMaskPipeline);
-      //     pass.setBindGroup(textureBindGroupLayout, textureBindGroup);
+      //     pass.setBindGroup(textureBindGroupLayout, imageTextureBindGroup);
       //     pass.setBindGroup(colorMaskBindGroupLayout, colorMaskBindGroup);
       //     pass.draw(6);
       //   }
       // );
       // root['~unstable'].flush();
 
-      bloomPipeline.withColorAttachment(bloomAttachment).draw(6);
-      colorMaskPipeline.withColorAttachment(colorMaskAttachment).draw(6);
+      for (let i = 0; i < pipelines.length; i++) {
+        pipelines[i]!.withColorAttachment(attachments[i]!).draw(6);
+      }
+      // bloomPipeline.withColorAttachment(bloomAttachment).draw(6);
+      // colorMaskPipeline.withColorAttachment(colorMaskAttachment).draw(6);
+      // maskPipeline.withColorAttachment(colorMaskAttachment).draw(6);
 
       context.present();
       frameRef.current = requestAnimationFrame(render);
@@ -309,6 +344,7 @@ export function Shine({
     root,
     presentationFormat,
     imageTexture,
+    maskTexture,
     rotationShared,
     bloomOptions,
     colorMaskOptions,
