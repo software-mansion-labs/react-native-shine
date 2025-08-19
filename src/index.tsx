@@ -34,6 +34,7 @@ import {
   createRotationValuesBindGroup,
 } from './shaders/bindGroupUtils';
 import {
+  createBindGroupPair,
   createBindGroupPairs,
   createBloomOptions,
   createColorMask,
@@ -48,6 +49,7 @@ import {
   attachBindGroups,
   createMaskPipeline,
   getDefaultTarget,
+  pipelineRenderFunction,
 } from './shaders/pipelineSetups';
 import colorMaskFragment from './shaders/fragmentShaders/colorMaskFragment';
 import {
@@ -256,6 +258,7 @@ export function Shine({
     const maskPipeline = createMaskPipeline(
       root,
       maskTexture,
+      createBindGroupPair(textureBindGroupLayout, imageTextureBindGroup),
       sampler,
       presentationFormat
     );
@@ -265,34 +268,36 @@ export function Shine({
 
     const rot = d.vec3f(0.0);
     let view: GPUTextureView;
-    // let bloomAttachment;
-    // let colorMaskAttachment;
-    view = context.getCurrentTexture().createView();
+    let initialAttachment;
+    let loadingAttachment;
+    const isInSinglePass = false;
     const render = () => {
       rot[0] = rotationShared.value[0];
       rot[1] = rotationShared.value[1];
       rot[2] = rotationShared.value[2];
       rotationBuffer.write(rot);
 
-      root['~unstable'].beginRenderPass(
-        {
-          colorAttachments: [
-            {
-              view: view,
-              clearValue: [0, 0, 0, 0],
-              loadOp: 'clear',
-              storeOp: 'store',
-            },
-          ],
-        },
-        (pass) => {
-          for (let i = 0; i < pipelines.length; i++) {
-            pass.setPipeline(pipelines[i]!);
-            pass.draw(6);
-          }
-        }
+      view = context.getCurrentTexture().createView();
+      initialAttachment = {
+        view: view,
+        clearValue: [0, 0, 0, 0],
+        loadOp: 'clear' as GPULoadOp,
+        storeOp: 'store' as GPUStoreOp,
+      };
+      loadingAttachment = {
+        view: view,
+        clearValue: [0, 0, 0, 0],
+        loadOp: 'load' as GPULoadOp,
+        storeOp: 'store' as GPUStoreOp,
+      };
+
+      pipelineRenderFunction(
+        root,
+        pipelines,
+        [initialAttachment, loadingAttachment, loadingAttachment],
+        view,
+        isInSinglePass
       );
-      root['~unstable'].flush();
 
       context.present();
       frameRef.current = requestAnimationFrame(render);
