@@ -24,10 +24,12 @@ const maskFragment = tgpu['~unstable'].fragmentFn({
     texcoord
   );
 
-  if (std.allEq(mask.xyz, d.vec3f(0.0, 0.0, 0.0))) {
-    return color;
+  if (!std.allEq(mask.xyz, d.vec3f(0.0, 0.0, 0.0))) {
+    return color; //i need to add intermediate texture for passing the previous state
   }
+
   std.discard();
+  return d.vec4f(1.0);
 });
 
 export default maskFragment;

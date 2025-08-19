@@ -49,16 +49,17 @@ export const attachBindGroupsToPass = (
 
 export const createMaskPipeline = (
   root: TgpuRoot,
-  texture: TgpuTexture | null,
+  maskTexture: TgpuTexture | null,
+  imageTextureBindGroupPair: BindGroupPair,
   sampler: GPUSampler,
   presentationFormat: GPUTextureFormat
 ): TgpuRenderPipeline | null => {
-  if (!texture) return null;
+  if (!maskTexture) return null;
 
   const maskTextureBindGroup = root.createBindGroup(
     maskTextureBindGroupLayout,
     {
-      texture: root.unwrap(texture).createView(),
+      texture: root.unwrap(maskTexture).createView(),
       sampler,
     }
   );
@@ -66,6 +67,7 @@ export const createMaskPipeline = (
     [maskTextureBindGroupLayout],
     [maskTextureBindGroup]
   );
+  maskBGP.push(imageTextureBindGroupPair);
 
   let maskPipeline = root['~unstable']
     .withVertex(mainVertex, {})
@@ -74,4 +76,40 @@ export const createMaskPipeline = (
   maskPipeline = attachBindGroups(maskPipeline, maskBGP);
 
   return maskPipeline;
+};
+
+export const pipelineRenderFunction = (
+  root: TgpuRoot,
+  pipelines: TgpuRenderPipeline[],
+  attachments: any[],
+  view: GPUTextureView,
+  isInSinglePass: boolean
+) => {
+  if (isInSinglePass) {
+    root['~unstable'].beginRenderPass(
+      {
+        colorAttachments: [
+          {
+            view: view,
+            clearValue: [0, 0, 0, 0],
+            loadOp: 'clear',
+            storeOp: 'store',
+          },
+        ],
+      },
+      (pass) => {
+        for (let i = 0; i < pipelines.length; i++) {
+          pass.setPipeline(pipelines[i]!);
+          pass.draw(6);
+        }
+      }
+    );
+    root['~unstable'].flush();
+  } else {
+    for (let i = 0; i < pipelines.length; i++) {
+      const attachment = attachments[i];
+      if (!attachment) return;
+      pipelines[i]!.withColorAttachment(attachment).draw(6);
+    }
+  }
 };
