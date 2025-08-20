@@ -317,6 +317,7 @@ export function Shine({
     rotationShared,
     bloomOptions,
     colorMaskOptions,
+    maskURI,
   ]);
 
   return (
