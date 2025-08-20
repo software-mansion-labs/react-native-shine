@@ -5,7 +5,7 @@ import {
   Shine,
   subscribeToOrientationChange,
 } from 'react-native-shine';
-import { pokemon, pokemonCardMask } from './img';
+import { pokemon, pokemonCardMaskGrad } from './img';
 
 export default function App() {
   const [orientation, setOrientation] = useState<string>();
@@ -61,7 +61,7 @@ export default function App() {
           baseColor: [0, 0, 0],
           rgbToleranceRange: { upper: [70, 80, 80] },
         }}
-        maskURI={pokemonCardMask}
+        maskURI={pokemonCardMaskGrad}
       />
     </View>
   );

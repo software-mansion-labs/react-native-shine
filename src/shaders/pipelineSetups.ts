@@ -16,23 +16,39 @@ export const attachBindGroups = (
   return pipeline;
 };
 
+export const lend: GPUBlendState = {
+  color: {
+    srcFactor: 'one-minus-src-alpha',
+    dstFactor: 'src-alpha',
+    operation: 'add',
+  } satisfies GPUBlendComponent,
+  alpha: {
+    srcFactor: 'one-minus-src-alpha',
+    dstFactor: 'dst-alpha',
+    operation: 'add',
+  } satisfies GPUBlendComponent,
+};
+
 export const getDefaultTarget = (
-  presentationFormat: GPUTextureFormat
+  presentationFormat: GPUTextureFormat,
+  blendMode?: GPUBlendState
 ): GPUColorTargetState => {
   return {
     format: presentationFormat,
-    blend: {
-      color: {
-        srcFactor: 'src-alpha',
-        dstFactor: 'one-minus-src-alpha',
-        operation: 'add',
-      },
-      alpha: {
-        srcFactor: 'one',
-        dstFactor: 'one-minus-src-alpha',
-        operation: 'add',
-      },
-    },
+    blend: !blendMode
+      ? {
+          color: {
+            srcFactor: 'src-alpha',
+            dstFactor: 'one-minus-src-alpha',
+            operation: 'add',
+          },
+          alpha: {
+            srcFactor: 'one',
+            dstFactor: 'one-minus-src-alpha',
+            operation: 'add',
+          },
+        }
+      : blendMode,
   };
 };
 
@@ -71,7 +87,7 @@ export const createMaskPipeline = (
 
   let maskPipeline = root['~unstable']
     .withVertex(mainVertex, {})
-    .withFragment(maskFragment, getDefaultTarget(presentationFormat))
+    .withFragment(maskFragment, getDefaultTarget(presentationFormat, lend))
     .createPipeline();
   maskPipeline = attachBindGroups(maskPipeline, maskBGP);
 

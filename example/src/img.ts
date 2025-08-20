@@ -9,4 +9,9 @@ const pokemon = Image.resolveAssetSource(sourcePokemon).uri;
 const sourcePokemonCardMask = require('../assets/pokemonCardMask.png');
 const pokemonCardMask = Image.resolveAssetSource(sourcePokemonCardMask).uri;
 
-export { charmander, pokemon, pokemonCardMask };
+const sourcePokemonCardMaskGrad = require('../assets/pokemonCardMaskGrad.png');
+const pokemonCardMaskGrad = Image.resolveAssetSource(
+  sourcePokemonCardMaskGrad
+).uri;
+
+export { charmander, pokemon, pokemonCardMask, pokemonCardMaskGrad };
