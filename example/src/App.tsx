@@ -5,7 +5,7 @@ import {
   Shine,
   subscribeToOrientationChange,
 } from 'react-native-shine';
-import { pokemon, pokemonCardMaskGrad } from './img';
+import { pokemon, pokemonCardMask } from './img';
 
 export default function App() {
   const [orientation, setOrientation] = useState<string>();
@@ -45,18 +45,18 @@ export default function App() {
           'https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/sm115/sm115-007.png?signature=d614178b139f5ebebe4d0009310f1b76678b6d3924c7218e28bf61d139097482'
         }
         glareOptions={{
-          glowPower: 1,
-          glareIntensity: 1,
-          lightIntensity: 1,
-          hueBlendPower: 3,
-          hueShiftAngleMax: 1,
-          hueShiftAngleMin: 0,
+          glowPower: 0.8,
+          glareIntensity: 0.6,
+          lightIntensity: 0.8,
+          hueBlendPower: 0.6,
+          hueShiftAngleMin: -10,
+          hueShiftAngleMax: -1.5,
         }}
         colorMaskOptions={{
           baseColor: [0, 0, 0],
-          rgbToleranceRange: { upper: [70, 80, 80] },
+          // rgbToleranceRange: { upper: [70, 80, 80] },
         }}
-        maskURI={pokemonCardMaskGrad}
+        maskURI={pokemonCardMask}
       />
       <Text style={styles.text}>nice</Text>
     </View>
