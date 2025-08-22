@@ -73,3 +73,38 @@ export const overlayChannels = tgpu.fn(
     overlayChannel(base.z, blend.z)
   );
 });
+
+/** Rec.601 luma */
+export const luma601 = tgpu.fn(
+  [d.vec3f],
+  d.f32
+)((rgb) => {
+  return std.add(
+    std.mul(rgb.x, 0.299),
+    std.add(std.mul(rgb.y, 0.587), std.mul(rgb.z, 0.114))
+  );
+});
+
+export const tiltTowardsLighterNeighbor = tgpu.fn(
+  [d.vec3f, d.f32],
+  d.vec3f
+)((rgb, t) => {
+  const toYellow = d.vec3f(std.max(rgb.x, rgb.y), std.max(rgb.x, rgb.y), rgb.z);
+  const toCyan = d.vec3f(rgb.x, std.max(rgb.y, rgb.z), std.max(rgb.y, rgb.z));
+
+  const yYellow = luma601(toYellow);
+  const yCyan = luma601(toCyan);
+
+  const toColor = std.select(toCyan, toYellow, yYellow >= yCyan);
+
+  const tClamped = std.clamp(t, 0.0, 1.0);
+  return std.mix(rgb, toColor, tClamped);
+});
+
+export const linearstep = tgpu.fn(
+  [d.f32, d.f32, d.f32],
+  d.f32
+)((num1, num2, x) => {
+  const t = (x - num1) / (num2 - num1);
+  return std.clamp(t, 0, 1);
+});

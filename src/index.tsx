@@ -55,7 +55,7 @@ import {
   createTexture,
   loadTexture,
 } from './shaders/resourceManagement/textures';
-import glareFragment from './shaders/fragmentShaders/glareFragment';
+import { newGlareFragment } from './shaders/fragmentShaders/glareFragment';
 interface ShineProps {
   width: number;
   height: number;
@@ -244,7 +244,7 @@ export function Shine({
 
     let glarePipeline = root['~unstable']
       .withVertex(mainVertex, {})
-      .withFragment(glareFragment, getDefaultTarget(presentationFormat))
+      .withFragment(newGlareFragment, getDefaultTarget(presentationFormat))
       .createPipeline();
     glarePipeline = attachBindGroups(glarePipeline, glareBGP);
 
