@@ -15,19 +15,19 @@ export const rotationValuesBindGroupLayout = tgpu.bindGroupLayout({
   vec: { uniform: d.vec3f },
 });
 
-export const bloomOptionsSchema = d.struct({
+export const glareOptionsSchema = d.struct({
   glowPower: d.f32,
   hueShiftAngleMax: d.f32,
   hueShiftAngleMin: d.f32,
   hueBlendPower: d.f32,
   lightIntensity: d.f32,
-  bloomIntensity: d.f32,
+  glareIntensity: d.f32,
 });
 
-export type bloomOptionsSchema = typeof bloomOptionsSchema;
+export type glareOptionsSchema = typeof glareOptionsSchema;
 
-export const bloomOptionsBindGroupLayout = tgpu.bindGroupLayout({
-  bloomOptions: { uniform: bloomOptionsSchema },
+export const glareOptionsBindGroupLayout = tgpu.bindGroupLayout({
+  glareOptions: { uniform: glareOptionsSchema },
 });
 
 export const colorMaskSchema = d.struct({

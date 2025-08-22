@@ -5,13 +5,13 @@ export type vec3 = [number, number, number];
 export type vec4 = [number, number, number, number];
 export type quaternion = vec4;
 
-export type BloomOptions = {
+export type GlareOptions = {
   glowPower: number;
   hueShiftAngleMax: number;
   hueShiftAngleMin: number;
   hueBlendPower: number;
   lightIntensity: number;
-  bloomIntensity: number;
+  glareIntensity: number;
 };
 
 export type ColorMask = {

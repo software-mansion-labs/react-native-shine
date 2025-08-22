@@ -1,20 +1,20 @@
 import { type TgpuBuffer, type TgpuRoot, type UniformFlag } from 'typegpu';
 import * as d from 'typegpu/data';
 import {
-  bloomOptionsBindGroupLayout,
-  bloomOptionsSchema,
+  glareOptionsBindGroupLayout,
+  glareOptionsSchema,
   colorMaskBindGroupLayout,
   colorMaskSchema,
   rotationValuesBindGroupLayout,
 } from './bindGroupLayouts';
 import type {
-  BloomOptions,
+  GlareOptions,
   ColorMask,
   PartiallyOptional,
 } from '../types/types';
 import {
   colorMaskToTyped,
-  createBloomOptions,
+  createGlareOptions,
   createColorMask,
   mapToF32,
 } from '../types/typeUtils';
@@ -47,32 +47,32 @@ export const createRotationValuesBindGroup = (
   return rotationValuesBindGroup;
 };
 
-export const createBloomOptionsBuffer = (
+export const createGlareOptionsBuffer = (
   root: TgpuRoot,
-  initValues?: Partial<BloomOptions>
+  initValues?: Partial<GlareOptions>
 ) => {
-  const bloomOptions: BloomOptions = createBloomOptions({ ...initValues });
-  const bloomOptionsTyped = mapToF32(bloomOptions);
+  const glareOptions: GlareOptions = createGlareOptions({ ...initValues });
+  const glareOptionsTyped = mapToF32(glareOptions);
 
-  const bloomOptionsBuffer = root
-    .createBuffer(bloomOptionsSchema, bloomOptionsTyped)
+  const glareOptionsBuffer = root
+    .createBuffer(glareOptionsSchema, glareOptionsTyped)
     .$usage('uniform');
 
-  return bloomOptionsBuffer;
+  return glareOptionsBuffer;
 };
 
-export const createBloomOptionsBindGroup = (
+export const createGlareOptionsBindGroup = (
   root: TgpuRoot,
-  buffer: TgpuBuffer<bloomOptionsSchema> & UniformFlag
+  buffer: TgpuBuffer<glareOptionsSchema> & UniformFlag
 ) => {
-  const bloomOptionsBindGroup = root.createBindGroup(
-    bloomOptionsBindGroupLayout,
+  const glareOptionsBindGroup = root.createBindGroup(
+    glareOptionsBindGroupLayout,
     {
-      bloomOptions: buffer,
+      glareOptions: buffer,
     }
   );
 
-  return bloomOptionsBindGroup;
+  return glareOptionsBindGroup;
 };
 
 export const createColorMaskBuffer = (

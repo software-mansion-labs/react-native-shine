@@ -1,7 +1,7 @@
 import { f32, vec2f, vec3f, vec4f } from 'typegpu/data';
 import type {
   BindGroupPair,
-  BloomOptions,
+  GlareOptions,
   ColorMask,
   DeepPartiallyOptional,
   vec3,
@@ -9,28 +9,28 @@ import type {
 import { div } from 'typegpu/std';
 import type { TgpuBindGroup, TgpuBindGroupLayout } from 'typegpu';
 
-export const createBloomOptions = (
-  options: Partial<BloomOptions>
-): BloomOptions => {
+export const createGlareOptions = (
+  options: Partial<GlareOptions>
+): GlareOptions => {
   const {
     glowPower,
     hueShiftAngleMax,
     hueShiftAngleMin,
     hueBlendPower,
     lightIntensity,
-    bloomIntensity,
+    glareIntensity,
   } = options;
 
-  const bloomOp = {
+  const glareOp = {
     glowPower: glowPower ?? 1.0,
     hueShiftAngleMax: hueShiftAngleMax ?? 1.0,
     hueShiftAngleMin: hueShiftAngleMin ?? 0.0,
     hueBlendPower: hueBlendPower ?? 1.0,
     lightIntensity: lightIntensity ?? 1.0,
-    bloomIntensity: bloomIntensity ?? 1.0,
+    glareIntensity: glareIntensity ?? 1.0,
   };
 
-  return bloomOp;
+  return glareOp;
 };
 
 export const mapToF32 = <T extends Record<string, number>>(

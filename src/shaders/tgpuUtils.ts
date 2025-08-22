@@ -33,7 +33,7 @@ export const hueShift = tgpu.fn(
   return d.vec3f(r, g, b);
 });
 
-export const bloomColorShift = tgpu.fn(
+export const glareColorShift = tgpu.fn(
   [d.vec3f, d.f32],
   d.vec3f
 )((color, power) => {
