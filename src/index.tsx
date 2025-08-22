@@ -11,7 +11,7 @@ import {
 } from './shaders/utils';
 import type { TgpuRenderPipeline, TgpuTexture } from 'typegpu';
 import {
-  bloomOptionsBindGroupLayout,
+  glareOptionsBindGroupLayout,
   colorMaskBindGroupLayout,
   rotationValuesBindGroupLayout,
   textureBindGroupLayout,
@@ -24,10 +24,9 @@ import {
 } from 'react-native-reanimated';
 import * as d from 'typegpu/data';
 import { Platform } from 'react-native';
-import bloomFragment from './shaders/fragmentShaders/bloomFragment';
 import {
-  createBloomOptionsBindGroup,
-  createBloomOptionsBuffer,
+  createGlareOptionsBindGroup,
+  createGlareOptionsBuffer,
   createColorMaskBindGroup,
   createColorMaskBuffer,
   createRotationBuffer,
@@ -36,12 +35,12 @@ import {
 import {
   createBindGroupPair,
   createBindGroupPairs,
-  createBloomOptions,
+  createGlareOptions,
   createColorMask,
 } from './types/typeUtils';
 import type {
   BindGroupPair,
-  BloomOptions,
+  GlareOptions,
   ColorMask,
   DeepPartiallyOptional,
 } from './types/types';
@@ -56,11 +55,12 @@ import {
   createTexture,
   loadTexture,
 } from './shaders/resourceManagement/textures';
+import glareFragment from './shaders/fragmentShaders/glareFragment';
 interface ShineProps {
   width: number;
   height: number;
   imageURI: string;
-  bloomOptions?: Partial<BloomOptions>;
+  glareOptions?: Partial<GlareOptions>;
   colorMaskOptions?: DeepPartiallyOptional<ColorMask, 'baseColor'>;
   maskURI?: string;
 }
@@ -69,7 +69,7 @@ export function Shine({
   width,
   height,
   imageURI,
-  bloomOptions,
+  glareOptions: glareOptions,
   colorMaskOptions,
   maskURI,
 }: ShineProps) {
@@ -207,13 +207,13 @@ export function Shine({
       rotationBuffer
     );
 
-    const bloomOptionsBuffer = createBloomOptionsBuffer(
+    const glareOptionsBuffer = createGlareOptionsBuffer(
       root,
-      createBloomOptions(bloomOptions ?? {})
+      createGlareOptions(glareOptions ?? {})
     );
-    const bloomOptionsBindGroup = createBloomOptionsBindGroup(
+    const glareOptionsBindGroup = createGlareOptionsBindGroup(
       root,
-      bloomOptionsBuffer
+      glareOptionsBuffer
     );
 
     const colorMaskBuffer = createColorMaskBuffer(
@@ -222,17 +222,17 @@ export function Shine({
     );
     const colorMaskBindGroup = createColorMaskBindGroup(root, colorMaskBuffer);
 
-    const bloomBGP: BindGroupPair[] = createBindGroupPairs(
+    const glareBGP: BindGroupPair[] = createBindGroupPairs(
       [
         textureBindGroupLayout,
         rotationValuesBindGroupLayout,
-        bloomOptionsBindGroupLayout,
+        glareOptionsBindGroupLayout,
         colorMaskBindGroupLayout,
       ],
       [
         imageTextureBindGroup,
         rotationBindGroup,
-        bloomOptionsBindGroup,
+        glareOptionsBindGroup,
         colorMaskBindGroup,
       ]
     );
@@ -242,11 +242,11 @@ export function Shine({
       [imageTextureBindGroup, colorMaskBindGroup]
     );
 
-    let bloomPipeline = root['~unstable']
+    let glarePipeline = root['~unstable']
       .withVertex(mainVertex, {})
-      .withFragment(bloomFragment, getDefaultTarget(presentationFormat))
+      .withFragment(glareFragment, getDefaultTarget(presentationFormat))
       .createPipeline();
-    bloomPipeline = attachBindGroups(bloomPipeline, bloomBGP);
+    glarePipeline = attachBindGroups(glarePipeline, glareBGP);
 
     let colorMaskPipeline = root['~unstable']
       .withVertex(mainVertex, {})
@@ -263,7 +263,7 @@ export function Shine({
       presentationFormat
     );
 
-    const pipelines: TgpuRenderPipeline[] = [bloomPipeline, colorMaskPipeline];
+    const pipelines: TgpuRenderPipeline[] = [glarePipeline, colorMaskPipeline];
     if (maskPipeline) pipelines.push(maskPipeline);
 
     const rot = d.vec3f(0.0);
@@ -315,7 +315,7 @@ export function Shine({
     imageTexture,
     maskTexture,
     rotationShared,
-    bloomOptions,
+    glareOptions,
     colorMaskOptions,
     maskURI,
   ]);
@@ -323,8 +323,14 @@ export function Shine({
   return (
     <Canvas
       ref={ref}
-      style={{ width, height, aspectRatio: width / height }}
+      style={{
+        width,
+        height,
+        // flex: 1,
+        aspectRatio: width / height,
+      }}
       transparent={Platform.OS === 'ios'}
+      // renderToHardwareTextureAndroid
     />
   );
 }

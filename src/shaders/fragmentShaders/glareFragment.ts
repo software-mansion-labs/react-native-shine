@@ -4,12 +4,12 @@ import * as std from 'typegpu/std';
 import {
   rotationValuesBindGroupLayout,
   textureBindGroupLayout,
-  bloomOptionsBindGroupLayout,
-  colorMaskBindGroupLayout,
+  glareOptionsBindGroupLayout,
+  // colorMaskBindGroupLayout,
 } from '../bindGroupLayouts';
-import { bloomColorShift, hueShift, overlayChannels } from '../tgpuUtils';
+import { glareColorShift, hueShift, overlayChannels } from '../tgpuUtils';
 
-const bloomFragment = tgpu['~unstable'].fragmentFn({
+const glareFragment = tgpu['~unstable'].fragmentFn({
   in: { uv: d.vec2f },
   out: d.vec4f,
 })((input) => {
@@ -20,17 +20,17 @@ const bloomFragment = tgpu['~unstable'].fragmentFn({
   const rot = rotationValuesBindGroupLayout.$.vec;
   const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y));
 
-  const bloomOptions = bloomOptionsBindGroupLayout.$.bloomOptions;
-  const bloomIntensity = bloomOptions.bloomIntensity;
-  const glowPower = bloomOptions.glowPower;
-  const hueBlendPower = bloomOptions.hueBlendPower;
-  const hueShiftAngleMax = bloomOptions.hueShiftAngleMax;
-  const hueShiftAngleMin = bloomOptions.hueShiftAngleMin;
-  const lightIntensity = bloomOptions.lightIntensity;
+  const glareOptions = glareOptionsBindGroupLayout.$.glareOptions;
+  const glareIntensity = glareOptions.glareIntensity;
+  const glowPower = glareOptions.glowPower;
+  const hueBlendPower = glareOptions.hueBlendPower;
+  const hueShiftAngleMax = glareOptions.hueShiftAngleMax;
+  const hueShiftAngleMin = glareOptions.hueShiftAngleMin;
+  const lightIntensity = glareOptions.lightIntensity;
 
-  const mask = colorMaskBindGroupLayout.$.mask;
-  const maskedColor = mask.baseColor;
-  const rgbToleranceRange = mask.rgbToleranceRange;
+  // const mask = colorMaskBindGroupLayout.$.mask;
+  // const maskedColor = mask.baseColor;
+  // const rgbToleranceRange = mask.rgbToleranceRange;
 
   let color = std.textureSample(
     textureBindGroupLayout.$.texture,
@@ -38,17 +38,17 @@ const bloomFragment = tgpu['~unstable'].fragmentFn({
     texcoord
   );
 
-  const maskedColorLower = std.sub(maskedColor, rgbToleranceRange.lower);
-  const maskedColorUpper = std.add(maskedColor, rgbToleranceRange.upper);
-  const upperCheck = std.all(std.le(color.xyz, maskedColorUpper));
-  const lowerCheck = std.all(std.ge(color.xyz, maskedColorLower));
-  if (upperCheck && lowerCheck) {
-    return color;
-  }
+  // const maskedColorLower = std.sub(maskedColor, rgbToleranceRange.lower);
+  // const maskedColorUpper = std.add(maskedColor, rgbToleranceRange.upper);
+  // const upperCheck = std.all(std.le(color.xyz, maskedColorUpper));
+  // const lowerCheck = std.all(std.ge(color.xyz, maskedColorLower));
+  // if (upperCheck && lowerCheck) {
+  //   return color;
+  // }
 
-  //bloomIntensity
+  //glareIntensity
   const dst = std.exp(-std.distance(center, centeredCoords));
-  const distToCenter = std.smoothstep(0.0, 1 / bloomIntensity, dst);
+  const distToCenter = std.smoothstep(0.0, 1 / glareIntensity, dst);
 
   //glowPower
   let glow = d.vec3f(distToCenter);
@@ -59,7 +59,7 @@ const bloomFragment = tgpu['~unstable'].fragmentFn({
 
   //lightIntensity
   glow = std.add(glow, lightIntensity / 10.0);
-  let shiftedRGB = bloomColorShift(color.xyz, dst / (lightIntensity * 2));
+  let shiftedRGB = glareColorShift(color.xyz, dst / (lightIntensity * 2));
 
   //hueShiftAngleMin/Max
   const hueShiftAngle = std.smoothstep(
@@ -80,4 +80,4 @@ const bloomFragment = tgpu['~unstable'].fragmentFn({
   return color;
 });
 
-export default bloomFragment;
+export default glareFragment;

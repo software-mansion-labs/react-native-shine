@@ -28,7 +28,6 @@ export default function App() {
         styles.containerColor,
       ]}
     >
-      <Text>nice</Text>
       <Shine
         width={200}
         height={267}
@@ -37,11 +36,7 @@ export default function App() {
           // charmander
           // 'https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/sm115/sm115-007.png?signature=d614178b139f5ebebe4d0009310f1b76678b6d3924c7218e28bf61d139097482'
         }
-        bloomOptions={{ glowPower: 10 }}
-        colorMaskOptions={{
-          baseColor: [255, 200, 0],
-          rgbToleranceRange: {},
-        }}
+        glareOptions={{ glowPower: 1 }}
       />
       <Shine
         width={300}
@@ -49,11 +44,11 @@ export default function App() {
         imageURI={
           'https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/sm115/sm115-007.png?signature=d614178b139f5ebebe4d0009310f1b76678b6d3924c7218e28bf61d139097482'
         }
-        bloomOptions={{
+        glareOptions={{
           glowPower: 1,
-          bloomIntensity: 1,
+          glareIntensity: 1,
           lightIntensity: 1,
-          hueBlendPower: 5,
+          hueBlendPower: 3,
           hueShiftAngleMax: 1,
           hueShiftAngleMin: 0,
         }}
@@ -63,6 +58,7 @@ export default function App() {
         }}
         maskURI={pokemonCardMaskGrad}
       />
+      <Text style={styles.text}>nice</Text>
     </View>
   );
 }
@@ -85,5 +81,9 @@ const styles = StyleSheet.create({
   },
   containerColor: {
     backgroundColor: '#ae78aeff',
+  },
+  text: {
+    color: '#FFFFFF',
+    fontSize: 30,
   },
 });
