@@ -14,4 +14,17 @@ const pokemonCardMaskGrad = Image.resolveAssetSource(
   sourcePokemonCardMaskGrad
 ).uri;
 
-export { charmander, pokemon, pokemonCardMask, pokemonCardMaskGrad };
+const sourceWildCharge = require('../assets/wild_charge.png');
+const wildCharge = Image.resolveAssetSource(sourceWildCharge).uri;
+
+const sourceWildChargeMask = require('../assets/masked_wild_charge.png');
+const wildChargeMask = Image.resolveAssetSource(sourceWildChargeMask).uri;
+
+export {
+  charmander,
+  pokemon,
+  pokemonCardMask,
+  pokemonCardMaskGrad,
+  wildCharge,
+  wildChargeMask,
+};
