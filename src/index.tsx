@@ -21,6 +21,7 @@ import {
   useAnimatedSensor,
   useDerivedValue,
   useSharedValue,
+  type SharedValue,
 } from 'react-native-reanimated';
 import * as d from 'typegpu/data';
 import { Platform } from 'react-native';
@@ -63,6 +64,8 @@ interface ShineProps {
   glareOptions?: Partial<GlareOptions>;
   colorMaskOptions?: DeepPartiallyOptional<ColorMask, 'baseColor'>;
   maskURI?: string;
+  useTouchControl?: boolean;
+  touchPosition?: SharedValue<[number, number]>;
 }
 
 export function Shine({
@@ -72,6 +75,8 @@ export function Shine({
   glareOptions: glareOptions,
   colorMaskOptions,
   maskURI,
+  useTouchControl = false,
+  touchPosition,
 }: ShineProps) {
   const { device = null } = useDevice();
   const root = device ? getOrInitRoot(device) : null;
@@ -90,8 +95,9 @@ export function Shine({
   const calibSum = useSharedValue<[number, number, number]>([0, 0, 0]);
   const calibCount = useSharedValue<number>(0);
   const calibrated = useSharedValue<boolean>(false);
-
   const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
+
+  // const fingerPos = useSharedValue<[number, number]>([0, 0]);
 
   // Subscribe to orientation changes and reset calibration on change
   useEffect(() => {
@@ -107,9 +113,18 @@ export function Shine({
   useDerivedValue(() => {
     'worklet';
 
+    if (useTouchControl) {
+      rotationShared.value = touchPosition
+        ? [...touchPosition.value, 0]
+        : [0, 0, 0];
+      return;
+    }
+
     // console.log(orientationAngle.value);
-    const v: any = gravitySensor.sensor?.value ??
+    const v: { x: number; y: number; z: number } = gravitySensor.sensor
+      ?.value ??
       gravitySensor.sensor.value ?? { x: 0, y: 0, z: 0 };
+
     const gx = v.x ?? 0;
     const gy = v.y ?? 0;
     const gz = v.z ?? 0;
@@ -326,11 +341,9 @@ export function Shine({
       style={{
         width,
         height,
-        // flex: 1,
         aspectRatio: width / height,
       }}
       transparent={Platform.OS === 'ios'}
-      // renderToHardwareTextureAndroid
     />
   );
 }
