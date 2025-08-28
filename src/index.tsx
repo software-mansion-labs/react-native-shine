@@ -47,9 +47,12 @@ import type {
 } from './types/types';
 import {
   attachBindGroups,
+  blend,
+  createReverseHoloPipeline,
   createMaskPipeline,
   getDefaultTarget,
   pipelineRenderFunction,
+  createRainbowHoloPipeline,
 } from './shaders/pipelineSetups';
 import colorMaskFragment from './shaders/fragmentShaders/colorMaskFragment';
 import {
@@ -265,7 +268,10 @@ export function Shine({
 
     let colorMaskPipeline = root['~unstable']
       .withVertex(mainVertex, {})
-      .withFragment(colorMaskFragment, getDefaultTarget(presentationFormat))
+      .withFragment(
+        colorMaskFragment,
+        getDefaultTarget(presentationFormat, blend)
+      )
       .createPipeline();
     colorMaskPipeline = attachBindGroups(colorMaskPipeline, colorMaskBGP);
 
@@ -278,8 +284,40 @@ export function Shine({
       presentationFormat
     );
 
+    const foilBGP: BindGroupPair[] = createBindGroupPairs(
+      [
+        textureBindGroupLayout,
+        rotationValuesBindGroupLayout,
+        glareOptionsBindGroupLayout,
+      ],
+      [imageTextureBindGroup, rotationBindGroup, glareOptionsBindGroup]
+    );
+
+    const reverseHoloPipeline = createReverseHoloPipeline(
+      root,
+      maskTexture,
+      foilBGP,
+      sampler,
+      presentationFormat
+    );
+
+    const rainbowHoloBGP: BindGroupPair[] = createBindGroupPairs(
+      [rotationValuesBindGroupLayout],
+      [rotationBindGroup]
+    );
+
+    const rainbowHoloPipeline = createRainbowHoloPipeline(
+      root,
+      imageTexture,
+      rainbowHoloBGP,
+      sampler,
+      presentationFormat
+    );
+
     const pipelines: TgpuRenderPipeline[] = [glarePipeline, colorMaskPipeline];
     if (maskPipeline) pipelines.push(maskPipeline);
+    if (reverseHoloPipeline) pipelines.push(reverseHoloPipeline);
+    if (rainbowHoloPipeline) pipelines.push(rainbowHoloPipeline);
 
     const rot = d.vec3f(0.0);
     let view: GPUTextureView;
@@ -309,7 +347,13 @@ export function Shine({
       pipelineRenderFunction(
         root,
         pipelines,
-        [initialAttachment, loadingAttachment, loadingAttachment],
+        [
+          initialAttachment,
+          loadingAttachment,
+          loadingAttachment,
+          loadingAttachment,
+          loadingAttachment,
+        ],
         view,
         isInSinglePass
       );

@@ -97,7 +97,7 @@ export const newGlareFragment = tgpu['~unstable'].fragmentFn({
   const hueBlendPower = opts.hueBlendPower; // [0..1+]: how much hue-shifted color blends in
   const hueShiftAngleMin = opts.hueShiftAngleMin; // radians
   const hueShiftAngleMax = opts.hueShiftAngleMax; // radians
-  const lightIntensity = opts.lightIntensity; // [0..∞): brightness boost of the glare/bloom
+  const lightIntensity = opts.lightIntensity / 1.3; // [0..∞): brightness boost of the glare/bloom
 
   let color = std.textureSample(
     textureBindGroupLayout.$.texture,
