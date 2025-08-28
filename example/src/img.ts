@@ -20,6 +20,12 @@ const wildCharge = Image.resolveAssetSource(sourceWildCharge).uri;
 const sourceWildChargeMask = require('../assets/masked_wild_charge.png');
 const wildChargeMask = Image.resolveAssetSource(sourceWildChargeMask).uri;
 
+const sourceDedenne = require('../assets/dedenne_pokemon.png');
+const dedenne = Image.resolveAssetSource(sourceDedenne).uri;
+
+const dedenneFoilHoloSource = require('../assets/dedenne_foil_holo.webp');
+const dedenneFoilHolo = Image.resolveAssetSource(dedenneFoilHoloSource).uri;
+
 export {
   charmander,
   pokemon,
@@ -27,4 +33,6 @@ export {
   pokemonCardMaskGrad,
   wildCharge,
   wildChargeMask,
+  dedenne,
+  dedenneFoilHolo,
 };

@@ -5,7 +5,7 @@ import {
   Shine,
   subscribeToOrientationChange,
 } from 'react-native-shine';
-import { pokemon, wildCharge, wildChargeMask } from './img';
+import { dedenne, dedenneFoilHolo, pokemon } from './img';
 import { useSharedValue } from 'react-native-reanimated';
 
 export default function App() {
@@ -39,7 +39,6 @@ export default function App() {
   useEffect(() => {
     const id = setInterval(() => {
       moveInCircle();
-      console.log(touchPosition.value);
     }, 50);
     return () => {
       clearInterval(id);
@@ -62,27 +61,35 @@ export default function App() {
           // 'https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/sm115/sm115-007.png?signature=d614178b139f5ebebe4d0009310f1b76678b6d3924c7218e28bf61d139097482'
         }
         glareOptions={{ glowPower: 1 }}
+        colorMaskOptions={{
+          baseColor: [230, 230, 100],
+          rgbToleranceRange: {
+            upper: [30, 30, 30],
+            lower: [30, 30, 30],
+          },
+        }}
       />
       <Shine
         width={300}
         height={400}
         imageURI={
           // 'https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/sm115/sm115-007.png?signature=d614178b139f5ebebe4d0009310f1b76678b6d3924c7218e28bf61d139097482'
-          wildCharge
+          dedenne
         }
         glareOptions={{
-          glowPower: 0.6,
+          glowPower: 0.8,
           glareIntensity: 0.6,
-          lightIntensity: 0.8,
-          hueBlendPower: 0.6,
+          lightIntensity: 0.9,
+          hueBlendPower: 0.3,
           hueShiftAngleMin: -10,
           hueShiftAngleMax: -1.5,
         }}
-        colorMaskOptions={{
-          baseColor: [0, 0, 0],
-          // rgbToleranceRange: { upper: [70, 80, 80] },
-        }}
-        maskURI={wildChargeMask}
+        // colorMaskOptions={{
+        //   // baseColor: [0, 0, 0],
+        //   baseColor: [200, 110, 70],
+        //   rgbToleranceRange: { upper: [75, 80, 80] },
+        // }}
+        maskURI={dedenneFoilHolo}
         useTouchControl={true}
         touchPosition={touchPosition}
       />

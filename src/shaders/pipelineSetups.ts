@@ -1,9 +1,14 @@
 import type { TgpuRenderPipeline, TgpuRoot, TgpuTexture } from 'typegpu';
 import type { BindGroupPair } from '../types/types';
-import { maskTextureBindGroupLayout } from './bindGroupLayouts';
-import { createBindGroupPairs } from '../types/typeUtils';
+import {
+  maskTextureBindGroupLayout,
+  textureBindGroupLayout,
+} from './bindGroupLayouts';
+import { createBindGroupPair, createBindGroupPairs } from '../types/typeUtils';
 import mainVertex from './vertexShaders/mainVertex';
 import maskFragment from './fragmentShaders/maskFragment';
+import { reverseHoloFragment } from './fragmentShaders/reverseHoloFragment';
+import { rainbowHoloFragment } from './fragmentShaders/rainbowHoloFragment';
 
 export const attachBindGroups = (
   pipeline: TgpuRenderPipeline,
@@ -79,6 +84,70 @@ export const createMaskPipeline = (
   maskPipeline = attachBindGroups(maskPipeline, maskBGP);
 
   return maskPipeline;
+};
+
+export const createReverseHoloPipeline = (
+  root: TgpuRoot,
+  texture: TgpuTexture | null,
+  BGP: BindGroupPair[],
+  sampler: GPUSampler,
+  presentationFormat: GPUTextureFormat
+): TgpuRenderPipeline | null => {
+  if (!texture) return null;
+
+  const reverseHoloBindGroup = root.createBindGroup(
+    maskTextureBindGroupLayout,
+    {
+      texture: root.unwrap(texture).createView(),
+      sampler,
+    }
+  );
+  const reverseHoloBGP: BindGroupPair[] = BGP;
+  reverseHoloBGP.push(
+    createBindGroupPair(maskTextureBindGroupLayout, reverseHoloBindGroup)
+  );
+
+  let reverseHoloPipeline = root['~unstable']
+    .withVertex(mainVertex, {})
+    .withFragment(
+      reverseHoloFragment,
+      getDefaultTarget(presentationFormat, blend)
+    )
+    .createPipeline();
+  reverseHoloPipeline = attachBindGroups(reverseHoloPipeline, reverseHoloBGP);
+
+  return reverseHoloPipeline;
+};
+
+export const createRainbowHoloPipeline = (
+  root: TgpuRoot,
+  texture: TgpuTexture | null,
+  BGP: BindGroupPair[],
+  sampler: GPUSampler,
+  presentationFormat: GPUTextureFormat
+): TgpuRenderPipeline | null => {
+  if (!texture) return null;
+
+  const imageTextureBindGroup = root.createBindGroup(textureBindGroupLayout, {
+    texture: root.unwrap(texture).createView(),
+    sampler,
+  });
+
+  const texBGP = createBindGroupPair(
+    textureBindGroupLayout,
+    imageTextureBindGroup
+  );
+
+  let rainbowHoloPipeline = root['~unstable']
+    .withVertex(mainVertex, {})
+    .withFragment(
+      rainbowHoloFragment,
+      getDefaultTarget(presentationFormat, blend)
+    )
+    .createPipeline();
+
+  rainbowHoloPipeline = attachBindGroups(rainbowHoloPipeline, [...BGP, texBGP]);
+  return rainbowHoloPipeline;
 };
 
 export const pipelineRenderFunction = (
