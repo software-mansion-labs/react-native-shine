@@ -1,4 +1,4 @@
-import tgpu from 'typegpu';
+import tgpu, { type ValidateBufferSchema } from 'typegpu';
 import * as d from 'typegpu/data';
 
 export const textureBindGroupLayout = tgpu.bindGroupLayout({
@@ -43,3 +43,22 @@ export type colorMaskSchema = typeof colorMaskSchema;
 export const colorMaskBindGroupLayout = tgpu.bindGroupLayout({
   mask: { uniform: colorMaskSchema },
 });
+
+export const bufferSchemas = {
+  rotationBuffer: d.vec3f,
+  glareBuffer: glareOptionsSchema,
+  colorMaskBuffer: colorMaskSchema,
+} satisfies Record<string, ValidateBufferSchema<any>>;
+
+export type BufferSchemaMap = typeof bufferSchemas;
+
+// export const holoSchema = d.struct({
+//   intensity: d.f32,
+//   waveCallback: WaveCallback, //TgpuFn<(uv: d.Vec2f) => d.Vec2f>,
+// });
+
+// export type holoSchema = typeof holoSchema;
+
+// export const holoBindGroupLayout = tgpu.bindGroupLayout({
+//   holoOptions: { uniform: holoSchema },
+// });

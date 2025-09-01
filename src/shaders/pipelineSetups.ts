@@ -8,7 +8,12 @@ import { createBindGroupPair, createBindGroupPairs } from '../types/typeUtils';
 import mainVertex from './vertexShaders/mainVertex';
 import maskFragment from './fragmentShaders/maskFragment';
 import { reverseHoloFragment } from './fragmentShaders/reverseHoloFragment';
-import { rainbowHoloFragment } from './fragmentShaders/rainbowHoloFragment';
+import { holoFragment } from './fragmentShaders/holoFragment';
+import {
+  WAVE_CALLBACKS,
+  waveCallbackFn,
+  waveCallbackSlot,
+} from '../enums/waveCallback';
 
 export const attachBindGroups = (
   pipeline: TgpuRenderPipeline,
@@ -139,11 +144,9 @@ export const createRainbowHoloPipeline = (
   );
 
   let rainbowHoloPipeline = root['~unstable']
+    .with(waveCallbackSlot, waveCallbackFn(WAVE_CALLBACKS.default))
     .withVertex(mainVertex, {})
-    .withFragment(
-      rainbowHoloFragment,
-      getDefaultTarget(presentationFormat, blend)
-    )
+    .withFragment(holoFragment, getDefaultTarget(presentationFormat, blend))
     .createPipeline();
 
   rainbowHoloPipeline = attachBindGroups(rainbowHoloPipeline, [...BGP, texBGP]);
