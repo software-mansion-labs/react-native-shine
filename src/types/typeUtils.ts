@@ -5,9 +5,11 @@ import type {
   ColorMask,
   DeepPartiallyOptional,
   vec3,
+  HoloOptions,
 } from './types';
 import { div } from 'typegpu/std';
 import type { TgpuBindGroup, TgpuBindGroupLayout } from 'typegpu';
+import { WAVE_CALLBACKS } from '../enums/waveCallback';
 
 export const createGlareOptions = (
   options: Partial<GlareOptions>
@@ -73,6 +75,18 @@ export const colorMaskToTyped = (colorMask: ColorMask) => {
     },
   };
   return result;
+};
+
+export const createHoloOptions = (
+  options: Partial<HoloOptions>
+): HoloOptions => {
+  const { intensity, waveCallback } = options;
+  const holoOpt = {
+    intensity: intensity ?? 0.7,
+    waveCallback: waveCallback ?? WAVE_CALLBACKS.default,
+  };
+
+  return holoOpt;
 };
 
 export const numberArrToTyped = (vec: number[]) => {

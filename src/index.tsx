@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useDevice, useGPUContext } from 'react-native-wgpu';
 import { getOrInitRoot } from './roots';
 import mainVertex from './shaders/vertexShaders/mainVertex';
@@ -15,6 +15,7 @@ import {
   colorMaskBindGroupLayout,
   rotationValuesBindGroupLayout,
   textureBindGroupLayout,
+  type BufferSchemaMap,
 } from './shaders/bindGroupLayouts';
 import {
   SensorType,
@@ -52,7 +53,7 @@ import {
   createMaskPipeline,
   getDefaultTarget,
   pipelineRenderFunction,
-  createRainbowHoloPipeline,
+  createRainbowHoloPipeline as createHoloPipeline,
 } from './shaders/pipelineSetups';
 import colorMaskFragment from './shaders/fragmentShaders/colorMaskFragment';
 import {
@@ -60,6 +61,7 @@ import {
   loadTexture,
 } from './shaders/resourceManagement/textures';
 import { newGlareFragment } from './shaders/fragmentShaders/glareFragment';
+import { TypedBufferMap } from './shaders/resourceManagement/bufferManager';
 interface ShineProps {
   width: number;
   height: number;
@@ -100,7 +102,11 @@ export function Shine({
   const calibrated = useSharedValue<boolean>(false);
   const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
 
-  // const fingerPos = useSharedValue<[number, number]>([0, 0]);
+  const bufferManager = useMemo(
+    () => new TypedBufferMap<BufferSchemaMap>(),
+    []
+  );
+  // const [bufferManager, setBufferManager] = useState<BufferManager | null>();
 
   // Subscribe to orientation changes and reset calibration on change
   useEffect(() => {
@@ -186,6 +192,7 @@ export function Shine({
   // Resource setup
   useEffect(() => {
     if (!root || !device || !context) return;
+
     (async () => {
       const bitmap = await getBitmapFromURI(imageURI);
       const texture = await createTexture(root, bitmap);
@@ -219,7 +226,29 @@ export function Shine({
       sampler,
     });
 
-    const rotationBuffer = createRotationBuffer(root);
+    // export const createRotationBuffer = (
+    //   root: TgpuRoot,
+    //   initValues?: { x: number; y: number; z: number }
+    // ) => {
+    //   const init = initValues
+    //     ? d.vec3f(initValues.x, initValues.y, initValues.z)
+    //     : d.vec3f(0.0);
+    //   const rotationValuesBuffer = root
+    //     .createBuffer(d.vec3f, init)
+    //     .$usage('uniform');
+
+    //   return rotationValuesBuffer;
+    // };
+
+    bufferManager.set('rotationBuffer', createRotationBuffer(root));
+    const rotationBuffer = bufferManager.get('rotationBuffer')!;
+    // const rotationBuffer = bufferManager.get('rotationBuffer')!;
+    // bufferManager.addBufferUniform<d.Vec3f>(
+    //   'rotationBuffer',
+    //   d.vec3f,
+    //   d.vec3f(0.0)
+    // );
+    // const rotationBuffer = bufferManager.getBuffer('rotationBuffer')!;
     const rotationBindGroup = createRotationValuesBindGroup(
       root,
       rotationBuffer
@@ -301,15 +330,15 @@ export function Shine({
       presentationFormat
     );
 
-    const rainbowHoloBGP: BindGroupPair[] = createBindGroupPairs(
+    const holoBGP: BindGroupPair[] = createBindGroupPairs(
       [rotationValuesBindGroupLayout],
       [rotationBindGroup]
     );
 
-    const rainbowHoloPipeline = createRainbowHoloPipeline(
+    const holoPipeline = createHoloPipeline(
       root,
       imageTexture,
-      rainbowHoloBGP,
+      holoBGP,
       sampler,
       presentationFormat
     );
@@ -317,7 +346,7 @@ export function Shine({
     const pipelines: TgpuRenderPipeline[] = [glarePipeline, colorMaskPipeline];
     if (maskPipeline) pipelines.push(maskPipeline);
     if (reverseHoloPipeline) pipelines.push(reverseHoloPipeline);
-    if (rainbowHoloPipeline) pipelines.push(rainbowHoloPipeline);
+    if (holoPipeline) pipelines.push(holoPipeline);
 
     const rot = d.vec3f(0.0);
     let view: GPUTextureView;
@@ -377,6 +406,7 @@ export function Shine({
     glareOptions,
     colorMaskOptions,
     maskURI,
+    bufferManager,
   ]);
 
   return (

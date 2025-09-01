@@ -1,4 +1,5 @@
 import type { TgpuBindGroup, TgpuBindGroupLayout } from 'typegpu';
+import type { WaveCallbackFn } from '../enums/waveCallback';
 
 export type vec2 = [number, number];
 export type vec3 = [number, number, number];
@@ -20,6 +21,11 @@ export type ColorMask = {
     upper: vec3;
     lower: vec3;
   };
+};
+
+export type HoloOptions = {
+  intensity: number;
+  waveCallback: WaveCallbackFn;
 };
 
 //makes all keys besides specified optional

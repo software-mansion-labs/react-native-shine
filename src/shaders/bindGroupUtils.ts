@@ -1,4 +1,9 @@
-import { type TgpuBuffer, type TgpuRoot, type UniformFlag } from 'typegpu';
+import {
+  type TgpuBuffer,
+  type TgpuRoot,
+  type UniformFlag,
+  type TgpuFn,
+} from 'typegpu';
 import * as d from 'typegpu/data';
 import {
   glareOptionsBindGroupLayout,
@@ -6,17 +11,20 @@ import {
   colorMaskBindGroupLayout,
   colorMaskSchema,
   rotationValuesBindGroupLayout,
+  holoSchema,
 } from './bindGroupLayouts';
 import type {
   GlareOptions,
   ColorMask,
   PartiallyOptional,
+  HoloOptions,
 } from '../types/types';
 import {
   colorMaskToTyped,
   createGlareOptions,
   createColorMask,
   mapToF32,
+  createHoloOptions,
 } from '../types/typeUtils';
 
 export const createRotationBuffer = (
@@ -35,12 +43,12 @@ export const createRotationBuffer = (
 
 export const createRotationValuesBindGroup = (
   root: TgpuRoot,
-  buffer: TgpuBuffer<d.Vec3f> & UniformFlag
+  buffer: TgpuBuffer<d.Vec3f>
 ) => {
   const rotationValuesBindGroup = root.createBindGroup(
     rotationValuesBindGroupLayout,
     {
-      vec: buffer,
+      vec: root.unwrap(buffer),
     }
   );
 
@@ -99,3 +107,18 @@ export const createColorMaskBindGroup = (
 
   return colorMaskBindGroup;
 };
+
+// export const crateHoloBuffer = (
+//   root: TgpuRoot,
+//   initValues: Partial<HoloOptions>
+// ) => {
+//   const holoOptions: HoloOptions = createHoloOptions({ ...initValues });
+//   const holoOptionsTyped = {
+//     intensity: d.f32(holoOptions.intensity),
+//     waveCallback: holoOptions.waveCallback,
+//   };
+
+//   const holoBuffer = root
+//     .createBuffer(holoSchema, holoOptionsTyped)
+//     .$usage('uniform');
+// };

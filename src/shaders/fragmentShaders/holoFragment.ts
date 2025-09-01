@@ -6,8 +6,9 @@ import {
   textureBindGroupLayout,
 } from '../bindGroupLayouts';
 import { hueShift } from '../tgpuUtils';
+import { waveCallbackSlot } from '../../enums/waveCallback';
 
-export const rainbowHoloFragment = tgpu['~unstable'].fragmentFn({
+export const holoFragment = tgpu['~unstable'].fragmentFn({
   in: { uv: d.vec2f },
   out: d.vec4f,
 })((input) => {
@@ -24,13 +25,15 @@ export const rainbowHoloFragment = tgpu['~unstable'].fragmentFn({
   const rot = rotationValuesBindGroupLayout.$.vec;
   const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y));
 
-  const waveX = std.sin(centeredCoords.x * 2.0);
-  const waveY = std.cos(centeredCoords.x * 2.0);
+  const wave = waveCallbackSlot.$(rot.xy);
+  const waveX = wave.x;
+  const waveY = wave.y;
+
   const band = std.add(waveX, waveY);
 
   const dist = std.distance(centeredCoords, center);
-  const glowPower = 0.7;
-  const falloff = std.pow(std.exp(-dist), 1.0 / glowPower);
+  const intensity = 0.7;
+  const falloff = std.pow(std.exp(-dist), 1.0 / intensity);
 
   const hueAngle = std.mul(std.abs(band), (10 * Math.PI * rot.x) / 3);
   const rainbowColor = hueShift(d.vec3f(1.0, 1.0, 1.0), hueAngle);
