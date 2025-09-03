@@ -1,5 +1,6 @@
 import tgpu, { type ValidateBufferSchema } from 'typegpu';
 import * as d from 'typegpu/data';
+import type { BufferUsageType } from './resourceManagement/bufferManager';
 
 export const textureBindGroupLayout = tgpu.bindGroupLayout({
   texture: { texture: 'float', dimension: '2d', sampleType: 'float' },
@@ -44,13 +45,25 @@ export const colorMaskBindGroupLayout = tgpu.bindGroupLayout({
   mask: { uniform: colorMaskSchema },
 });
 
-export const bufferSchemas = {
-  rotationBuffer: d.vec3f,
-  glareBuffer: glareOptionsSchema,
-  colorMaskBuffer: colorMaskSchema,
-} satisfies Record<string, ValidateBufferSchema<any>>;
+export const bufferData = {
+  rotationBuffer: {
+    schema: d.vec3f,
+    usage: 'uniform',
+  },
+  glareBuffer: {
+    schema: glareOptionsSchema,
+    usage: 'uniform',
+  },
+  colorMaskBuffer: {
+    schema: colorMaskSchema,
+    usage: 'uniform',
+  },
+} as const satisfies Record<
+  string,
+  { schema: ValidateBufferSchema<any>; usage: BufferUsageType }
+>;
 
-export type BufferSchemaMap = typeof bufferSchemas;
+export type BufferDataMap = typeof bufferData;
 
 // export const holoSchema = d.struct({
 //   intensity: d.f32,

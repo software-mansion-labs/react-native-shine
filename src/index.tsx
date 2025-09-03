@@ -15,7 +15,8 @@ import {
   colorMaskBindGroupLayout,
   rotationValuesBindGroupLayout,
   textureBindGroupLayout,
-  type BufferSchemaMap,
+  type BufferDataMap,
+  bufferData,
 } from './shaders/bindGroupLayouts';
 import {
   SensorType,
@@ -103,7 +104,7 @@ export function Shine({
   const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
 
   const bufferManager = useMemo(
-    () => new TypedBufferMap<BufferSchemaMap>(),
+    () => new TypedBufferMap(bufferData as BufferDataMap),
     []
   );
   // const [bufferManager, setBufferManager] = useState<BufferManager | null>();
@@ -226,36 +227,20 @@ export function Shine({
       sampler,
     });
 
-    // export const createRotationBuffer = (
-    //   root: TgpuRoot,
-    //   initValues?: { x: number; y: number; z: number }
-    // ) => {
-    //   const init = initValues
-    //     ? d.vec3f(initValues.x, initValues.y, initValues.z)
-    //     : d.vec3f(0.0);
-    //   const rotationValuesBuffer = root
-    //     .createBuffer(d.vec3f, init)
-    //     .$usage('uniform');
+    const rotationBuffer = bufferManager.addBuffer(
+      root,
+      'rotationBuffer',
+      d.vec3f(0.0)
+    );
 
-    //   return rotationValuesBuffer;
-    // };
-
-    bufferManager.set('rotationBuffer', createRotationBuffer(root));
-    const rotationBuffer = bufferManager.get('rotationBuffer')!;
-    // const rotationBuffer = bufferManager.get('rotationBuffer')!;
-    // bufferManager.addBufferUniform<d.Vec3f>(
-    //   'rotationBuffer',
-    //   d.vec3f,
-    //   d.vec3f(0.0)
-    // );
-    // const rotationBuffer = bufferManager.getBuffer('rotationBuffer')!;
     const rotationBindGroup = createRotationValuesBindGroup(
       root,
       rotationBuffer
     );
 
-    const glareOptionsBuffer = createGlareOptionsBuffer(
+    const glareOptionsBuffer = bufferManager.addBuffer(
       root,
+      'glareBuffer',
       createGlareOptions(glareOptions ?? {})
     );
     const glareOptionsBindGroup = createGlareOptionsBindGroup(
