@@ -63,7 +63,7 @@ export const attachBindGroupsToPass = (
 export const createMaskPipeline = (
   root: TgpuRoot,
   maskTexture: TgpuTexture | null,
-  imageTextureBindGroupPair: BindGroupPair,
+  BGP: BindGroupPair[],
   sampler: GPUSampler,
   presentationFormat: GPUTextureFormat
 ): TgpuRenderPipeline | null => {
@@ -80,8 +80,9 @@ export const createMaskPipeline = (
     [maskTextureBindGroupLayout],
     [maskTextureBindGroup]
   );
-  maskBGP.push(imageTextureBindGroupPair);
-
+  for (let i = 0; i < BGP.length; i++) {
+    maskBGP.push(BGP[i]!);
+  }
   let maskPipeline = root['~unstable']
     .withVertex(mainVertex, {})
     .withFragment(maskFragment, getDefaultTarget(presentationFormat, blend))

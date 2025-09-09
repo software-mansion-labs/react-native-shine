@@ -18,7 +18,7 @@ import {
   type BufferDataMap,
   bufferData,
 } from './shaders/bindGroupLayouts';
-import {
+import Animated, {
   SensorType,
   useAnimatedSensor,
   useDerivedValue,
@@ -29,17 +29,14 @@ import * as d from 'typegpu/data';
 import { Platform } from 'react-native';
 import {
   createGlareOptionsBindGroup,
-  createGlareOptionsBuffer,
   createColorMaskBindGroup,
-  createColorMaskBuffer,
-  createRotationBuffer,
   createRotationValuesBindGroup,
 } from './shaders/bindGroupUtils';
 import {
-  createBindGroupPair,
   createBindGroupPairs,
   createGlareOptions,
   createColorMask,
+  colorMaskToTyped,
 } from './types/typeUtils';
 import type {
   BindGroupPair,
@@ -63,6 +60,7 @@ import {
 } from './shaders/resourceManagement/textures';
 import { newGlareFragment } from './shaders/fragmentShaders/glareFragment';
 import { TypedBufferMap } from './shaders/resourceManagement/bufferManager';
+import { useOrientation } from './hooks/useOrientation';
 interface ShineProps {
   width: number;
   height: number;
@@ -72,6 +70,9 @@ interface ShineProps {
   maskURI?: string;
   useTouchControl?: boolean;
   touchPosition?: SharedValue<[number, number]>;
+  addTextureMask?: boolean;
+  addReverseHolo?: boolean;
+  addHolo?: boolean;
 }
 
 export function Shine({
@@ -81,8 +82,11 @@ export function Shine({
   glareOptions: glareOptions,
   colorMaskOptions,
   maskURI,
-  useTouchControl = false,
   touchPosition,
+  useTouchControl = false,
+  addTextureMask = false,
+  addHolo = false,
+  addReverseHolo = false,
 }: ShineProps) {
   const { device = null } = useDevice();
   const root = device ? getOrInitRoot(device) : null;
@@ -107,8 +111,22 @@ export function Shine({
     () => new TypedBufferMap(bufferData as BufferDataMap),
     []
   );
-  // const [bufferManager, setBufferManager] = useState<BufferManager | null>();
 
+  //TODO: add once again, when the wgpu issues are fixed :3
+
+  // const animatedStyle = useAnimatedStyle(() => {
+  //   const rotX = rotationShared.value[0] * 10;
+  //   const rotY = rotationShared.value[1] * 10;
+
+  //   return {
+  //     transform: [
+  //       { perspective: 100 },
+  //       // { rotateX: `${-rotX}deg` },
+  //       // { rotateY: `${rotY}deg` },
+  //       { rotateZ: `${rotX * 5}deg` },
+  //     ],
+  //   };
+  // });
   // Subscribe to orientation changes and reset calibration on change
   useEffect(() => {
     orientationAngle.value = getAngleFromDimensions();
@@ -127,6 +145,7 @@ export function Shine({
       rotationShared.value = touchPosition
         ? [...touchPosition.value, 0]
         : [0, 0, 0];
+
       return;
     }
 
@@ -248,9 +267,12 @@ export function Shine({
       glareOptionsBuffer
     );
 
-    const colorMaskBuffer = createColorMaskBuffer(
+    const colorMaskBuffer = bufferManager.addBuffer(
       root,
-      createColorMask(colorMaskOptions ?? { baseColor: [-20, -20, -20] })
+      'colorMaskBuffer',
+      colorMaskToTyped(
+        createColorMask(colorMaskOptions ?? { baseColor: [-20, -20, -20] })
+      )
     );
     const colorMaskBindGroup = createColorMaskBindGroup(root, colorMaskBuffer);
 
@@ -270,8 +292,12 @@ export function Shine({
     );
 
     const colorMaskBGP: BindGroupPair[] = createBindGroupPairs(
-      [textureBindGroupLayout, colorMaskBindGroupLayout],
-      [imageTextureBindGroup, colorMaskBindGroup]
+      [
+        textureBindGroupLayout,
+        colorMaskBindGroupLayout,
+        rotationValuesBindGroupLayout,
+      ],
+      [imageTextureBindGroup, colorMaskBindGroup, rotationBindGroup]
     );
 
     let glarePipeline = root['~unstable']
@@ -293,12 +319,15 @@ export function Shine({
     const maskPipeline = createMaskPipeline(
       root,
       maskTexture,
-      createBindGroupPair(textureBindGroupLayout, imageTextureBindGroup),
+      createBindGroupPairs(
+        [textureBindGroupLayout, rotationValuesBindGroupLayout],
+        [imageTextureBindGroup, rotationBindGroup]
+      ),
       sampler,
       presentationFormat
     );
 
-    const foilBGP: BindGroupPair[] = createBindGroupPairs(
+    const reverseHoloBGP: BindGroupPair[] = createBindGroupPairs(
       [
         textureBindGroupLayout,
         rotationValuesBindGroupLayout,
@@ -310,7 +339,7 @@ export function Shine({
     const reverseHoloPipeline = createReverseHoloPipeline(
       root,
       maskTexture,
-      foilBGP,
+      reverseHoloBGP,
       sampler,
       presentationFormat
     );
@@ -328,10 +357,12 @@ export function Shine({
       presentationFormat
     );
 
-    const pipelines: TgpuRenderPipeline[] = [glarePipeline, colorMaskPipeline];
-    if (maskPipeline) pipelines.push(maskPipeline);
-    if (reverseHoloPipeline) pipelines.push(reverseHoloPipeline);
-    if (holoPipeline) pipelines.push(holoPipeline);
+    const pipelines: TgpuRenderPipeline[] = [glarePipeline];
+    if (addTextureMask && maskPipeline) pipelines.push(maskPipeline);
+    if (addReverseHolo && reverseHoloPipeline)
+      pipelines.push(reverseHoloPipeline);
+    if (addHolo && holoPipeline) pipelines.push(holoPipeline);
+    if (colorMaskOptions) pipelines.push(colorMaskPipeline);
 
     const rot = d.vec3f(0.0);
     let view: GPUTextureView;
@@ -388,23 +419,34 @@ export function Shine({
     imageTexture,
     maskTexture,
     rotationShared,
+    bufferManager,
     glareOptions,
     colorMaskOptions,
     maskURI,
-    bufferManager,
+    addHolo,
+    addReverseHolo,
+    addTextureMask,
   ]);
 
   return (
-    <Canvas
-      ref={ref}
-      style={{
-        width,
-        height,
-        aspectRatio: width / height,
-      }}
-      transparent={Platform.OS === 'ios'}
-    />
+    <Animated.View
+      style={
+        [
+          /*animatedStyle*/
+        ]
+      }
+    >
+      <Canvas
+        ref={ref}
+        style={{
+          width,
+          height,
+          aspectRatio: width / height,
+        }}
+        transparent={Platform.OS === 'ios'}
+      />
+    </Animated.View>
   );
 }
 
-export { subscribeToOrientationChange, getAngleFromDimensions };
+export { subscribeToOrientationChange, getAngleFromDimensions, useOrientation };

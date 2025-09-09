@@ -27,7 +27,7 @@ const colorMaskFragment = tgpu['~unstable'].fragmentFn({
   const upperCheck = std.all(std.le(color.xyz, maskedColorUpper));
   const lowerCheck = std.all(std.ge(color.xyz, maskedColorLower));
   if (upperCheck && lowerCheck) {
-    return d.vec4f(color.xyz, 0.4);
+    return d.vec4f(color.xyz, 0.0);
   }
   return d.vec4f(1.0);
 });
