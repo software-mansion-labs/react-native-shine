@@ -1,6 +1,5 @@
 import type { TgpuRoot, TgpuBuffer, ValidateBufferSchema } from 'typegpu';
 
-// You already have this
 export type BufferUsageType = 'uniform' | 'storage' | 'vertex';
 
 type BufferWithUsageFromEntry<

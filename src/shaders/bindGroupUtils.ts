@@ -1,9 +1,4 @@
-import {
-  type TgpuBuffer,
-  type TgpuRoot,
-  type UniformFlag,
-  type TgpuFn,
-} from 'typegpu';
+import { type TgpuBuffer, type TgpuRoot, type UniformFlag } from 'typegpu';
 import * as d from 'typegpu/data';
 import {
   glareOptionsBindGroupLayout,
@@ -11,20 +6,17 @@ import {
   colorMaskBindGroupLayout,
   colorMaskSchema,
   rotationValuesBindGroupLayout,
-  holoSchema,
 } from './bindGroupLayouts';
 import type {
   GlareOptions,
   ColorMask,
   PartiallyOptional,
-  HoloOptions,
 } from '../types/types';
 import {
   colorMaskToTyped,
   createGlareOptions,
   createColorMask,
   mapToF32,
-  createHoloOptions,
 } from '../types/typeUtils';
 
 export const createRotationBuffer = (

@@ -1,17 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import {
-  getAngleFromDimensions,
-  Shine,
-  subscribeToOrientationChange,
-} from 'react-native-shine';
-import { dedenne, dedenneFoilHolo, pokemon } from './img';
+import { View, StyleSheet } from 'react-native';
+import { Shine, useOrientation } from 'react-native-shine';
+import { dedenne, dedenneFoilHolo } from './img';
 import { useSharedValue } from 'react-native-reanimated';
 
 export default function App() {
-  const [orientation, setOrientation] = useState<string>();
+  const orientation = useOrientation();
   const touchPosition = useSharedValue<[number, number]>([0.0, 0.0]);
   const rotation = useRef<number>(0);
+  const nh = 0.58;
+  const nw = nh;
+
+  const currentImage = dedenne;
+  const currentMask = dedenneFoilHolo;
+
+  const [glareOptions /*setGlareOptions*/] = useState({
+    glowPower: 0.9,
+    glareIntensity: 0.6,
+    lightIntensity: 0.9,
+    hueBlendPower: 0.3,
+    hueShiftAngleMin: -10,
+    hueShiftAngleMax: -1.5,
+  });
 
   const moveInCircle = () => {
     const radius = 0.5;
@@ -25,16 +35,6 @@ export default function App() {
 
     rotation.current += 0.05;
   };
-  //TODO: add a function that gets the stateSetter and updates the value accordingly
-  //      so that the user doesn't have to write such basic logic
-  useEffect(() => {
-    setOrientation(getAngleFromDimensions() === 0 ? 'PORTRAIT' : 'LANDSCAPE');
-    const unsubscribe = subscribeToOrientationChange((angleDeg) => {
-      setOrientation(angleDeg === 0 ? 'PORTRAIT' : 'LANDSCAPE');
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -53,47 +53,25 @@ export default function App() {
       ]}
     >
       <Shine
-        width={200}
-        height={267}
+        width={732 * nw}
+        height={1024 * nh}
         imageURI={
-          pokemon
-          // charmander
           // 'https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/sm115/sm115-007.png?signature=d614178b139f5ebebe4d0009310f1b76678b6d3924c7218e28bf61d139097482'
+          currentImage
         }
-        glareOptions={{ glowPower: 1 }}
         colorMaskOptions={{
-          baseColor: [230, 230, 100],
-          rgbToleranceRange: {
-            upper: [30, 30, 30],
-            lower: [30, 30, 30],
-          },
+          baseColor: [0, 0, 0],
+          // baseColor: [200, 110, 70],
+          rgbToleranceRange: { upper: [75, 80, 80] },
         }}
+        addHolo={true}
+        addReverseHolo={true}
+        addTextureMask={true}
+        glareOptions={glareOptions}
+        maskURI={currentMask}
+        // useTouchControl={true}
+        // touchPosition={touchPosition}
       />
-      <Shine
-        width={300}
-        height={400}
-        imageURI={
-          // 'https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/sm115/sm115-007.png?signature=d614178b139f5ebebe4d0009310f1b76678b6d3924c7218e28bf61d139097482'
-          dedenne
-        }
-        glareOptions={{
-          glowPower: 0.8,
-          glareIntensity: 0.6,
-          lightIntensity: 0.9,
-          hueBlendPower: 0.3,
-          hueShiftAngleMin: -10,
-          hueShiftAngleMax: -1.5,
-        }}
-        // colorMaskOptions={{
-        //   // baseColor: [0, 0, 0],
-        //   baseColor: [200, 110, 70],
-        //   rgbToleranceRange: { upper: [75, 80, 80] },
-        // }}
-        maskURI={dedenneFoilHolo}
-        useTouchControl={true}
-        touchPosition={touchPosition}
-      />
-      <Text style={styles.text}>nice</Text>
     </View>
   );
 }
@@ -115,7 +93,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   containerColor: {
-    backgroundColor: '#ae78aeff',
+    // backgroundColor: '#ae78aeff',
+    backgroundColor: '#2c2c2c',
   },
   text: {
     color: '#FFFFFF',

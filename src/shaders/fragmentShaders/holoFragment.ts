@@ -32,7 +32,7 @@ export const holoFragment = tgpu['~unstable'].fragmentFn({
   const band = std.add(waveX, waveY);
 
   const dist = std.distance(centeredCoords, center);
-  const intensity = 0.7;
+  const intensity = std.clamp(1.0 - dist, 0.0, 1.0);
   const falloff = std.pow(std.exp(-dist), 1.0 / intensity);
 
   const hueAngle = std.mul(std.abs(band), (10 * Math.PI * rot.x) / 3);
