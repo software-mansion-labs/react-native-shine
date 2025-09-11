@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   getAngleFromDimensions,
   subscribeToOrientationChange,
-} from 'react-native-shine';
+} from '../shaders/utils';
 
 export const useOrientation = () => {
   const [orientation, setOrientation] = useState<string>();
