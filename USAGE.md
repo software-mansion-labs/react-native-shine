@@ -30,12 +30,12 @@ The `Shine` component from `react-native-shine` provides animated and interactiv
 ### Color Mask Options
 
 ```ts
-type vec3 = [number, number, number];
+type rgb = [number, number, number];
 ```
 
 - **`colorMaskOptions`** `ColorMask` (optional): Controls color-based masking for highlighting or filtering.
-  - **`baseColor`** `vec3`: Target RGB color for masking.
-  - **`rgbToleranceRange`** `{ upper?: vec3, lower?: vec3 }` : Upper and lower bounds for RGB tolerance.
+  - **`baseColor`** `rgb`: Target RGB color for masking.
+  - **`rgbToleranceRange`** `{ upper?: rgb, lower?: rgb }` : Upper and lower bounds for RGB tolerance.
 
 Example:
 

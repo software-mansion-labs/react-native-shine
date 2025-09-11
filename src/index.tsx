@@ -21,6 +21,7 @@ import {
 import Animated, {
   SensorType,
   useAnimatedSensor,
+  useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
   type SharedValue,
@@ -114,19 +115,19 @@ export function Shine({
 
   //TODO: add once again, when the wgpu issues are fixed :3
 
-  // const animatedStyle = useAnimatedStyle(() => {
-  //   const rotX = rotationShared.value[0] * 10;
-  //   const rotY = rotationShared.value[1] * 10;
+  const animatedStyle = useAnimatedStyle(() => {
+    const rotX = rotationShared.value[0] * 10;
+    const rotY = rotationShared.value[1] * 10;
 
-  //   return {
-  //     transform: [
-  //       { perspective: 100 },
-  //       // { rotateX: `${-rotX}deg` },
-  //       // { rotateY: `${rotY}deg` },
-  //       { rotateZ: `${rotX * 5}deg` },
-  //     ],
-  //   };
-  // });
+    return {
+      transform: [
+        { perspective: 300 },
+        { rotateX: `${-rotX}deg` },
+        { rotateY: `${rotY}deg` },
+        // { rotateZ: `${rotX * 5}deg` },
+      ],
+    };
+  });
   // Subscribe to orientation changes and reset calibration on change
   useEffect(() => {
     orientationAngle.value = getAngleFromDimensions();
@@ -429,13 +430,7 @@ export function Shine({
   ]);
 
   return (
-    <Animated.View
-      style={
-        [
-          /*animatedStyle*/
-        ]
-      }
-    >
+    <Animated.View style={[animatedStyle]}>
       <Canvas
         ref={ref}
         style={{

@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Shine, useOrientation } from 'react-native-shine';
-import { dedenne, dedenneFoilHolo } from './img';
+import { charmander, pokemonCardMaskGrad } from './img';
 import { useSharedValue } from 'react-native-reanimated';
 
 export default function App() {
   const orientation = useOrientation();
   const touchPosition = useSharedValue<[number, number]>([0.0, 0.0]);
   const rotation = useRef<number>(0);
-  const nh = 0.58;
+  const nh = 0.5;
   const nw = nh;
 
-  const currentImage = dedenne;
-  const currentMask = dedenneFoilHolo;
+  const currentImage = charmander; //dedenne;
+  const currentMask = pokemonCardMaskGrad; //dedenneFoilHolo;
 
   const [glareOptions /*setGlareOptions*/] = useState({
     glowPower: 0.9,
@@ -53,7 +53,7 @@ export default function App() {
       ]}
     >
       <Shine
-        width={732 * nw}
+        width={734 * nw}
         height={1024 * nh}
         imageURI={
           // 'https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/sm115/sm115-007.png?signature=d614178b139f5ebebe4d0009310f1b76678b6d3924c7218e28bf61d139097482'
@@ -69,8 +69,8 @@ export default function App() {
         addTextureMask={true}
         glareOptions={glareOptions}
         maskURI={currentMask}
-        // useTouchControl={true}
-        // touchPosition={touchPosition}
+        useTouchControl={true}
+        touchPosition={touchPosition}
       />
     </View>
   );
