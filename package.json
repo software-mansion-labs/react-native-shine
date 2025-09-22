@@ -167,6 +167,7 @@
   "dependencies": {
     "expo-asset": "^11.1.7",
     "react-native-orientation-locker": "^1.7.0",
+    "react-native-view-shot": "^4.0.3",
     "unplugin-typegpu": "^0.2.2"
   }
 }
