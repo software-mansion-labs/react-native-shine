@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Shine, useOrientation } from 'react-native-shine';
+import { View, Text, StyleSheet } from 'react-native';
+import { Shine, ShineGroup, useOrientation } from 'react-native-shine';
 import { charmander, pokemonCardMaskGrad } from './img';
 import { useSharedValue } from 'react-native-reanimated';
 
@@ -64,7 +64,7 @@ export default function App() {
           // baseColor: [200, 110, 70],
           rgbToleranceRange: { upper: [75, 80, 80] },
         }}
-        addHolo={true}
+        // addHolo={true} //change how holo effect works (not really a holo rn, should be global for the card too)
         addReverseHolo={true}
         addTextureMask={true}
         glareOptions={glareOptions}
@@ -72,6 +72,19 @@ export default function App() {
         useTouchControl={true}
         touchPosition={touchPosition}
       />
+      <ShineGroup
+        glareOptions={glareOptions}
+        // addHolo={true}
+        useTouchControl={true}
+        touchPosition={touchPosition}
+      >
+        <View style={{ backgroundColor: 'red' }}>
+          <View>
+            <Text>some example text inside the inner View</Text>
+          </View>
+          <Text>some example text outside the inner View</Text>
+        </View>
+      </ShineGroup>
     </View>
   );
 }
