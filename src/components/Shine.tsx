@@ -116,7 +116,7 @@ export function Shine({
   const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
 
   const bufferManager = useMemo(
-    () => new TypedBufferMap(bufferData as BufferDataMap),
+    () => new TypedBufferMap<BufferDataMap>(bufferData),
     []
   );
 
