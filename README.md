@@ -4,6 +4,8 @@ Fast and efficient way to add interactive GPU-based shader effects to your React
 
 `react-native-shine` leverages powerful GPU execution via native bindings, delivering lovely, fancy and **shiny** effects—ideal for UIs or creative interactions.
 
+![cardPreview](./cardPreview.gif)
+
 ---
 
 ## ⚙️ Installation
@@ -103,7 +105,7 @@ export default function Index() {
 }
 ```
 
-Coming soon: docs and examples.
+For more thorough usage examples and docs click [here](https://github.com/wojtus7/react-native-shine/blob/main/USAGE.md)
 
 ---
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Shine, ShineGroup, useOrientation } from 'react-native-shine';
-import { charmander, pokemonCardMaskGrad } from './img';
+import { dedenne, dedenneFoilHolo } from './img';
 import { useSharedValue } from 'react-native-reanimated';
 
 export default function App() {
@@ -11,8 +11,8 @@ export default function App() {
   const nh = 0.5;
   const nw = nh;
 
-  const currentImage = charmander; //dedenne;
-  const currentMask = pokemonCardMaskGrad; //dedenneFoilHolo;
+  const currentImage = dedenne;
+  const currentMask = dedenneFoilHolo;
 
   const [glareOptions /*setGlareOptions*/] = useState({
     glowPower: 0.9,
