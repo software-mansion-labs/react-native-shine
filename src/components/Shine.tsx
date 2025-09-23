@@ -39,6 +39,7 @@ import {
   createColorMask,
   colorMaskToTyped,
 } from '../types/typeUtils';
+import type { V3d } from '../types/vector';
 import type {
   BindGroupPair,
   GlareOptions,
@@ -61,6 +62,7 @@ import {
 } from '../shaders/resourceManagement/textures';
 import { newGlareFragment } from '../shaders/fragmentShaders/glareFragment';
 import { TypedBufferMap } from '../shaders/resourceManagement/bufferManager';
+import { add, div, subtract, zero } from '../utils/vector';
 
 export interface ShineProps {
   width: number;
@@ -109,8 +111,8 @@ export function Shine({
   const rotationShared = useSharedValue<[number, number, number]>([0, 0, 0]); // final GPU offsets
 
   // Calibration shared values (UI thread)
-  const initialGravity = useSharedValue<[number, number, number]>([0, 0, 0]);
-  const calibSum = useSharedValue<[number, number, number]>([0, 0, 0]);
+  const initialGravity = useSharedValue<V3d>(zero);
+  const calibSum = useSharedValue<V3d>(zero);
   const calibCount = useSharedValue<number>(0);
   const calibrated = useSharedValue<boolean>(false);
   const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
@@ -162,9 +164,7 @@ export function Shine({
       ?.value ??
       gravitySensor.sensor.value ?? { x: 0, y: 0, z: 0 };
 
-    const gx = v.x ?? 0;
-    const gy = v.y ?? 0;
-    const gz = v.z ?? 0;
+    const g = { x: v.x ?? 0, y: v.y ?? 0, z: v.z ?? 0 };
 
     const CALIBRATION_SAMPLES = 40;
     const alpha = 0.15; // smoothing
@@ -174,12 +174,12 @@ export function Shine({
       // accumulate baseline in device coordinates
       const s = calibSum.value;
       const c = calibCount.value + 1;
-      calibSum.value = [s[0] + gx, s[1] + gy, s[2] + gz];
+      calibSum.value = add(s, g);
       calibCount.value = c;
 
       if (c >= CALIBRATION_SAMPLES) {
         const avg = calibSum.value;
-        initialGravity.value = [avg[0] / c, avg[1] / c, avg[2] / c];
+        initialGravity.value = div(avg, c);
         calibrated.value = true;
       }
 
@@ -188,19 +188,17 @@ export function Shine({
     }
 
     const init = initialGravity.value;
-    const dx = gx - init[0];
-    const dy = gy - init[1];
-    const dz = gz - init[2];
+    const dg = subtract(g, init);
 
     // Rotate into screen coordinates so offsets auto-swap with orientation
-    const [mx, my] = rotate2D([dx, dy], -orientationAngle.value);
+    const [mx, my] = rotate2D([dg.x, dg.y], -orientationAngle.value);
     const screenX = mx;
     const screenY = -my;
 
     const prev = rotationShared.value;
     const smoothX = prev[0] * (1 - alpha) + screenX * alpha;
     const smoothY = prev[1] * (1 - alpha) + screenY * alpha;
-    const smoothZ = prev[2] * (1 - alpha) + dz * alpha;
+    const smoothZ = prev[2] * (1 - alpha) + dg.z * alpha;
 
     if (orientationAngle.value === 90) {
       rotationShared.value = [
