@@ -468,6 +468,7 @@ export function Shine({
             // { transform: [{ scaleX: 1 / dpr }, { scaleY: 1 / dpr }] },
           ]}
           transparent={Platform.OS === 'ios'}
+          // transparent={true}
         />
       </View>
     </Animated.View>

@@ -1418,7 +1418,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-wgpu (0.2.1):
+  - react-native-wgpu (0.2.8):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2219,7 +2219,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 96a2f2a176268581733be182fa6eebab1c0193be
   React-microtasksnativemodule: bda561d2648e1e52bd9e5a87f8889836bdbde2e2
   react-native-view-shot: 57c7b8158751f19f32cb885109574712955ea016
-  react-native-wgpu: 5d7ea269ae6ea8001cc91651d31bc60296bcbc5a
+  react-native-wgpu: 2854e773b3f962e37ba511e8054bb3065abb6fe6
   React-NativeModulesApple: 1ecb83880dd11baf2228f8dd89d8419c387e03ad
   React-oscompat: 0592889a9fcf0eacb205532028e4a364e22907dd
   React-perflogger: c584fa50e422a46f37404d083fad12eb289d5de4
