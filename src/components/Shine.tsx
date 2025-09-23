@@ -89,8 +89,8 @@ export function Shine({
   addHolo = false,
   addReverseHolo = false,
 }: ShineProps) {
-  const { device = null } = useDevice();
-  const root = device ? getOrInitRoot(device) : null;
+  const { device } = useDevice();
+  const root = device && getOrInitRoot(device);
   const { ref, context } = useGPUContext();
   const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
   const frameRef = useRef<number | null>(null);
