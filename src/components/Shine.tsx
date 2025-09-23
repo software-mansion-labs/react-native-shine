@@ -62,7 +62,7 @@ import {
 } from '../shaders/resourceManagement/textures';
 import { newGlareFragment } from '../shaders/fragmentShaders/glareFragment';
 import { TypedBufferMap } from '../shaders/resourceManagement/bufferManager';
-import { add, div, subtract, zero } from '../utils/vector';
+import { add, div, subtract, toComponents, zero } from '../utils/vector';
 
 export interface ShineProps {
   width: number;
@@ -108,7 +108,7 @@ export function Shine({
   const [maskTexture, setMaskTexture] = useState<TgpuTexture | null>(null);
 
   const orientationAngle = useSharedValue<number>(0); // degrees
-  const rotationShared = useSharedValue<[number, number, number]>([0, 0, 0]); // final GPU offsets
+  const rotationShared = useSharedValue<V3d>(zero); // final GPU offsets
 
   // Calibration shared values (UI thread)
   const initialGravity = useSharedValue<V3d>(zero);
@@ -125,8 +125,8 @@ export function Shine({
   //TODO: add once again, when the wgpu issues are fixed :3
 
   const animatedStyle = useAnimatedStyle(() => {
-    // const rotX = rotationShared.value[0] * 10;
-    // const rotY = rotationShared.value[1] * 10;
+    // const rotX = rotationShared.value.x * 10;
+    // const rotY = rotationShared.value.y * 10;
 
     return {
       transform: [
@@ -153,8 +153,8 @@ export function Shine({
 
     if (useTouchControl) {
       rotationShared.value = touchPosition
-        ? [...touchPosition.value, 0]
-        : [0, 0, 0];
+        ? { x: touchPosition.value[0], y: touchPosition.value[1], z: 0 }
+        : zero;
 
       return;
     }
@@ -183,7 +183,7 @@ export function Shine({
         calibrated.value = true;
       }
 
-      rotationShared.value = [0, 0, 0];
+      rotationShared.value = zero;
       return;
     }
 
@@ -196,22 +196,22 @@ export function Shine({
     const screenY = -my;
 
     const prev = rotationShared.value;
-    const smoothX = prev[0] * (1 - alpha) + screenX * alpha;
-    const smoothY = prev[1] * (1 - alpha) + screenY * alpha;
-    const smoothZ = prev[2] * (1 - alpha) + dg.z * alpha;
+    const smoothX = prev.x * (1 - alpha) + screenX * alpha;
+    const smoothY = prev.y * (1 - alpha) + screenY * alpha;
+    const smoothZ = prev.z * (1 - alpha) + dg.z * alpha;
 
     if (orientationAngle.value === 90) {
-      rotationShared.value = [
-        clamp(smoothY * scale, -1, 1),
-        clamp(-smoothX * scale, -1, 1),
-        clamp(smoothZ * scale, -1, 1),
-      ];
+      rotationShared.value = {
+        x: clamp(smoothY * scale, -1, 1),
+        y: clamp(-smoothX * scale, -1, 1),
+        z: clamp(smoothZ * scale, -1, 1),
+      };
     } else {
-      rotationShared.value = [
-        clamp(smoothX * scale, -1, 1),
-        clamp(smoothY * scale, -1, 1),
-        clamp(smoothZ * scale, -1, 1),
-      ];
+      rotationShared.value = {
+        x: clamp(smoothX * scale, -1, 1),
+        y: clamp(smoothY * scale, -1, 1),
+        z: clamp(smoothZ * scale, -1, 1),
+      };
     }
   });
 
@@ -382,16 +382,12 @@ export function Shine({
     if (addHolo && holoPipeline) pipelines.push(holoPipeline);
     if (colorMaskOptions) pipelines.push(colorMaskPipeline);
 
-    const rot = d.vec3f(0.0);
     let view: GPUTextureView;
     let initialAttachment;
     let loadingAttachment;
     const isInSinglePass = false;
     const render = () => {
-      rot[0] = rotationShared.value[0];
-      rot[1] = rotationShared.value[1];
-      rot[2] = rotationShared.value[2];
-      rotationBuffer.write(rot);
+      rotationBuffer.write(d.vec3f(...toComponents(rotationShared.value)));
 
       view = context.getCurrentTexture().createView();
       initialAttachment = {
