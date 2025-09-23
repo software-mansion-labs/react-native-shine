@@ -30,4 +30,8 @@ export function subtract(a: V3d, b: V3d) {
   return add(a, negate(b));
 }
 
+export function toComponents({ x, y, z }: V3d): [number, number, number] {
+  return [x, y, z];
+}
+
 export const zero = { x: 0, y: 0, z: 0 };
