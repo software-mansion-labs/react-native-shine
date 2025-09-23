@@ -84,7 +84,7 @@
     "react-native": "0.79.5",
     "react-native-builder-bob": "^0.40.13",
     "react-native-reanimated": "^4.0.1",
-    "react-native-wgpu": "^0.2.3",
+    "react-native-wgpu": "^0.2.8",
     "react-native-worklets": "^0.4.1",
     "release-it": "^17.10.0",
     "typegpu": "^0.7.0",
@@ -95,7 +95,7 @@
     "react": "*",
     "react-native": "*",
     "react-native-reanimated": "^4.0.1",
-    "react-native-wgpu": "^0.2.3",
+    "react-native-wgpu": "^0.2.8",
     "react-native-worklets": "^0.4.1",
     "typegpu": "^0.7.0"
   },
