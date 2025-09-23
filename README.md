@@ -1,4 +1,4 @@
-# react-native-shine
+![image](./cover.png)
 
 Fast and efficient way to add interactive GPU-based shader effects to your React Native apps using [TypeGPU](https://github.com/software-mansion/TypeGPU) and [WebGPU](https://github.com/wcandillon/react-native-webgpu).
 
@@ -150,10 +150,23 @@ We welcome shaders, GPU visual effects, demos, and bug fixes!
 
 ---
 
-## 📜 License
+## TypeGPU is created by Software Mansion
 
-MIT © [VoidFrog](https://github.com/VoidFrog)
+[![swm](https://logo.swmansion.com/logo?color=white&variant=desktop&width=150&tag=typegpu-github 'Software Mansion')](https://swmansion.com)
 
----
+Since 2012 [Software Mansion](https://swmansion.com) is a software agency with
+experience in building web and mobile apps. We are Core React Native
+Contributors and experts in dealing with all kinds of React Native issues. We
+can help you build your next dream product –
+[Hire us](https://swmansion.com/contact/projects?utm_source=shine&utm_medium=readme).
 
-Made with ❤️ and [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
+<!-- automd:contributors author="software-mansion" -->
+
+Made by [@software-mansion](https://github.com/software-mansion) and
+[community](https://github.com/wojtus7/react-native-shine/graphs/contributors) 💛
+<br><br>
+<a href="https://github.com/wojtus7/react-native-shine/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=wojtus7/react-native-shine" />
+</a>
+
+<!-- /automd -->
