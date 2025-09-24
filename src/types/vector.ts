@@ -9,3 +9,5 @@ export interface V2d extends V1d {
 export interface V3d extends V2d {
   z: number;
 }
+
+export type Transformer = (value: number) => number;
