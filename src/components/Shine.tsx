@@ -3,10 +3,7 @@ import { Canvas, useDevice, useGPUContext } from 'react-native-wgpu';
 import { getOrInitRoot } from '../roots';
 import mainVertex from '../shaders/vertexShaders/mainVertex';
 import getBitmapFromURI from '../shaders/resourceManagement/bitmaps';
-import {
-  subscribeToOrientationChange,
-  getAngleFromDimensions,
-} from '../shaders/utils';
+import { subscribeToOrientationChange } from '../shaders/utils';
 import type { TgpuRenderPipeline, TgpuTexture } from 'typegpu';
 import {
   textureBindGroupLayout,
@@ -111,7 +108,7 @@ export function Shine({
   const [imageTexture, setImageTexture] = useState<TgpuTexture>();
   const [maskTexture, setMaskTexture] = useState<TgpuTexture>();
 
-  const orientationAngle = useSharedValue<number>(0); // degrees
+  const landscape = useSharedValue<boolean>(false);
   const rotationShared = useSharedValue<V3d>(zeroV3d); // final GPU offsets
 
   // Calibration shared values (UI thread)
@@ -142,13 +139,13 @@ export function Shine({
     };
   });
   // Subscribe to orientation changes and reset calibration on change
-  useEffect(() => {
-    orientationAngle.value = getAngleFromDimensions();
-
-    return subscribeToOrientationChange((angleDeg) => {
-      orientationAngle.value = angleDeg;
-    });
-  }, [orientationAngle]);
+  useEffect(
+    () =>
+      subscribeToOrientationChange((isLandscape) => {
+        landscape.value = isLandscape;
+      }),
+    [landscape]
+  );
 
   // Calibration & mapping logic
   useDerivedValue(() => {
@@ -162,7 +159,6 @@ export function Shine({
       return;
     }
 
-    // console.log(orientationAngle.value);
     const g = gravitySensor.sensor.value;
     const CALIBRATION_SAMPLES = 40;
     const alpha = 0.15; // smoothing
@@ -185,7 +181,7 @@ export function Shine({
     const dg = subtractV3d(g, init);
 
     // Rotate into screen coordinates so offsets auto-swap with orientation
-    const m = rotateV2d(dg, degToRad(-orientationAngle.value));
+    const m = rotateV2d(dg, degToRad(-90 * Number(landscape.value)));
     const screen = negateV2dY(m);
     const smoothOffset = { ...scaleV2d(screen, alpha), z: dg.z * alpha };
     const smooth = scaleV3d(
@@ -194,7 +190,7 @@ export function Shine({
     );
 
     rotationShared.value = clampV3d(
-      orientationAngle.value === 90
+      landscape.value
         ? {
             x: smooth.y,
             y: -smooth.x,
