@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useDevice, useGPUContext } from 'react-native-wgpu';
 import { getOrInitRoot } from '../roots';
 import mainVertex from '../shaders/vertexShaders/mainVertex';
-import getBitmapFromURI from '../shaders/resourceManagement/bitmaps';
 import { subscribeToOrientationChange } from '../shaders/utils';
 import type { TgpuRenderPipeline, TgpuTexture } from 'typegpu';
 import {
@@ -47,10 +46,7 @@ import {
   renderPipelines,
 } from '../shaders/pipelineSetups';
 import colorMaskFragment from '../shaders/fragmentShaders/colorMaskFragment';
-import {
-  createTexture,
-  loadTexture,
-} from '../shaders/resourceManagement/textures';
+import { loadBitmap } from '../shaders/resourceManagement/textures';
 import { newGlareFragment } from '../shaders/fragmentShaders/glareFragment';
 import { TypedBufferMap } from '../shaders/resourceManagement/bufferManager';
 import {
@@ -210,16 +206,9 @@ export function Shine({
     if (!root || !device || !context) return;
 
     (async () => {
-      const bitmap = await getBitmapFromURI(imageURI);
-      const texture = await createTexture(root, bitmap);
-      setImageTexture(texture);
-      await loadTexture(root, bitmap, texture);
+      await loadBitmap(root, imageURI, setImageTexture);
 
-      if (!maskURI) return;
-      const maskBitmap = await getBitmapFromURI(maskURI);
-      const maskTex = await createTexture(root, maskBitmap);
-      setMaskTexture(maskTex);
-      await loadTexture(root, maskBitmap, maskTex);
+      if (maskURI) await loadBitmap(root, maskURI, setMaskTexture);
     })();
   }, [root, device, context, imageURI, maskURI]);
 
