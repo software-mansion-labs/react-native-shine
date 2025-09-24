@@ -62,12 +62,12 @@ export const attachBindGroupsToPass = (
 
 export const createMaskPipeline = (
   root: TgpuRoot,
-  maskTexture: TgpuTexture | null,
+  maskTexture: TgpuTexture | undefined,
   BGP: BindGroupPair[],
   sampler: GPUSampler,
   presentationFormat: GPUTextureFormat
-): TgpuRenderPipeline | null => {
-  if (!maskTexture) return null;
+): TgpuRenderPipeline | void => {
+  if (!maskTexture) return;
 
   const maskTextureBindGroup = root.createBindGroup(
     maskTextureBindGroupLayout,
@@ -94,12 +94,12 @@ export const createMaskPipeline = (
 
 export const createReverseHoloPipeline = (
   root: TgpuRoot,
-  texture: TgpuTexture | null,
+  texture: TgpuTexture | undefined,
   BGP: BindGroupPair[],
   sampler: GPUSampler,
   presentationFormat: GPUTextureFormat
-): TgpuRenderPipeline | null => {
-  if (!texture) return null;
+): TgpuRenderPipeline | void => {
+  if (!texture) return;
 
   const reverseHoloBindGroup = root.createBindGroup(
     maskTextureBindGroupLayout,

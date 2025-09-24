@@ -95,7 +95,7 @@ export function Shine({
   const root = device && getOrInitRoot(device);
   const { ref, context } = useGPUContext();
   const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-  const frameRef = useRef<number | null>(null);
+  const frameRef = useRef<number>(null);
 
   //changing canvas size to prevent blur
   const dpr = PixelRatio.get();
@@ -104,8 +104,8 @@ export function Shine({
   const pixelWidth = Math.max(1, Math.round(logicalWidth * dpr));
   const pixelHeight = Math.max(1, Math.round(logicalHeight * dpr));
 
-  const [imageTexture, setImageTexture] = useState<TgpuTexture | null>(null);
-  const [maskTexture, setMaskTexture] = useState<TgpuTexture | null>(null);
+  const [imageTexture, setImageTexture] = useState<TgpuTexture>();
+  const [maskTexture, setMaskTexture] = useState<TgpuTexture>();
 
   const orientationAngle = useSharedValue<number>(0); // degrees
   const rotationShared = useSharedValue<V3d>(zero); // final GPU offsets
