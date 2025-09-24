@@ -99,10 +99,8 @@ export function Shine({
 
   //changing canvas size to prevent blur
   const dpr = PixelRatio.get();
-  const logicalWidth = width;
-  const logicalHeight = height;
-  const pixelWidth = Math.max(1, Math.round(logicalWidth * dpr));
-  const pixelHeight = Math.max(1, Math.round(logicalHeight * dpr));
+  const pixelWidth = Math.max(1, Math.round(width * dpr));
+  const pixelHeight = Math.max(1, Math.round(height * dpr));
 
   const [imageTexture, setImageTexture] = useState<TgpuTexture>();
   const [maskTexture, setMaskTexture] = useState<TgpuTexture>();
@@ -450,14 +448,14 @@ export function Shine({
         style={
           [
             // styles.container,
-            // { width: logicalWidth, height: logicalHeight },
+            // { width, height },
           ]
         }
       >
         <Canvas
           ref={ref}
           style={[
-            { width: logicalWidth, height: logicalHeight },
+            { width, height },
             // aspectRatio: pixelWidth / pixelHeight,
             // { transform: [{ scaleX: 1 / dpr }, { scaleY: 1 / dpr }] },
           ]}
