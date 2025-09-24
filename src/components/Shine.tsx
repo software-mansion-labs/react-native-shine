@@ -82,7 +82,7 @@ export function Shine({
   width,
   height,
   imageURI,
-  glareOptions: glareOptions,
+  glareOptions,
   colorMaskOptions,
   maskURI,
   touchPosition,
