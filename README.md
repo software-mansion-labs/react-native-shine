@@ -152,7 +152,7 @@ We welcome shaders, GPU visual effects, demos, and bug fixes!
 
 ---
 
-## TypeGPU is created by Software Mansion
+## Shine is created by Software Mansion
 
 [![swm](https://logo.swmansion.com/logo?color=white&variant=desktop&width=150&tag=typegpu-github 'Software Mansion')](https://swmansion.com)
 
