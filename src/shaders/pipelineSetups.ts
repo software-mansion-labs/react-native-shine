@@ -154,10 +154,12 @@ export function renderPipelines(
   pipelines: TgpuRenderPipeline[],
   attachments: ColorAttachment[]
 ) {
-  for (let i = 0; i < pipelines.length; i++) {
+  for (const i in pipelines) {
+    const pipeline = pipelines[i];
     const attachment = attachments[i];
-    if (!attachment) return;
-    pipelines[i]!.withColorAttachment(attachment).draw(6);
+
+    if (pipeline && attachment)
+      pipeline.withColorAttachment(attachment).draw(6);
   }
 }
 
@@ -166,23 +168,24 @@ export function renderPipelinesInSinglePass(
   pipelines: TgpuRenderPipeline[],
   view: GPUTextureView
 ) {
-  root['~unstable'].beginRenderPass(
+  const unstableRoot = root['~unstable'];
+  const attachment: GPURenderPassColorAttachment = {
+    view,
+    clearValue: [0, 0, 0, 0],
+    loadOp: 'clear',
+    storeOp: 'store',
+  };
+
+  unstableRoot.beginRenderPass(
     {
-      colorAttachments: [
-        {
-          view: view,
-          clearValue: [0, 0, 0, 0],
-          loadOp: 'clear',
-          storeOp: 'store',
-        },
-      ],
+      colorAttachments: [attachment],
     },
     (pass) => {
-      for (let i = 0; i < pipelines.length; i++) {
-        pass.setPipeline(pipelines[i]!);
+      for (const pipeline of pipelines) {
+        pass.setPipeline(pipeline);
         pass.draw(6);
       }
     }
   );
-  root['~unstable'].flush();
+  unstableRoot.flush();
 }
