@@ -42,6 +42,10 @@ export function transformV2d({ x, y }: V2d, transformer: Transformer): V2d {
   };
 }
 
+export function clampV2d(v2d: V3d, min: number, max: number): V2d {
+  return transformV2d(v2d, (value) => clamp(value, min, max));
+}
+
 export const zeroV2d = { x: 0, y: 0 };
 
 // 3d

@@ -65,6 +65,7 @@ import {
   clampV3d,
   degToRad,
   rotateV2d,
+  transformV2d,
 } from '../utils/vector';
 
 export interface ShineProps {
@@ -101,9 +102,11 @@ export function Shine({
   const frameRef = useRef<number>(null);
 
   //changing canvas size to prevent blur
-  const dpr = PixelRatio.get();
-  const pixelWidth = Math.max(1, Math.round(width * dpr));
-  const pixelHeight = Math.max(1, Math.round(height * dpr));
+  const pixelRatio = PixelRatio.get();
+  const size = { x: width, y: height };
+  const pixelSize = transformV2d(scaleV2d(size, pixelRatio), (v) =>
+    Math.max(1, Math.round(v))
+  );
 
   const [imageTexture, setImageTexture] = useState<TgpuTexture>();
   const [maskTexture, setMaskTexture] = useState<TgpuTexture>();
@@ -226,13 +229,13 @@ export function Shine({
 
     //this sets the underlying resolution of the canvas to prevent blurriness
     const canvasElement = context.canvas;
+
     if (
-      canvasElement &&
-      canvasElement.width !== pixelWidth &&
-      canvasElement.height !== pixelHeight
+      canvasElement.width !== pixelSize.x &&
+      canvasElement.height !== pixelSize.y
     ) {
-      canvasElement.width = pixelWidth;
-      canvasElement.height = pixelHeight;
+      canvasElement.width = pixelSize.x;
+      canvasElement.height = pixelSize.y;
     }
 
     context.configure({
@@ -389,8 +392,7 @@ export function Shine({
     addHolo,
     addReverseHolo,
     addTextureMask,
-    pixelWidth,
-    pixelHeight,
+    pixelSize,
   ]);
 
   return (
