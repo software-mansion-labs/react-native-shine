@@ -1,4 +1,5 @@
-import { type TgpuRoot, type TgpuTexture } from 'typegpu';
+import { type TextureProps, type TgpuRoot, type TgpuTexture } from 'typegpu';
+import getBitmapFromURI from './bitmaps';
 
 export const createTexture = async (
   root: TgpuRoot,
@@ -28,3 +29,14 @@ export const loadTexture = async (
     [imageBitmap.width, imageBitmap.height]
   );
 };
+
+export async function loadBitmap(
+  root: TgpuRoot,
+  imageURI: string,
+  setTexture: (texture: TgpuTexture<TextureProps>) => void
+) {
+  const bitmap = await getBitmapFromURI(imageURI);
+  const texture = await createTexture(root, bitmap);
+  setTexture(texture);
+  await loadTexture(root, bitmap, texture);
+}
