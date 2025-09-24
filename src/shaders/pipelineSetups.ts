@@ -125,12 +125,12 @@ export const createReverseHoloPipeline = (
 
 export const createRainbowHoloPipeline = (
   root: TgpuRoot,
-  texture: TgpuTexture | null,
+  texture: TgpuTexture | undefined,
   bindGroups: TgpuBindGroup[],
   sampler: GPUSampler,
   presentationFormat: GPUTextureFormat
-): TgpuRenderPipeline | null => {
-  if (!texture) return null;
+): TgpuRenderPipeline | void => {
+  if (!texture) return;
 
   const imageTextureBindGroup = root.createBindGroup(textureBindGroupLayout, {
     texture: root.unwrap(texture).createView(),
