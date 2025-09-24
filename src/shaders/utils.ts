@@ -37,21 +37,23 @@ export const rotateVectorByQuaternion = (
 
 // Simple helper to get angle from dimensions (0 or 90)
 export function getAngleFromDimensions() {
+  return 90 * Number(isLandscapeMode());
+}
+
+export function isLandscapeMode() {
   const { width, height } = Dimensions.get('window');
-  return width >= height ? 90 : 0;
+
+  return width >= height;
 }
 
 // Subscribe to orientation change via Dimensions API only
 export function subscribeToOrientationChange(
-  callback: (angleDeg: number) => void
+  callback: (isLandscape: boolean) => void
 ) {
-  callback(getAngleFromDimensions());
-  const handler = () => {
-    callback(getAngleFromDimensions());
-  };
+  const handler = () => callback(isLandscapeMode());
+  const subscription = Dimensions.addEventListener('change', handler);
 
-  const dimSub = Dimensions.addEventListener('change', handler);
-  return () => {
-    dimSub.remove();
-  };
+  handler();
+
+  return () => subscription.remove();
 }

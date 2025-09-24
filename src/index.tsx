@@ -1,10 +1,16 @@
 import { useOrientation } from './hooks/useOrientation';
 import {
   getAngleFromDimensions,
+  isLandscapeMode,
   subscribeToOrientationChange,
 } from './shaders/utils';
 
-export { subscribeToOrientationChange, getAngleFromDimensions, useOrientation };
+export {
+  subscribeToOrientationChange,
+  getAngleFromDimensions,
+  isLandscapeMode,
+  useOrientation,
+};
 export { Shine } from './components/Shine';
 export { ShineGroup } from './components/ShineGroup';
 export type { ShineProps } from './components/Shine';
