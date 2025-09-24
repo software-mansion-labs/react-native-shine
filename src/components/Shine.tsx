@@ -46,8 +46,8 @@ import {
   createReverseHoloPipeline,
   createMaskPipeline,
   getDefaultTarget,
-  pipelineRenderFunction,
   createRainbowHoloPipeline as createHoloPipeline,
+  renderPipelines,
 } from '../shaders/pipelineSetups';
 import colorMaskFragment from '../shaders/fragmentShaders/colorMaskFragment';
 import {
@@ -362,19 +362,13 @@ export function Shine({
         storeOp: 'store',
       };
 
-      pipelineRenderFunction(
-        root,
-        pipelines,
-        [
-          initialAttachment,
-          loadingAttachment,
-          loadingAttachment,
-          loadingAttachment,
-          loadingAttachment,
-        ],
-        view,
-        false
-      );
+      renderPipelines(pipelines, [
+        initialAttachment,
+        loadingAttachment,
+        loadingAttachment,
+        loadingAttachment,
+        loadingAttachment,
+      ]);
 
       context.present();
       frameRef.current = requestAnimationFrame(render);

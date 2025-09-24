@@ -150,38 +150,39 @@ export const createRainbowHoloPipeline = (
   return rainbowHoloPipeline;
 };
 
-export const pipelineRenderFunction = (
+export function renderPipelines(
+  pipelines: TgpuRenderPipeline[],
+  attachments: ColorAttachment[]
+) {
+  for (let i = 0; i < pipelines.length; i++) {
+    const attachment = attachments[i];
+    if (!attachment) return;
+    pipelines[i]!.withColorAttachment(attachment).draw(6);
+  }
+}
+
+export function renderPipelinesInSinglePass(
   root: TgpuRoot,
   pipelines: TgpuRenderPipeline[],
-  attachments: ColorAttachment[],
-  view: GPUTextureView,
-  isInSinglePass: boolean
-) => {
-  if (isInSinglePass) {
-    root['~unstable'].beginRenderPass(
-      {
-        colorAttachments: [
-          {
-            view: view,
-            clearValue: [0, 0, 0, 0],
-            loadOp: 'clear',
-            storeOp: 'store',
-          },
-        ],
-      },
-      (pass) => {
-        for (let i = 0; i < pipelines.length; i++) {
-          pass.setPipeline(pipelines[i]!);
-          pass.draw(6);
-        }
+  view: GPUTextureView
+) {
+  root['~unstable'].beginRenderPass(
+    {
+      colorAttachments: [
+        {
+          view: view,
+          clearValue: [0, 0, 0, 0],
+          loadOp: 'clear',
+          storeOp: 'store',
+        },
+      ],
+    },
+    (pass) => {
+      for (let i = 0; i < pipelines.length; i++) {
+        pass.setPipeline(pipelines[i]!);
+        pass.draw(6);
       }
-    );
-    root['~unstable'].flush();
-  } else {
-    for (let i = 0; i < pipelines.length; i++) {
-      const attachment = attachments[i];
-      if (!attachment) return;
-      pipelines[i]!.withColorAttachment(attachment).draw(6);
     }
-  }
-};
+  );
+  root['~unstable'].flush();
+}
