@@ -9,9 +9,6 @@ import {
 } from '../shaders/utils';
 import type { TgpuRenderPipeline, TgpuTexture } from 'typegpu';
 import {
-  glareOptionsBindGroupLayout,
-  colorMaskBindGroupLayout,
-  rotationValuesBindGroupLayout,
   textureBindGroupLayout,
   type BufferDataMap,
   bufferData,
@@ -32,14 +29,12 @@ import {
   createRotationValuesBindGroup,
 } from '../shaders/bindGroupUtils';
 import {
-  createBindGroupPairs,
   createGlareOptions,
   createColorMask,
   colorMaskToTyped,
 } from '../types/typeUtils';
 import type { V2d, V3d } from '../types/vector';
 import type {
-  BindGroupPair,
   GlareOptions,
   ColorMask,
   DeepPartiallyOptional,
@@ -290,29 +285,18 @@ export function Shine({
     );
     const colorMaskBindGroup = createColorMaskBindGroup(root, colorMaskBuffer);
 
-    const glareBGP: BindGroupPair[] = createBindGroupPairs(
-      [
-        textureBindGroupLayout,
-        rotationValuesBindGroupLayout,
-        glareOptionsBindGroupLayout,
-        colorMaskBindGroupLayout,
-      ],
-      [
-        imageTextureBindGroup,
-        rotationBindGroup,
-        glareOptionsBindGroup,
-        colorMaskBindGroup,
-      ]
-    );
+    const glareBGP = [
+      imageTextureBindGroup,
+      rotationBindGroup,
+      glareOptionsBindGroup,
+      colorMaskBindGroup,
+    ];
 
-    const colorMaskBGP: BindGroupPair[] = createBindGroupPairs(
-      [
-        textureBindGroupLayout,
-        colorMaskBindGroupLayout,
-        rotationValuesBindGroupLayout,
-      ],
-      [imageTextureBindGroup, colorMaskBindGroup, rotationBindGroup]
-    );
+    const colorMaskBGP = [
+      imageTextureBindGroup,
+      colorMaskBindGroup,
+      rotationBindGroup,
+    ];
 
     let glarePipeline = root['~unstable']
       .withVertex(mainVertex, {})
@@ -333,40 +317,23 @@ export function Shine({
     const maskPipeline = createMaskPipeline(
       root,
       maskTexture,
-      createBindGroupPairs(
-        [textureBindGroupLayout, rotationValuesBindGroupLayout],
-        [imageTextureBindGroup, rotationBindGroup]
-      ),
+      [imageTextureBindGroup, rotationBindGroup],
       sampler,
       presentationFormat
-    );
-
-    const reverseHoloBGP: BindGroupPair[] = createBindGroupPairs(
-      [
-        textureBindGroupLayout,
-        rotationValuesBindGroupLayout,
-        glareOptionsBindGroupLayout,
-      ],
-      [imageTextureBindGroup, rotationBindGroup, glareOptionsBindGroup]
     );
 
     const reverseHoloPipeline = createReverseHoloPipeline(
       root,
       maskTexture,
-      reverseHoloBGP,
+      [imageTextureBindGroup, rotationBindGroup, glareOptionsBindGroup],
       sampler,
       presentationFormat
-    );
-
-    const holoBGP: BindGroupPair[] = createBindGroupPairs(
-      [rotationValuesBindGroupLayout],
-      [rotationBindGroup]
     );
 
     const holoPipeline = createHoloPipeline(
       root,
       imageTexture,
-      holoBGP,
+      [rotationBindGroup],
       sampler,
       presentationFormat
     );

@@ -1,6 +1,5 @@
 import { f32, vec2f, vec3f, vec4f } from 'typegpu/data';
 import type {
-  BindGroupPair,
   GlareOptions,
   ColorMask,
   DeepPartiallyOptional,
@@ -8,7 +7,6 @@ import type {
   HoloOptions,
 } from './types';
 import { div } from 'typegpu/std';
-import type { TgpuBindGroup, TgpuBindGroupLayout } from 'typegpu';
 import { WAVE_CALLBACKS } from '../enums/waveCallback';
 
 export const createGlareOptions = (
@@ -107,30 +105,4 @@ export const numberArrToTyped = (vec: number[]) => {
 
   const typed = convFn(...vec);
   return typed;
-};
-
-export const createBindGroupPair = (
-  bindGroupLayout: TgpuBindGroupLayout,
-  bindGroup: TgpuBindGroup
-): BindGroupPair => {
-  return { layout: bindGroupLayout, group: bindGroup };
-};
-
-export const createBindGroupPairs = (
-  bindGroupLayouts: TgpuBindGroupLayout[],
-  bindGroups: TgpuBindGroup[]
-): BindGroupPair[] => {
-  if (
-    bindGroupLayouts.length > 0 &&
-    bindGroupLayouts.length !== bindGroups.length
-  )
-    throw new Error(
-      'createBindGroups: bindGroupLayout and bindGroup arrrays must be of the same length'
-    );
-  const pairs: BindGroupPair[] = [];
-  for (let i = 0; i < bindGroupLayouts.length; i++) {
-    pairs.push(createBindGroupPair(bindGroupLayouts[i]!, bindGroups[i]!));
-  }
-
-  return pairs;
 };
