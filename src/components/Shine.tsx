@@ -43,6 +43,7 @@ import type {
   GlareOptions,
   ColorMask,
   DeepPartiallyOptional,
+  ColorAttachment,
 } from '../types/types';
 import {
   attachBindGroups,
@@ -377,25 +378,21 @@ export function Shine({
     if (addHolo && holoPipeline) pipelines.push(holoPipeline);
     if (colorMaskOptions) pipelines.push(colorMaskPipeline);
 
-    let view: GPUTextureView;
-    let initialAttachment;
-    let loadingAttachment;
-    const isInSinglePass = false;
     const render = () => {
       rotationBuffer.write(d.vec3f(...componentsFromV3d(rotationShared.value)));
 
-      view = context.getCurrentTexture().createView();
-      initialAttachment = {
-        view: view,
+      const view = context.getCurrentTexture().createView();
+      const initialAttachment: ColorAttachment = {
+        view,
         clearValue: [0, 0, 0, 0],
-        loadOp: 'clear' as GPULoadOp,
-        storeOp: 'store' as GPUStoreOp,
+        loadOp: 'clear',
+        storeOp: 'store',
       };
-      loadingAttachment = {
-        view: view,
+      const loadingAttachment: ColorAttachment = {
+        view,
         clearValue: [0, 0, 0, 0],
-        loadOp: 'load' as GPULoadOp,
-        storeOp: 'store' as GPUStoreOp,
+        loadOp: 'load',
+        storeOp: 'store',
       };
 
       pipelineRenderFunction(
@@ -409,7 +406,7 @@ export function Shine({
           loadingAttachment,
         ],
         view,
-        isInSinglePass
+        false
       );
 
       context.present();
