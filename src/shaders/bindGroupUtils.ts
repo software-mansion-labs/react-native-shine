@@ -1,3 +1,4 @@
+import { componentsFromV3d, zeroV3d } from 'react-native-shine';
 import { type TgpuBuffer, type TgpuRoot, type UniformFlag } from 'typegpu';
 import * as d from 'typegpu/data';
 import {
@@ -19,86 +20,56 @@ import {
   mapToF32,
 } from '../types/typeUtils';
 
-export const createRotationBuffer = (
-  root: TgpuRoot,
-  initValues?: { x: number; y: number; z: number }
-) => {
-  const init = initValues
-    ? d.vec3f(initValues.x, initValues.y, initValues.z)
-    : d.vec3f(0.0);
-  const rotationValuesBuffer = root
-    .createBuffer(d.vec3f, init)
+export const createRotationBuffer = (root: TgpuRoot, initValues = zeroV3d) =>
+  root
+    .createBuffer(d.vec3f, d.vec3f(...componentsFromV3d(initValues)))
     .$usage('uniform');
-
-  return rotationValuesBuffer;
-};
 
 export const createRotationValuesBindGroup = (
   root: TgpuRoot,
   buffer: TgpuBuffer<d.Vec3f>
-) => {
-  const rotationValuesBindGroup = root.createBindGroup(
-    rotationValuesBindGroupLayout,
-    {
-      vec: root.unwrap(buffer),
-    }
-  );
-
-  return rotationValuesBindGroup;
-};
+) =>
+  root.createBindGroup(rotationValuesBindGroupLayout, {
+    vec: root.unwrap(buffer),
+  });
 
 export const createGlareOptionsBuffer = (
   root: TgpuRoot,
   initValues?: Partial<GlareOptions>
-) => {
-  const glareOptions: GlareOptions = createGlareOptions({ ...initValues });
-  const glareOptionsTyped = mapToF32(glareOptions);
-
-  const glareOptionsBuffer = root
-    .createBuffer(glareOptionsSchema, glareOptionsTyped)
+) =>
+  root
+    .createBuffer(
+      glareOptionsSchema,
+      mapToF32(createGlareOptions({ ...initValues }))
+    )
     .$usage('uniform');
-
-  return glareOptionsBuffer;
-};
 
 export const createGlareOptionsBindGroup = (
   root: TgpuRoot,
   buffer: TgpuBuffer<glareOptionsSchema> & UniformFlag
-) => {
-  const glareOptionsBindGroup = root.createBindGroup(
-    glareOptionsBindGroupLayout,
-    {
-      glareOptions: buffer,
-    }
-  );
-
-  return glareOptionsBindGroup;
-};
+) =>
+  root.createBindGroup(glareOptionsBindGroupLayout, {
+    glareOptions: buffer,
+  });
 
 export const createColorMaskBuffer = (
   root: TgpuRoot,
   initValues: PartiallyOptional<ColorMask, 'baseColor'>
-) => {
-  const colorMask: ColorMask = createColorMask({ ...initValues });
-  const colorMaskTyped = colorMaskToTyped(colorMask);
-
-  const colorMaskBuffer = root
-    .createBuffer(colorMaskSchema, colorMaskTyped)
+) =>
+  root
+    .createBuffer(
+      colorMaskSchema,
+      colorMaskToTyped(createColorMask({ ...initValues }))
+    )
     .$usage('uniform');
-
-  return colorMaskBuffer;
-};
 
 export const createColorMaskBindGroup = (
   root: TgpuRoot,
   buffer: TgpuBuffer<colorMaskSchema> & UniformFlag
-) => {
-  const colorMaskBindGroup = root.createBindGroup(colorMaskBindGroupLayout, {
+) =>
+  root.createBindGroup(colorMaskBindGroupLayout, {
     mask: buffer,
   });
-
-  return colorMaskBindGroup;
-};
 
 // export const crateHoloBuffer = (
 //   root: TgpuRoot,
