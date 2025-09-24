@@ -4,7 +4,7 @@ import type {
   TgpuRoot,
   TgpuTexture,
 } from 'typegpu';
-import type { BindGroupPair } from '../types/types';
+import type { BindGroupPair, ColorAttachment } from '../types/types';
 import {
   maskTextureBindGroupLayout,
   textureBindGroupLayout,
@@ -153,7 +153,7 @@ export const createRainbowHoloPipeline = (
 export const pipelineRenderFunction = (
   root: TgpuRoot,
   pipelines: TgpuRenderPipeline[],
-  attachments: any[],
+  attachments: ColorAttachment[],
   view: GPUTextureView,
   isInSinglePass: boolean
 ) => {
