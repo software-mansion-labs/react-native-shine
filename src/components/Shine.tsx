@@ -109,7 +109,7 @@ export function Shine({
   const [maskTexture, setMaskTexture] = useState<TgpuTexture>();
 
   const landscape = useSharedValue<boolean>(false);
-  const rotationShared = useSharedValue<V3d>(zeroV3d); // final GPU offsets
+  const rotation = useSharedValue<V3d>(zeroV3d); // final GPU offsets
 
   // Calibration shared values (UI thread)
   const initialGravity = useSharedValue<V3d>(zeroV3d);
@@ -152,7 +152,7 @@ export function Shine({
     'worklet';
 
     if (useTouchControl) {
-      rotationShared.value = touchPosition
+      rotation.value = touchPosition
         ? { x: touchPosition.value.x, y: touchPosition.value.y, z: 0 }
         : zeroV3d;
 
@@ -173,7 +173,7 @@ export function Shine({
         calibrated.value = true;
       }
 
-      rotationShared.value = zeroV3d;
+      rotation.value = zeroV3d;
       return;
     }
 
@@ -185,11 +185,11 @@ export function Shine({
     const screen = negateV2dY(m);
     const smoothOffset = { ...scaleV2d(screen, alpha), z: dg.z * alpha };
     const smooth = scaleV3d(
-      addV3d(scaleV3d(rotationShared.value, 1 - alpha), smoothOffset),
+      addV3d(scaleV3d(rotation.value, 1 - alpha), smoothOffset),
       scale
     );
 
-    rotationShared.value = clampV3d(
+    rotation.value = clampV3d(
       landscape.value
         ? {
             x: smooth.y,
@@ -342,7 +342,7 @@ export function Shine({
     if (colorMaskOptions) pipelines.push(colorMaskPipeline);
 
     const render = () => {
-      rotationBuffer.write(d.vec3f(...componentsFromV3d(rotationShared.value)));
+      rotationBuffer.write(d.vec3f(...componentsFromV3d(rotation.value)));
 
       const view = context.getCurrentTexture().createView();
       const initialAttachment: ColorAttachment = {
@@ -381,7 +381,7 @@ export function Shine({
     presentationFormat,
     imageTexture,
     maskTexture,
-    rotationShared,
+    rotation,
     bufferManager,
     glareOptions,
     colorMaskOptions,
