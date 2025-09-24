@@ -4,8 +4,6 @@ import { getOrInitRoot } from '../roots';
 import mainVertex from '../shaders/vertexShaders/mainVertex';
 import getBitmapFromURI from '../shaders/resourceManagement/bitmaps';
 import {
-  clamp,
-  rotate2D,
   subscribeToOrientationChange,
   getAngleFromDimensions,
 } from '../shaders/utils';
@@ -39,7 +37,7 @@ import {
   createColorMask,
   colorMaskToTyped,
 } from '../types/typeUtils';
-import type { V3d } from '../types/vector';
+import type { V2d, V3d } from '../types/vector';
 import type {
   BindGroupPair,
   GlareOptions,
@@ -62,7 +60,19 @@ import {
 } from '../shaders/resourceManagement/textures';
 import { newGlareFragment } from '../shaders/fragmentShaders/glareFragment';
 import { TypedBufferMap } from '../shaders/resourceManagement/bufferManager';
-import { add, div, subtract, toComponents, zero } from '../utils/vector';
+import {
+  addV3d,
+  divV3d,
+  subtractV3d,
+  componentsFromV3d,
+  zeroV3d,
+  negateV2dY,
+  scaleV2d,
+  scaleV3d,
+  clampV3d,
+  degToRad,
+  rotateV2d,
+} from '../utils/vector';
 
 export interface ShineProps {
   width: number;
@@ -72,7 +82,7 @@ export interface ShineProps {
   colorMaskOptions?: DeepPartiallyOptional<ColorMask, 'baseColor'>;
   maskURI?: string;
   useTouchControl?: boolean;
-  touchPosition?: SharedValue<[number, number]>;
+  touchPosition?: SharedValue<V2d>;
   addTextureMask?: boolean;
   addReverseHolo?: boolean;
   addHolo?: boolean;
@@ -106,11 +116,11 @@ export function Shine({
   const [maskTexture, setMaskTexture] = useState<TgpuTexture>();
 
   const orientationAngle = useSharedValue<number>(0); // degrees
-  const rotationShared = useSharedValue<V3d>(zero); // final GPU offsets
+  const rotationShared = useSharedValue<V3d>(zeroV3d); // final GPU offsets
 
   // Calibration shared values (UI thread)
-  const initialGravity = useSharedValue<V3d>(zero);
-  const calibSum = useSharedValue<V3d>(zero);
+  const initialGravity = useSharedValue<V3d>(zeroV3d);
+  const calibSum = useSharedValue<V3d>(zeroV3d);
   const calibCount = useSharedValue<number>(0);
   const calibrated = useSharedValue<boolean>(false);
   const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
@@ -150,66 +160,54 @@ export function Shine({
 
     if (useTouchControl) {
       rotationShared.value = touchPosition
-        ? { x: touchPosition.value[0], y: touchPosition.value[1], z: 0 }
-        : zero;
+        ? { x: touchPosition.value.x, y: touchPosition.value.y, z: 0 }
+        : zeroV3d;
 
       return;
     }
 
     // console.log(orientationAngle.value);
-    const v: { x: number; y: number; z: number } = gravitySensor.sensor
-      ?.value ??
-      gravitySensor.sensor.value ?? { x: 0, y: 0, z: 0 };
-
-    const g = { x: v.x ?? 0, y: v.y ?? 0, z: v.z ?? 0 };
-
+    const g = gravitySensor.sensor.value;
     const CALIBRATION_SAMPLES = 40;
     const alpha = 0.15; // smoothing
     const scale = 0.6;
 
     if (!calibrated.value) {
       // accumulate baseline in device coordinates
-      const s = calibSum.value;
-      const c = calibCount.value + 1;
-      calibSum.value = add(s, g);
-      calibCount.value = c;
+      calibSum.value = addV3d(calibSum.value, g);
 
-      if (c >= CALIBRATION_SAMPLES) {
-        const avg = calibSum.value;
-        initialGravity.value = div(avg, c);
+      if (++calibCount.value >= CALIBRATION_SAMPLES) {
+        initialGravity.value = divV3d(calibSum.value, calibCount.value);
         calibrated.value = true;
       }
 
-      rotationShared.value = zero;
+      rotationShared.value = zeroV3d;
       return;
     }
 
     const init = initialGravity.value;
-    const dg = subtract(g, init);
+    const dg = subtractV3d(g, init);
 
     // Rotate into screen coordinates so offsets auto-swap with orientation
-    const [mx, my] = rotate2D([dg.x, dg.y], -orientationAngle.value);
-    const screenX = mx;
-    const screenY = -my;
+    const m = rotateV2d(dg, degToRad(-orientationAngle.value));
+    const screen = negateV2dY(m);
+    const smoothOffset = { ...scaleV2d(screen, alpha), z: dg.z * alpha };
+    const smooth = scaleV3d(
+      addV3d(scaleV3d(rotationShared.value, 1 - alpha), smoothOffset),
+      scale
+    );
 
-    const prev = rotationShared.value;
-    const smoothX = prev.x * (1 - alpha) + screenX * alpha;
-    const smoothY = prev.y * (1 - alpha) + screenY * alpha;
-    const smoothZ = prev.z * (1 - alpha) + dg.z * alpha;
-
-    if (orientationAngle.value === 90) {
-      rotationShared.value = {
-        x: clamp(smoothY * scale, -1, 1),
-        y: clamp(-smoothX * scale, -1, 1),
-        z: clamp(smoothZ * scale, -1, 1),
-      };
-    } else {
-      rotationShared.value = {
-        x: clamp(smoothX * scale, -1, 1),
-        y: clamp(smoothY * scale, -1, 1),
-        z: clamp(smoothZ * scale, -1, 1),
-      };
-    }
+    rotationShared.value = clampV3d(
+      orientationAngle.value === 90
+        ? {
+            x: smooth.y,
+            y: -smooth.x,
+            z: smooth.z,
+          }
+        : smooth,
+      -1,
+      1
+    );
   });
 
   // Resource setup
@@ -384,7 +382,7 @@ export function Shine({
     let loadingAttachment;
     const isInSinglePass = false;
     const render = () => {
-      rotationBuffer.write(d.vec3f(...toComponents(rotationShared.value)));
+      rotationBuffer.write(d.vec3f(...componentsFromV3d(rotationShared.value)));
 
       view = context.getCurrentTexture().createView();
       initialAttachment = {

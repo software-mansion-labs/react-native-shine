@@ -1,5 +1,5 @@
-import type { quaternion, vec3 } from '../types/types';
 import { Dimensions } from 'react-native';
+import type { quaternion, vec3 } from '../types/types';
 
 export const rotateVectorByQuaternion = (
   vec: vec3,
@@ -33,22 +33,6 @@ export const rotateVectorByQuaternion = (
   ];
 
   return [rotated[0], rotated[1], rotated[2]];
-};
-
-export const clamp = (v: number, min = -1, max = 1) => {
-  'worklet';
-  return Math.max(min, Math.min(max, v));
-};
-
-export const rotate2D = (
-  [x, y]: [number, number],
-  angleDeg: number
-): [number, number] => {
-  'worklet';
-  const rad = (angleDeg * Math.PI) / 180;
-  const c = Math.cos(rad);
-  const s = Math.sin(rad);
-  return [x * c - y * s, x * s + y * c];
 };
 
 // Simple helper to get angle from dimensions (0 or 90)
