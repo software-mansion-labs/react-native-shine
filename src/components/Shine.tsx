@@ -138,11 +138,10 @@ export function Shine({
   // Subscribe to orientation changes and reset calibration on change
   useEffect(() => {
     orientationAngle.value = getAngleFromDimensions();
-    const unsubscribe = subscribeToOrientationChange((angleDeg) => {
+
+    return subscribeToOrientationChange((angleDeg) => {
       orientationAngle.value = angleDeg;
     });
-
-    return () => unsubscribe();
   }, [orientationAngle]);
 
   // Calibration & mapping logic
