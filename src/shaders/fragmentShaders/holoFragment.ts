@@ -2,7 +2,7 @@ import tgpu from 'typegpu';
 import * as d from 'typegpu/data';
 import * as std from 'typegpu/std';
 import {
-  rotationValuesBindGroupLayout,
+  rotationBindGroupLayout,
   textureBindGroupLayout,
 } from '../bindGroupLayouts';
 import { hueShift } from '../tgpuUtils';
@@ -22,7 +22,7 @@ export const holoFragment = tgpu['~unstable'].fragmentFn({
     texcoord
   );
 
-  const rot = rotationValuesBindGroupLayout.$.vec;
+  const rot = rotationBindGroupLayout.$.vec;
   const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y));
 
   const wave = waveCallbackSlot.$(rot.xy);

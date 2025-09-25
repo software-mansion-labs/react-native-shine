@@ -2,11 +2,13 @@ import { componentsFromV3d, zeroV3d } from 'react-native-shine';
 import { type TgpuBuffer, type TgpuRoot, type UniformFlag } from 'typegpu';
 import * as d from 'typegpu/data';
 import {
-  glareOptionsBindGroupLayout,
-  glareOptionsSchema,
+  glareBindGroupLayout,
+  glareSchema,
   colorMaskBindGroupLayout,
+  type ColorMaskSchema,
+  rotationBindGroupLayout,
+  type GlareSchema,
   colorMaskSchema,
-  rotationValuesBindGroupLayout,
 } from './bindGroupLayouts';
 import type {
   GlareOptions,
@@ -29,7 +31,7 @@ export const createRotationValuesBindGroup = (
   root: TgpuRoot,
   buffer: TgpuBuffer<d.Vec3f>
 ) =>
-  root.createBindGroup(rotationValuesBindGroupLayout, {
+  root.createBindGroup(rotationBindGroupLayout, {
     vec: root.unwrap(buffer),
   });
 
@@ -38,17 +40,14 @@ export const createGlareOptionsBuffer = (
   initValues?: Partial<GlareOptions>
 ) =>
   root
-    .createBuffer(
-      glareOptionsSchema,
-      mapToF32(createGlareOptions({ ...initValues }))
-    )
+    .createBuffer(glareSchema, mapToF32(createGlareOptions({ ...initValues })))
     .$usage('uniform');
 
 export const createGlareOptionsBindGroup = (
   root: TgpuRoot,
-  buffer: TgpuBuffer<glareOptionsSchema> & UniformFlag
+  buffer: TgpuBuffer<GlareSchema> & UniformFlag
 ) =>
-  root.createBindGroup(glareOptionsBindGroupLayout, {
+  root.createBindGroup(glareBindGroupLayout, {
     glareOptions: buffer,
   });
 
@@ -65,7 +64,7 @@ export const createColorMaskBuffer = (
 
 export const createColorMaskBindGroup = (
   root: TgpuRoot,
-  buffer: TgpuBuffer<colorMaskSchema> & UniformFlag
+  buffer: TgpuBuffer<ColorMaskSchema> & UniformFlag
 ) =>
   root.createBindGroup(colorMaskBindGroupLayout, {
     mask: buffer,

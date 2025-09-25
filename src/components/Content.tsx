@@ -13,7 +13,7 @@ import * as d from 'typegpu/data';
 import type { TextureProps, TgpuRoot, TgpuTexture } from 'typegpu';
 import {
   bufferData,
-  type BufferDataMap,
+  type BufferData,
   textureBindGroupLayout,
 } from '../shaders/bindGroupLayouts';
 import { TypedBufferMap } from '../shaders/resourceManagement/bufferManager';
@@ -116,8 +116,8 @@ export default function Content({
   const calibrated = useSharedValue<boolean>(false);
   const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
 
-  const bufferManager = useMemo(
-    () => new TypedBufferMap<BufferDataMap>(bufferData),
+  const bufferMap = useMemo(
+    () => new TypedBufferMap<BufferData>(bufferData),
     []
   );
 
@@ -231,20 +231,16 @@ export default function Content({
       sampler,
     });
 
-    const rotationBuffer = bufferManager.addBuffer(
-      root,
-      'rotationBuffer',
-      d.vec3f(0.0)
-    );
+    const rotationBuffer = bufferMap.addBuffer(root, 'rotation', d.vec3f(0.0));
 
     const rotationBindGroup = createRotationValuesBindGroup(
       root,
       rotationBuffer
     );
 
-    const glareOptionsBuffer = bufferManager.addBuffer(
+    const glareOptionsBuffer = bufferMap.addBuffer(
       root,
-      'glareBuffer',
+      'glare',
       createGlareOptions(glareOptions ?? {})
     );
     const glareOptionsBindGroup = createGlareOptionsBindGroup(
@@ -252,9 +248,9 @@ export default function Content({
       glareOptionsBuffer
     );
 
-    const colorMaskBuffer = bufferManager.addBuffer(
+    const colorMaskBuffer = bufferMap.addBuffer(
       root,
-      'colorMaskBuffer',
+      'colorMask',
       colorMaskToTyped(
         createColorMask(colorMaskOptions ?? { baseColor: [-20, -20, -20] })
       )
@@ -367,7 +363,7 @@ export default function Content({
     imageTexture,
     maskTexture,
     rotation,
-    bufferManager,
+    bufferMap,
     glareOptions,
     colorMaskOptions,
     addHolo,
