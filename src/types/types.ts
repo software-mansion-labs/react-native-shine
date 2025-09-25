@@ -63,3 +63,5 @@ export type BindGroupPair = {
 export type ColorAttachment = Parameters<
   TgpuRenderPipeline['withColorAttachment']
 >[0];
+
+export type PipelineAttachmentPair = [TgpuRenderPipeline, ColorAttachment];

@@ -4,7 +4,7 @@ import type {
   TgpuRoot,
   TgpuTexture,
 } from 'typegpu';
-import type { BindGroupPair, ColorAttachment } from '../types/types';
+import type { BindGroupPair } from '../types/types';
 import {
   maskTextureBindGroupLayout,
   textureBindGroupLayout,
@@ -149,19 +149,6 @@ export const createRainbowHoloPipeline = (
   ]);
   return rainbowHoloPipeline;
 };
-
-export function renderPipelines(
-  pipelines: TgpuRenderPipeline[],
-  attachments: ColorAttachment[]
-) {
-  for (const i in pipelines) {
-    const pipeline = pipelines[i];
-    const attachment = attachments[i];
-
-    if (pipeline && attachment)
-      pipeline.withColorAttachment(attachment).draw(6);
-  }
-}
 
 export function renderPipelinesInSinglePass(
   root: TgpuRoot,
