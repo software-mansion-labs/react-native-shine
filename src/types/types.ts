@@ -1,4 +1,8 @@
-import type { TgpuBindGroup, TgpuBindGroupLayout } from 'typegpu';
+import type {
+  TgpuBindGroup,
+  TgpuBindGroupLayout,
+  TgpuRenderPipeline,
+} from 'typegpu';
 import type { WaveCallbackFn } from '../enums/waveCallback';
 
 export type vec2 = [number, number];
@@ -55,3 +59,9 @@ export type BindGroupPair = {
   layout: TgpuBindGroupLayout;
   group: TgpuBindGroup;
 };
+
+export type ColorAttachment = Parameters<
+  TgpuRenderPipeline['withColorAttachment']
+>[0];
+
+export type PipelineAttachmentPair = [TgpuRenderPipeline, ColorAttachment];

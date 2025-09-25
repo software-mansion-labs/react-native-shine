@@ -4,8 +4,8 @@ import * as std from 'typegpu/std';
 import {
   textureBindGroupLayout,
   maskTextureBindGroupLayout,
-  rotationValuesBindGroupLayout,
-  glareOptionsBindGroupLayout,
+  rotationBindGroupLayout,
+  glareBindGroupLayout,
 } from '../bindGroupLayouts';
 import { hueShift } from '../tgpuUtils';
 
@@ -17,10 +17,10 @@ export const reverseHoloFragment = tgpu['~unstable'].fragmentFn({
   const uv = texcoord;
   const centeredCoords = std.sub(std.mul(uv, 2.0), 1.0);
 
-  const rot = rotationValuesBindGroupLayout.$.vec;
+  const rot = rotationBindGroupLayout.$.vec;
   const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y)); // center from device orientation/touch
 
-  const opts = glareOptionsBindGroupLayout.$.glareOptions;
+  const opts = glareBindGroupLayout.$.glareOptions;
   const glareIntensity = opts.glareIntensity;
   const glowPower = opts.glowPower;
   const hueBlendPower = opts.hueBlendPower;

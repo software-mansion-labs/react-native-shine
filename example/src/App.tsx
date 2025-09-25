@@ -1,12 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Shine, ShineGroup, useOrientation } from 'react-native-shine';
+import { useFrameCallback, useSharedValue } from 'react-native-reanimated';
+import {
+  addV2d,
+  angleToV2d,
+  multiplyV2d,
+  Shine,
+  ShineGroup,
+  useOrientation,
+  type V2d,
+  zeroV2d,
+} from 'react-native-shine';
 import { dedenne, dedenneFoilHolo } from './img';
-import { useSharedValue } from 'react-native-reanimated';
 
 export default function App() {
   const orientation = useOrientation();
-  const touchPosition = useSharedValue<[number, number]>([0.0, 0.0]);
+  const touchPosition = useSharedValue<V2d>(zeroV2d);
   const rotation = useRef<number>(0);
   const nh = 0.5;
   const nw = nh;
@@ -23,26 +32,11 @@ export default function App() {
     hueShiftAngleMax: -1.5,
   });
 
-  const moveInCircle = () => {
-    const radius = 0.5;
-    const [centerX, centerY] = [0, 0];
-    const angle = rotation.current;
-
-    const x = centerX + radius * Math.cos(angle);
-    const y = centerY + radius * Math.sin(angle);
-
-    touchPosition.value = [x, y];
-
-    rotation.current += 0.05;
-  };
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      moveInCircle();
-    }, 50);
-    return () => {
-      clearInterval(id);
-    };
+  useFrameCallback(() => {
+    touchPosition.value = addV2d(
+      zeroV2d,
+      multiplyV2d(angleToV2d((rotation.current += 0.01)), 0.5)
+    );
   });
 
   return (

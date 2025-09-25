@@ -1,20 +1,18 @@
 import { useEffect, useState } from 'react';
-import {
-  getAngleFromDimensions,
-  subscribeToOrientationChange,
-} from '../shaders/utils';
+import { subscribeToOrientationChange } from '../shaders/utils';
+
+type Orientation = 'LANDSCAPE' | 'PORTRAIT';
 
 export const useOrientation = () => {
-  const [orientation, setOrientation] = useState<string>();
+  const [orientation, setOrientation] = useState<Orientation>();
 
-  useEffect(() => {
-    setOrientation(getAngleFromDimensions() === 0 ? 'PORTRAIT' : 'LANDSCAPE');
-    const unsubscribe = subscribeToOrientationChange((angleDeg) => {
-      setOrientation(angleDeg === 0 ? 'PORTRAIT' : 'LANDSCAPE');
-    });
-
-    return () => unsubscribe();
-  }, []);
+  useEffect(
+    () =>
+      subscribeToOrientationChange((isLandscape) =>
+        setOrientation(isLandscape ? 'LANDSCAPE' : 'PORTRAIT')
+      ),
+    []
+  );
 
   return orientation;
 };

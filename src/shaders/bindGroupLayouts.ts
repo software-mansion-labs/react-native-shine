@@ -12,11 +12,11 @@ export const maskTextureBindGroupLayout = tgpu.bindGroupLayout({
   sampler: { sampler: 'filtering' },
 });
 
-export const rotationValuesBindGroupLayout = tgpu.bindGroupLayout({
+export const rotationBindGroupLayout = tgpu.bindGroupLayout({
   vec: { uniform: d.vec3f },
 });
 
-export const glareOptionsSchema = d.struct({
+export const glareSchema = d.struct({
   glowPower: d.f32,
   hueShiftAngleMax: d.f32,
   hueShiftAngleMin: d.f32,
@@ -25,10 +25,10 @@ export const glareOptionsSchema = d.struct({
   glareIntensity: d.f32,
 });
 
-export type glareOptionsSchema = typeof glareOptionsSchema;
+export type GlareSchema = typeof glareSchema;
 
-export const glareOptionsBindGroupLayout = tgpu.bindGroupLayout({
-  glareOptions: { uniform: glareOptionsSchema },
+export const glareBindGroupLayout = tgpu.bindGroupLayout({
+  glareOptions: { uniform: glareSchema },
 });
 
 export const colorMaskSchema = d.struct({
@@ -39,22 +39,22 @@ export const colorMaskSchema = d.struct({
   }),
 });
 
-export type colorMaskSchema = typeof colorMaskSchema;
+export type ColorMaskSchema = typeof colorMaskSchema;
 
 export const colorMaskBindGroupLayout = tgpu.bindGroupLayout({
   mask: { uniform: colorMaskSchema },
 });
 
 export const bufferData = {
-  rotationBuffer: {
+  rotation: {
     schema: d.vec3f,
     usage: 'uniform',
   },
-  glareBuffer: {
-    schema: glareOptionsSchema,
+  glare: {
+    schema: glareSchema,
     usage: 'uniform',
   },
-  colorMaskBuffer: {
+  colorMask: {
     schema: colorMaskSchema,
     usage: 'uniform',
   },
@@ -63,7 +63,7 @@ export const bufferData = {
   { schema: ValidateBufferSchema<any>; usage: BufferUsageType }
 >;
 
-export type BufferDataMap = typeof bufferData;
+export type BufferData = typeof bufferData;
 
 // export const holoSchema = d.struct({
 //   intensity: d.f32,
