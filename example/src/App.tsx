@@ -42,13 +42,13 @@ export default function App() {
       multiplyV2d(angleToV2d(angle), radius)
     );
 
-    rotation.current += 0.05;
+    rotation.current += 0.025;
   };
 
   useEffect(() => {
     const id = setInterval(() => {
       moveInCircle();
-    }, 50);
+    }, 10);
     return () => {
       clearInterval(id);
     };
