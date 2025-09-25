@@ -203,18 +203,18 @@ export function Shine({
 
   // Resource setup
   useEffect(() => {
-    if (!root || !device || !context) return;
+    if (!root || !context) return;
 
     (async () => {
       await loadBitmap(root, imageURI, setImageTexture);
 
       if (maskURI) await loadBitmap(root, maskURI, setMaskTexture);
     })();
-  }, [root, device, context, imageURI, maskURI]);
+  }, [root, context, imageURI, maskURI]);
 
   // Render loop
   useEffect(() => {
-    if (!root || !device || !context || !imageTexture) return;
+    if (!root || !context || !imageTexture) return;
 
     //this sets the underlying resolution of the canvas to prevent blurriness
     const canvasElement = context.canvas;
@@ -228,12 +228,12 @@ export function Shine({
     }
 
     context.configure({
-      device,
+      device: root.device,
       format: presentationFormat,
       alphaMode: 'premultiplied',
     });
 
-    const sampler = device.createSampler({
+    const sampler = root.device.createSampler({
       magFilter: 'linear',
       minFilter: 'linear',
     });
