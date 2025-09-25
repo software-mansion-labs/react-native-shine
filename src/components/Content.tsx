@@ -10,12 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Canvas, useGPUContext } from 'react-native-wgpu';
 import * as d from 'typegpu/data';
-import type {
-  TextureProps,
-  TgpuRenderPipeline,
-  TgpuRoot,
-  TgpuTexture,
-} from 'typegpu';
+import type { TextureProps, TgpuRoot, TgpuTexture } from 'typegpu';
 import {
   bufferData,
   type BufferDataMap,
@@ -36,7 +31,6 @@ import {
   createRainbowHoloPipeline as createHoloPipeline,
   createReverseHoloPipeline,
   getDefaultTarget,
-  renderPipelines,
 } from '../shaders/pipelineSetups';
 import mainVertex from '../shaders/vertexShaders/mainVertex';
 import { subscribeToOrientationChange } from '../shaders/utils';
@@ -45,6 +39,7 @@ import type {
   ColorMask,
   DeepPartiallyOptional,
   GlareOptions,
+  PipelineAttachmentPair,
 } from '../types/types';
 import {
   colorMaskToTyped,
@@ -233,7 +228,7 @@ export default function Content({
 
     const imageTextureBindGroup = root.createBindGroup(textureBindGroupLayout, {
       texture: root.unwrap(imageTexture).createView(),
-      sampler: sampler,
+      sampler,
     });
 
     const rotationBuffer = bufferManager.addBuffer(
@@ -319,16 +314,7 @@ export default function Content({
       presentationFormat
     );
 
-    const pipelines: TgpuRenderPipeline[] = [glarePipeline];
-    if (addTextureMask && maskPipeline) pipelines.push(maskPipeline);
-    if (addReverseHolo && reverseHoloPipeline)
-      pipelines.push(reverseHoloPipeline);
-    if (addHolo && holoPipeline) pipelines.push(holoPipeline);
-    if (colorMaskOptions) pipelines.push(colorMaskPipeline);
-
-    const render = () => {
-      rotationBuffer.write(d.vec3f(...componentsFromV3d(rotation.value)));
-
+    const renderPipelines = () => {
       const view = context.getCurrentTexture().createView();
       const initialAttachment: ColorAttachment = {
         view,
@@ -343,13 +329,27 @@ export default function Content({
         storeOp: 'store',
       };
 
-      renderPipelines(pipelines, [
-        initialAttachment,
-        loadingAttachment,
-        loadingAttachment,
-        loadingAttachment,
-        loadingAttachment,
-      ]);
+      const pairs: PipelineAttachmentPair[] = [
+        [glarePipeline, initialAttachment],
+      ];
+
+      if (addTextureMask && maskPipeline)
+        pairs.push([maskPipeline, loadingAttachment]);
+      if (addReverseHolo && reverseHoloPipeline)
+        pairs.push([reverseHoloPipeline, loadingAttachment]);
+      if (addHolo && holoPipeline)
+        pairs.push([holoPipeline, loadingAttachment]);
+      if (colorMaskOptions) pairs.push([colorMaskPipeline, loadingAttachment]);
+
+      pairs.forEach(([pipeline, attachment]) =>
+        pipeline.withColorAttachment(attachment).draw(6)
+      );
+    };
+
+    const render = () => {
+      rotationBuffer.write(d.vec3f(...componentsFromV3d(rotation.value)));
+
+      renderPipelines();
 
       context.present();
       frameRef.current = requestAnimationFrame(render);
