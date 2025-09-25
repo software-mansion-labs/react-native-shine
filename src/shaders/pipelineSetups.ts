@@ -1,10 +1,14 @@
-import type { TgpuRenderPipeline, TgpuRoot, TgpuTexture } from 'typegpu';
+import type {
+  TgpuBindGroup,
+  TgpuRenderPipeline,
+  TgpuRoot,
+  TgpuTexture,
+} from 'typegpu';
 import type { BindGroupPair } from '../types/types';
 import {
   maskTextureBindGroupLayout,
   textureBindGroupLayout,
 } from './bindGroupLayouts';
-import { createBindGroupPair, createBindGroupPairs } from '../types/typeUtils';
 import mainVertex from './vertexShaders/mainVertex';
 import maskFragment from './fragmentShaders/maskFragment';
 import { reverseHoloFragment } from './fragmentShaders/reverseHoloFragment';
@@ -17,10 +21,10 @@ import {
 
 export const attachBindGroups = (
   pipeline: TgpuRenderPipeline,
-  bindGroupPairs: BindGroupPair[]
+  bindGroups: TgpuBindGroup[]
 ) => {
-  for (const pair of bindGroupPairs) {
-    pipeline = pipeline.with(pair.layout, pair.group);
+  for (const bindGroup of bindGroups) {
+    pipeline = pipeline.with(bindGroup.layout, bindGroup);
   }
 
   return pipeline;
@@ -62,12 +66,12 @@ export const attachBindGroupsToPass = (
 
 export const createMaskPipeline = (
   root: TgpuRoot,
-  maskTexture: TgpuTexture | null,
-  BGP: BindGroupPair[],
+  maskTexture: TgpuTexture | undefined,
+  bindGroups: TgpuBindGroup[],
   sampler: GPUSampler,
   presentationFormat: GPUTextureFormat
-): TgpuRenderPipeline | null => {
-  if (!maskTexture) return null;
+): TgpuRenderPipeline | void => {
+  if (!maskTexture) return;
 
   const maskTextureBindGroup = root.createBindGroup(
     maskTextureBindGroupLayout,
@@ -76,12 +80,9 @@ export const createMaskPipeline = (
       sampler,
     }
   );
-  const maskBGP: BindGroupPair[] = createBindGroupPairs(
-    [maskTextureBindGroupLayout],
-    [maskTextureBindGroup]
-  );
-  for (let i = 0; i < BGP.length; i++) {
-    maskBGP.push(BGP[i]!);
+  const maskBGP: TgpuBindGroup[] = [maskTextureBindGroup];
+  for (let i = 0; i < bindGroups.length; i++) {
+    maskBGP.push(bindGroups[i]!);
   }
   let maskPipeline = root['~unstable']
     .withVertex(mainVertex, {})
@@ -94,12 +95,12 @@ export const createMaskPipeline = (
 
 export const createReverseHoloPipeline = (
   root: TgpuRoot,
-  texture: TgpuTexture | null,
-  BGP: BindGroupPair[],
+  texture: TgpuTexture | undefined,
+  bindGroups: TgpuBindGroup[],
   sampler: GPUSampler,
   presentationFormat: GPUTextureFormat
-): TgpuRenderPipeline | null => {
-  if (!texture) return null;
+): TgpuRenderPipeline | void => {
+  if (!texture) return;
 
   const reverseHoloBindGroup = root.createBindGroup(
     maskTextureBindGroupLayout,
@@ -108,10 +109,7 @@ export const createReverseHoloPipeline = (
       sampler,
     }
   );
-  const reverseHoloBGP: BindGroupPair[] = BGP;
-  reverseHoloBGP.push(
-    createBindGroupPair(maskTextureBindGroupLayout, reverseHoloBindGroup)
-  );
+  const reverseHoloBGP: TgpuBindGroup[] = [...bindGroups, reverseHoloBindGroup];
 
   let reverseHoloPipeline = root['~unstable']
     .withVertex(mainVertex, {})
@@ -127,22 +125,17 @@ export const createReverseHoloPipeline = (
 
 export const createRainbowHoloPipeline = (
   root: TgpuRoot,
-  texture: TgpuTexture | null,
-  BGP: BindGroupPair[],
+  texture: TgpuTexture | undefined,
+  bindGroups: TgpuBindGroup[],
   sampler: GPUSampler,
   presentationFormat: GPUTextureFormat
-): TgpuRenderPipeline | null => {
-  if (!texture) return null;
+): TgpuRenderPipeline | void => {
+  if (!texture) return;
 
   const imageTextureBindGroup = root.createBindGroup(textureBindGroupLayout, {
     texture: root.unwrap(texture).createView(),
     sampler,
   });
-
-  const texBGP = createBindGroupPair(
-    textureBindGroupLayout,
-    imageTextureBindGroup
-  );
 
   let rainbowHoloPipeline = root['~unstable']
     .with(waveCallbackSlot, waveCallbackFn(WAVE_CALLBACKS.default))
@@ -150,42 +143,36 @@ export const createRainbowHoloPipeline = (
     .withFragment(holoFragment, getDefaultTarget(presentationFormat, blend))
     .createPipeline();
 
-  rainbowHoloPipeline = attachBindGroups(rainbowHoloPipeline, [...BGP, texBGP]);
+  rainbowHoloPipeline = attachBindGroups(rainbowHoloPipeline, [
+    ...bindGroups,
+    imageTextureBindGroup,
+  ]);
   return rainbowHoloPipeline;
 };
 
-export const pipelineRenderFunction = (
+export function renderPipelinesInSinglePass(
   root: TgpuRoot,
   pipelines: TgpuRenderPipeline[],
-  attachments: any[],
-  view: GPUTextureView,
-  isInSinglePass: boolean
-) => {
-  if (isInSinglePass) {
-    root['~unstable'].beginRenderPass(
-      {
-        colorAttachments: [
-          {
-            view: view,
-            clearValue: [0, 0, 0, 0],
-            loadOp: 'clear',
-            storeOp: 'store',
-          },
-        ],
-      },
-      (pass) => {
-        for (let i = 0; i < pipelines.length; i++) {
-          pass.setPipeline(pipelines[i]!);
-          pass.draw(6);
-        }
+  view: GPUTextureView
+) {
+  const unstableRoot = root['~unstable'];
+  const attachment: GPURenderPassColorAttachment = {
+    view,
+    clearValue: [0, 0, 0, 0],
+    loadOp: 'clear',
+    storeOp: 'store',
+  };
+
+  unstableRoot.beginRenderPass(
+    {
+      colorAttachments: [attachment],
+    },
+    (pass) => {
+      for (const pipeline of pipelines) {
+        pass.setPipeline(pipeline);
+        pass.draw(6);
       }
-    );
-    root['~unstable'].flush();
-  } else {
-    for (let i = 0; i < pipelines.length; i++) {
-      const attachment = attachments[i];
-      if (!attachment) return;
-      pipelines[i]!.withColorAttachment(attachment).draw(6);
     }
-  }
-};
+  );
+  unstableRoot.flush();
+}

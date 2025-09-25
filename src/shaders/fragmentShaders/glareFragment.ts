@@ -2,9 +2,9 @@ import tgpu from 'typegpu';
 import * as d from 'typegpu/data';
 import * as std from 'typegpu/std';
 import {
-  rotationValuesBindGroupLayout,
+  rotationBindGroupLayout,
   textureBindGroupLayout,
-  glareOptionsBindGroupLayout,
+  glareBindGroupLayout,
   // colorMaskBindGroupLayout,
 } from '../bindGroupLayouts';
 import { glareColorShift, hueShift, overlayChannels } from '../tgpuUtils';
@@ -17,10 +17,10 @@ export const glareFragment = tgpu['~unstable'].fragmentFn({
   const uv = d.vec2f(input.uv.x, 1.0 - input.uv.y);
   const centeredCoords = std.sub(std.mul(uv, 2.0), 1); //-1 to 1
 
-  const rot = rotationValuesBindGroupLayout.$.vec;
+  const rot = rotationBindGroupLayout.$.vec;
   const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y));
 
-  const glareOptions = glareOptionsBindGroupLayout.$.glareOptions;
+  const glareOptions = glareBindGroupLayout.$.glareOptions;
   const glareIntensity = glareOptions.glareIntensity;
   const glowPower = glareOptions.glowPower;
   const hueBlendPower = glareOptions.hueBlendPower;
@@ -88,10 +88,10 @@ export const newGlareFragment = tgpu['~unstable'].fragmentFn({
   const uv = d.vec2f(input.uv.x, 1.0 - input.uv.y);
   const centeredCoords = std.sub(std.mul(uv, 2.0), 1.0);
 
-  const rot = rotationValuesBindGroupLayout.$.vec;
+  const rot = rotationBindGroupLayout.$.vec;
   const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y)); // do not change
 
-  const opts = glareOptionsBindGroupLayout.$.glareOptions;
+  const opts = glareBindGroupLayout.$.glareOptions;
   const glareIntensity = opts.glareIntensity; // [0..∞): bigger → wider/stronger area
   const glowPower = opts.glowPower; // (0..∞): curve shaping; bigger → softer/wider glow
   const hueBlendPower = opts.hueBlendPower; // [0..1+]: how much hue-shifted color blends in
