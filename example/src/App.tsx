@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useSharedValue } from 'react-native-reanimated';
+import { useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import {
   addV2d,
   angleToV2d,
@@ -32,26 +32,11 @@ export default function App() {
     hueShiftAngleMax: -1.5,
   });
 
-  const moveInCircle = () => {
-    const radius = 0.5;
-    const center = zeroV2d;
-    const angle = rotation.current;
-
+  useFrameCallback(() => {
     touchPosition.value = addV2d(
-      center,
-      multiplyV2d(angleToV2d(angle), radius)
+      zeroV2d,
+      multiplyV2d(angleToV2d((rotation.current += 0.01)), 0.5)
     );
-
-    rotation.current += 0.025;
-  };
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      moveInCircle();
-    }, 10);
-    return () => {
-      clearInterval(id);
-    };
   });
 
   return (

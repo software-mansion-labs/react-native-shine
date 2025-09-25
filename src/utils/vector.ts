@@ -2,6 +2,7 @@ import type { Transformer, V2d, V3d } from '../types/vector';
 
 // 2d
 export function scaleV2d(a: V2d, value: number): V2d {
+  'worklet';
   return {
     x: value * a.x,
     y: value * a.y,
@@ -11,6 +12,7 @@ export function scaleV2d(a: V2d, value: number): V2d {
 export const multiplyV2d = scaleV2d;
 
 export function addV2d(a: V2d, b: V2d): V2d {
+  'worklet';
   return {
     x: a.x + b.x,
     y: a.y + b.y,
@@ -18,6 +20,7 @@ export function addV2d(a: V2d, b: V2d): V2d {
 }
 
 export function angleToV2d(angle: number): V2d {
+  'worklet';
   return { x: Math.cos(angle), y: Math.sin(angle) };
 }
 
