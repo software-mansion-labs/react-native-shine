@@ -17,13 +17,11 @@ export function Shine({ imageURI, maskURI, ...props }: ShineProps) {
   const [maskTexture, setMaskTexture] = useState<TgpuTexture>();
 
   useEffect(() => {
-    if (!root) return;
+    if (root) loadBitmap(root, imageURI, setImageTexture);
+  }, [root, imageURI]);
 
-    (async () => {
-      await loadBitmap(root, imageURI, setImageTexture);
-
-      if (maskURI) await loadBitmap(root, maskURI, setMaskTexture);
-    })();
+  useEffect(() => {
+    if (root && maskURI) loadBitmap(root, maskURI, setMaskTexture);
   }, [root, imageURI, maskURI]);
 
   return (
