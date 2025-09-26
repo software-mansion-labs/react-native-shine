@@ -24,7 +24,7 @@ export function ShineGroup({
   addHolo = false,
   addReverseHolo = false,
 }: ShineGroupProps & Partial<ShineProps>) {
-  const viewShotRef = useRef<any>(null);
+  const viewShotRef = useRef<ViewShot>(null);
   const [capturedURI, setCapturedURI] = useState<string | null>(null);
   const [size, setSize] = useState<{ width: number; height: number } | null>(
     null
@@ -52,7 +52,7 @@ export function ShineGroup({
         const pixelW = Math.round(size.width * dpr);
         const pixelH = Math.round(size.height * dpr);
 
-        const uri = await captureRef(viewShotRef.current, {
+        const uri = await captureRef(viewShotRef, {
           format: 'png',
           quality: 1,
           width: pixelW,
