@@ -21,6 +21,7 @@ import {
   type BufferData,
   textureBindGroupLayout,
 } from '../shaders/bindGroupLayouts';
+import useAnimationFrame from '../hooks/useAnimationFrame';
 import { TypedBufferMap } from '../shaders/resourceManagement/bufferManager';
 import {
   createColorMaskBindGroup,
@@ -110,7 +111,7 @@ export default function Content({
   const { device } = root;
   const { ref, context } = useGPUContext();
   const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-  const frameRef = useRef<number>(null);
+  const renderRef = useRef<() => void>(null);
 
   //changing canvas size to prevent blur
   const pixelRatio = PixelRatio.get();
@@ -349,16 +350,10 @@ export default function Content({
 
     const presentContext = () => context.present();
 
-    const render = () => {
+    renderRef.current = () => {
       modifyBuffers();
       renderPipelines();
       presentContext();
-      frameRef.current = requestAnimationFrame(render);
-    };
-    frameRef.current = requestAnimationFrame(render);
-
-    return () => {
-      if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
   }, [
     device,
@@ -376,6 +371,8 @@ export default function Content({
     addTextureMask,
     pixelSize,
   ]);
+
+  useAnimationFrame(() => renderRef.current?.());
 
   return (
     <Animated.View style={[animatedStyle]}>
