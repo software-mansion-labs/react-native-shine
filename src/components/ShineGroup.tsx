@@ -7,6 +7,9 @@ import {
   PixelRatio,
 } from 'react-native';
 import ViewShot, { captureRef } from 'react-native-view-shot';
+import type { V2d } from '../types/vector';
+import { sizeFromV2d, sizeToV2d } from '../utils/size';
+import { areV2dEqual, multiplyV2d, round2D } from '../utils/vector';
 import { Shine, type ShineProps } from './Shine';
 
 type ShineGroupProps = PropsWithChildren<Partial<ShineProps>>;
@@ -24,16 +27,13 @@ export function ShineGroup({
 }: ShineGroupProps) {
   const viewShotRef = useRef<ViewShot>(null);
   const [capturedURI, setCapturedURI] = useState<string | null>(null);
-  const [size, setSize] = useState<{ width: number; height: number } | null>(
-    null
-  );
+  const [size, setSize] = useState<V2d | null>(null);
 
   const onInnerLayout = (e: LayoutChangeEvent) => {
-    const { width, height } = e.nativeEvent.layout;
-    if (width > 0 && height > 0) {
-      if (!size || size.width !== width || size.height !== height) {
-        setSize({ width, height });
-      }
+    const layoutV2d = sizeToV2d(e.nativeEvent.layout);
+
+    if (!size || !areV2dEqual(size, layoutV2d)) {
+      setSize(layoutV2d);
     }
   };
 
@@ -45,15 +45,12 @@ export function ShineGroup({
     let mounted = true;
     const t = setTimeout(async () => {
       try {
-        const dpr = PixelRatio.get();
-        const pixelW = Math.round(size.width * dpr);
-        const pixelH = Math.round(size.height * dpr);
+        const pixel = round2D(multiplyV2d(size, PixelRatio.get()));
 
         const uri = await captureRef(viewShotRef, {
           format: 'png',
           quality: 1,
-          width: pixelW,
-          height: pixelH,
+          ...sizeFromV2d(pixel),
         });
         if (mounted) setCapturedURI(uri);
       } catch (err) {
@@ -76,13 +73,12 @@ export function ShineGroup({
       </ViewShot>
 
       {capturedURI && size && (
-        <Image src={capturedURI} width={size.width} height={size.height} />
+        <Image src={capturedURI} {...sizeFromV2d(size)} />
       )}
 
       {capturedURI && size && (
         <Shine
-          width={size.width}
-          height={size.height}
+          {...sizeFromV2d(size)}
           imageURI={capturedURI}
           glareOptions={glareOptions}
           colorMaskOptions={colorMaskOptions}
