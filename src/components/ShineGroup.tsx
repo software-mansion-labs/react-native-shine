@@ -35,7 +35,6 @@ export function ShineGroup({
         setSize({ width, height });
       }
     }
-    console.log('onInnerLayout', width, height);
   };
 
   // When we have a valid measured size, take a snapshot (after a short tick)
