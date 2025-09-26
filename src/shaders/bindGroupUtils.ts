@@ -1,4 +1,3 @@
-import { componentsFromV3d, zeroV3d } from 'react-native-shine';
 import { type TgpuBuffer, type TgpuRoot, type UniformFlag } from 'typegpu';
 import * as d from 'typegpu/data';
 import {
@@ -21,6 +20,7 @@ import {
   createColorMask,
   mapToF32,
 } from '../types/typeUtils';
+import { componentsFromV3d, zeroV3d } from '../utils/vector';
 
 export const createRotationBuffer = (root: TgpuRoot, initValues = zeroV3d) =>
   root
@@ -43,7 +43,7 @@ export const createGlareOptionsBuffer = (
     .createBuffer(glareSchema, mapToF32(createGlareOptions({ ...initValues })))
     .$usage('uniform');
 
-export const createGlareOptionsBindGroup = (
+export const createGlareBindGroup = (
   root: TgpuRoot,
   buffer: TgpuBuffer<GlareSchema> & UniformFlag
 ) =>
