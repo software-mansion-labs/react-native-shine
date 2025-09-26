@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { type PropsWithChildren, useEffect, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,9 +9,7 @@ import {
 import ViewShot, { captureRef } from 'react-native-view-shot';
 import { Shine, type ShineProps } from './Shine';
 
-interface ShineGroupProps {
-  children: React.ReactNode;
-}
+type ShineGroupProps = PropsWithChildren<Partial<ShineProps>>;
 
 export function ShineGroup({
   children,
@@ -23,7 +21,7 @@ export function ShineGroup({
   addTextureMask = false,
   addHolo = false,
   addReverseHolo = false,
-}: ShineGroupProps & Partial<ShineProps>) {
+}: ShineGroupProps) {
   const viewShotRef = useRef<ViewShot>(null);
   const [capturedURI, setCapturedURI] = useState<string | null>(null);
   const [size, setSize] = useState<{ width: number; height: number } | null>(
