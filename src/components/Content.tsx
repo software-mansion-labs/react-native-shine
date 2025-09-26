@@ -19,7 +19,7 @@ import {
 import { TypedBufferMap } from '../shaders/resourceManagement/bufferManager';
 import {
   createColorMaskBindGroup,
-  createGlareOptionsBindGroup,
+  createGlareBindGroup,
   createRotationValuesBindGroup,
 } from '../shaders/bindGroupUtils';
 import colorMaskFragment from '../shaders/fragmentShaders/colorMaskFragment';
@@ -238,15 +238,12 @@ export default function Content({
       rotationBuffer
     );
 
-    const glareOptionsBuffer = bufferMap.addBuffer(
+    const glareBuffer = bufferMap.addBuffer(
       root,
       'glare',
       createGlareOptions(glareOptions ?? {})
     );
-    const glareOptionsBindGroup = createGlareOptionsBindGroup(
-      root,
-      glareOptionsBuffer
-    );
+    const glareBindGroup = createGlareBindGroup(root, glareBuffer);
 
     const colorMaskBuffer = bufferMap.addBuffer(
       root,
@@ -260,7 +257,7 @@ export default function Content({
     const glareBGP = [
       imageTextureBindGroup,
       rotationBindGroup,
-      glareOptionsBindGroup,
+      glareBindGroup,
       colorMaskBindGroup,
     ];
 
@@ -297,7 +294,7 @@ export default function Content({
     const reverseHoloPipeline = createReverseHoloPipeline(
       root,
       maskTexture,
-      [imageTextureBindGroup, rotationBindGroup, glareOptionsBindGroup],
+      [imageTextureBindGroup, rotationBindGroup, glareBindGroup],
       sampler,
       presentationFormat
     );

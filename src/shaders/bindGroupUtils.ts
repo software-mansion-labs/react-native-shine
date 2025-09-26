@@ -43,7 +43,7 @@ export const createGlareOptionsBuffer = (
     .createBuffer(glareSchema, mapToF32(createGlareOptions({ ...initValues })))
     .$usage('uniform');
 
-export const createGlareOptionsBindGroup = (
+export const createGlareBindGroup = (
   root: TgpuRoot,
   buffer: TgpuBuffer<GlareSchema> & UniformFlag
 ) =>
