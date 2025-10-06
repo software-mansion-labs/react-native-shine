@@ -1764,7 +1764,7 @@ PODS:
     - React-logger (= 0.79.5)
     - React-perflogger (= 0.79.5)
     - React-utils (= 0.79.5)
-  - RNReanimated (4.0.1):
+  - RNReanimated (4.1.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1787,10 +1787,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated (= 4.0.1)
+    - RNReanimated/reanimated (= 4.1.2)
     - RNWorklets
     - Yoga
-  - RNReanimated/reanimated (4.0.1):
+  - RNReanimated/reanimated (4.1.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1813,10 +1813,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated/apple (= 4.0.1)
+    - RNReanimated/reanimated/apple (= 4.1.2)
     - RNWorklets
     - Yoga
-  - RNReanimated/reanimated/apple (4.0.1):
+  - RNReanimated/reanimated/apple (4.1.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1841,7 +1841,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - RNWorklets
     - Yoga
-  - RNWorklets (0.4.1):
+  - RNWorklets (0.5.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1864,9 +1864,9 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNWorklets/worklets (= 0.4.1)
+    - RNWorklets/worklets (= 0.5.1)
     - Yoga
-  - RNWorklets/worklets (0.4.1):
+  - RNWorklets/worklets (0.5.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1889,9 +1889,9 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNWorklets/worklets/apple (= 0.4.1)
+    - RNWorklets/worklets/apple (= 0.5.1)
     - Yoga
-  - RNWorklets/worklets/apple (0.4.1):
+  - RNWorklets/worklets/apple (0.5.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2251,8 +2251,8 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: f3e842e6cb5a825b6918a74a38402ba1409411f8
   ReactCodegen: 6cb6e0d0b52471abc883541c76589d1c367c64c7
   ReactCommon: 1ab5451fc5da87c4cc4c3046e19a8054624ca763
-  RNReanimated: 8a8270c2f6189ad9a7bba3b10f1a34b40b2ecc2f
-  RNWorklets: 32e63979c33291a69d4d8541d4425ab91763320e
+  RNReanimated: e8e6ad352b23bf457cb569ae44733a5817deb45d
+  RNWorklets: 6811e15dbdf2d61945b4327a249283515c36cde7
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: adb397651e1c00672c12e9495babca70777e411e
 
