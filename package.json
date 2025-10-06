@@ -85,9 +85,9 @@
     "react-native-builder-bob": "^0.40.13",
     "react-native-reanimated": "^4.0.1",
     "react-native-wgpu": "^0.2.8",
-    "react-native-worklets": "^0.5.1",
+    "react-native-worklets": "^0.4.1",
     "release-it": "^17.10.0",
-    "typegpu": "^0.7.0",
+    "typegpu": "^0.7.1",
     "typescript": "^5.8.3",
     "unplugin-typegpu": "^0.2.2"
   },
@@ -96,8 +96,8 @@
     "react-native": "*",
     "react-native-reanimated": "^4.0.1",
     "react-native-wgpu": "^0.2.8",
-    "react-native-worklets": "^0.5.1",
-    "typegpu": "^0.7.0"
+    "react-native-worklets": "^0.4.1",
+    "typegpu": "^0.7.1"
   },
   "workspaces": [
     "example"

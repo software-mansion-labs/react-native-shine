@@ -58,7 +58,7 @@ export default function App() {
           // baseColor: [200, 110, 70],
           rgbToleranceRange: { upper: [75, 80, 80] },
         }}
-        // addHolo={true} //change how holo effect works (not really a holo rn, should be global for the card too)
+        addHolo={true} //change how holo effect works (not really a holo rn, should be global for the card too)
         addReverseHolo={true}
         addTextureMask={true}
         glareOptions={glareOptions}

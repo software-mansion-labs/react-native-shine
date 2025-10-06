@@ -29,15 +29,17 @@ export const holoFragment = tgpu['~unstable'].fragmentFn({
   const waveX = wave.x;
   const waveY = wave.y;
 
-  const band = std.add(waveX, waveY);
+  const band = std.add(0.2 * waveX * uv.x, 2 * waveY * uv.y);
 
   const dist = std.distance(centeredCoords, center);
-  const intensity = std.clamp(1.0 - dist, 0.0, 1.0);
-  const falloff = std.pow(std.exp(-dist), 1.0 / intensity);
+  // const intensity = std.clamp(1.0 - dist, 0.0, 1.0);
+  // const falloff = std.pow(std.exp(-dist), 1.0 / intensity);
 
   const hueAngle = std.mul(std.abs(band), (10 * Math.PI * rot.x) / 3);
   const rainbowColor = hueShift(d.vec3f(1.0, 1.0, 1.0), hueAngle);
-  const finalColor = std.mul(rainbowColor, falloff);
+  // const finalColor = std.mul(rainbowColor, falloff);
+  const finalColor = std.mul(rainbowColor, 1.0);
 
-  return d.vec4f(finalColor, 1 - falloff * dist * textureColor.w);
+  // return d.vec4f(finalColor, 1 - falloff * dist * textureColor.w);
+  return d.vec4f(finalColor, 1.0 * (0.2 + std.max(0.5, dist)) * textureColor.w);
 });
