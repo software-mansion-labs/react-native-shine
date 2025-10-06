@@ -102,17 +102,17 @@ export function transformV3d(v3d: V3d, transformer: Transformer): V3d {
   };
 }
 
+export function clamp(v: number, min = -1, max = 1): number {
+  'worklet';
+  return Math.max(min, Math.min(max, v));
+}
+
 export function clampV3d(v3d: V3d, min: number, max: number): V3d {
   'worklet';
   return transformV3d(v3d, (value) => clamp(value, min, max));
 }
 
 // helpers
-
-export function clamp(v: number, min = -1, max = 1): number {
-  'worklet';
-  return Math.max(min, Math.min(max, v));
-}
 
 export function degToRad(deg: number): number {
   'worklet';
