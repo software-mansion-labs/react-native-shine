@@ -25,20 +25,24 @@ export function angleToV2d(angle: number): V2d {
 }
 
 export function rotateV2d({ x, y }: V2d, rad: number): V2d {
+  'worklet';
   const { x: c, y: s } = angleToV2d(rad);
 
   return { x: x * c - y * s, y: x * s + y * c };
 }
 
 export function negateV2dX({ x, y }: V2d): V2d {
+  'worklet';
   return { x: -x, y };
 }
 
 export function negateV2dY({ x, y }: V2d): V2d {
+  'worklet';
   return { x, y: -y };
 }
 
 export function transformV2d({ x, y }: V2d, transformer: Transformer): V2d {
+  'worklet';
   return {
     x: transformer(x),
     y: transformer(y),
@@ -46,6 +50,7 @@ export function transformV2d({ x, y }: V2d, transformer: Transformer): V2d {
 }
 
 export function clampV2d(v2d: V3d, min: number, max: number): V2d {
+  'worklet';
   return transformV2d(v2d, (value) => clamp(value, min, max));
 }
 
@@ -53,6 +58,7 @@ export const zeroV2d = { x: 0, y: 0 };
 
 // 3d
 export function scaleV3d(a: V3d, value: number): V3d {
+  'worklet';
   return {
     ...scaleV2d(a, value),
     z: value * a.z,
@@ -62,14 +68,17 @@ export function scaleV3d(a: V3d, value: number): V3d {
 export const multiplyV3d = scaleV3d;
 
 export function divV3d(a: V3d, value: number): V3d {
+  'worklet';
   return multiplyV3d(a, 1 / value);
 }
 
 export function negateV3d(a: V3d): V3d {
+  'worklet';
   return scaleV3d(a, -1);
 }
 
 export function addV3d(a: V3d, b: V3d): V3d {
+  'worklet';
   return {
     ...addV2d(a, b),
     z: a.z + b.z,
@@ -77,6 +86,7 @@ export function addV3d(a: V3d, b: V3d): V3d {
 }
 
 export function subtractV3d(a: V3d, b: V3d): V3d {
+  'worklet';
   return addV3d(a, negateV3d(b));
 }
 
@@ -85,6 +95,7 @@ export function componentsFromV3d({ x, y, z }: V3d): [number, number, number] {
 }
 
 export function transformV3d(v3d: V3d, transformer: Transformer): V3d {
+  'worklet';
   return {
     ...transformV2d(v3d, transformer),
     z: transformer(v3d.z),
@@ -92,16 +103,19 @@ export function transformV3d(v3d: V3d, transformer: Transformer): V3d {
 }
 
 export function clampV3d(v3d: V3d, min: number, max: number): V3d {
+  'worklet';
   return transformV3d(v3d, (value) => clamp(value, min, max));
 }
 
 // helpers
 
 export function clamp(v: number, min = -1, max = 1): number {
+  'worklet';
   return Math.max(min, Math.min(max, v));
 }
 
 export function degToRad(deg: number): number {
+  'worklet';
   return (deg * Math.PI) / 180;
 }
 

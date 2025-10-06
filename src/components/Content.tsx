@@ -196,6 +196,7 @@ export default function Content({
     const m = rotateV2d(dg, degToRad(-90 * Number(landscape.value)));
     const screen = negateV2dY(m);
     const smoothOffset = { ...scaleV2d(screen, alpha), z: dg.z * alpha };
+    console.log('after scale');
     const smooth = scaleV3d(
       addV3d(scaleV3d(rotation.value, 1 - alpha), smoothOffset),
       scale
