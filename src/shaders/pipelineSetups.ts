@@ -22,13 +22,11 @@ import {
 export const attachBindGroups = (
   pipeline: TgpuRenderPipeline,
   bindGroups: TgpuBindGroup[]
-) => {
-  for (const bindGroup of bindGroups) {
-    pipeline = pipeline.with(bindGroup.layout, bindGroup);
-  }
-
-  return pipeline;
-};
+) =>
+  bindGroups.reduce(
+    (acc, bindGroup) => acc.with(bindGroup.layout, bindGroup),
+    pipeline
+  );
 
 export const blend: GPUBlendState = {
   color: {

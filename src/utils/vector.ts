@@ -49,9 +49,18 @@ export function transformV2d({ x, y }: V2d, transformer: Transformer): V2d {
   };
 }
 
-export function clampV2d(v2d: V3d, min: number, max: number): V2d {
+export function clampV2d(v2d: V2d, min: number, max: number): V2d {
   'worklet';
   return transformV2d(v2d, (value) => clamp(value, min, max));
+}
+
+export function round2D(v2d: V2d): V2d {
+  'worklet';
+  return transformV2d(v2d, (value) => Math.round(value));
+}
+
+export function areV2dEqual(a: V2d, b: V2d): boolean {
+  return a.x === b.x && a.y === b.y;
 }
 
 export const zeroV2d = { x: 0, y: 0 };
@@ -91,6 +100,7 @@ export function subtractV3d(a: V3d, b: V3d): V3d {
 }
 
 export function componentsFromV3d({ x, y, z }: V3d): [number, number, number] {
+  'worklet';
   return [x, y, z];
 }
 
