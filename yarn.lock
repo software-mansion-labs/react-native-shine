@@ -12059,6 +12059,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-reanimated@npm:^4.1.3":
+  version: 4.1.3
+  resolution: "react-native-reanimated@npm:4.1.3"
+  dependencies:
+    react-native-is-edge-to-edge: ^1.2.1
+    semver: 7.7.2
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+    react: "*"
+    react-native: "*"
+    react-native-worklets: ">=0.5.0"
+  checksum: 5f3b7298dd721b5da7f8bab64c557624d08b8715502f4ba2ff9118f31d852e3d9734ffbfaacd1302468ba68d4790689eead39605645a80f737802c8de0008064
+  languageName: node
+  linkType: hard
+
 "react-native-shine-example@workspace:example":
   version: 0.0.0-use.local
   resolution: "react-native-shine-example@workspace:example"
@@ -12109,10 +12124,10 @@ __metadata:
     react-native: 0.79.5
     react-native-builder-bob: ^0.40.13
     react-native-orientation-locker: ^1.7.0
-    react-native-reanimated: ^4.0.1
+    react-native-reanimated: ^4.1.3
     react-native-view-shot: ^4.0.3
     react-native-wgpu: ^0.2.8
-    react-native-worklets: ^0.4.1
+    react-native-worklets: ^0.5.1
     release-it: ^17.10.0
     typegpu: ^0.7.1
     typescript: ^5.8.3
@@ -12120,9 +12135,9 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-    react-native-reanimated: ^4.0.1
+    react-native-reanimated: ^4.1.3
     react-native-wgpu: ^0.2.8
-    react-native-worklets: ^0.4.1
+    react-native-worklets: ^0.5.1
     typegpu: ^0.7.1
   languageName: unknown
   linkType: soft
@@ -12187,6 +12202,29 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 2259a11afdf3d480b69e96ce4630869a9131bf01242bd1cf599365cbcde87eab234c3e4827313b63e90675213eed3f2267ee4d1c970b3929befdf9b93732b7e7
+  languageName: node
+  linkType: hard
+
+"react-native-worklets@npm:^0.5.1":
+  version: 0.5.1
+  resolution: "react-native-worklets@npm:0.5.1"
+  dependencies:
+    "@babel/plugin-transform-arrow-functions": ^7.0.0-0
+    "@babel/plugin-transform-class-properties": ^7.0.0-0
+    "@babel/plugin-transform-classes": ^7.0.0-0
+    "@babel/plugin-transform-nullish-coalescing-operator": ^7.0.0-0
+    "@babel/plugin-transform-optional-chaining": ^7.0.0-0
+    "@babel/plugin-transform-shorthand-properties": ^7.0.0-0
+    "@babel/plugin-transform-template-literals": ^7.0.0-0
+    "@babel/plugin-transform-unicode-regex": ^7.0.0-0
+    "@babel/preset-typescript": ^7.16.7
+    convert-source-map: ^2.0.0
+    semver: 7.7.2
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+    react: "*"
+    react-native: "*"
+  checksum: 5ab09d00f20f621779258ee2e18e825404920cacb6da3b68be29d99cc7daa8f0d402eb6b9a77bde7fe891e98d251cfc51023fb53922a3d04f9e9e341c99feeb0
   languageName: node
   linkType: hard
 
