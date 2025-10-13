@@ -81,6 +81,7 @@
     "jest": "^29.7.0",
     "prettier": "^3.0.3",
     "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-native": "0.79.5",
     "react-native-builder-bob": "^0.40.13",
     "react-native-reanimated": "^4.0.1",

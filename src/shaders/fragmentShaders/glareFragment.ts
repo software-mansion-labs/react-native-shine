@@ -135,8 +135,9 @@ export const newGlareFragment = tgpu['~unstable'].fragmentFn({
   const overlaidRGB = overlayChannels(chromaMixed, glareLayer);
   const finalRGB = std.mix(chromaMixed, overlaidRGB, d.vec3f(maskedGlow));
 
-  // Optional mild safety clamp to avoid NaNs/overflow artifacts.
   const outRGB = std.clamp(finalRGB, d.vec3f(0.0), d.vec3f(1.0));
+
+  // if (maskedGlow > 0.6) return d.vec4f(0.0, 0.0, 0.0, 0.0);
 
   return d.vec4f(outRGB, color.w);
 });

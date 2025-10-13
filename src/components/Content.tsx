@@ -138,14 +138,14 @@ export default function Content({
   //TODO: add once again, when the wgpu issues are fixed :3
 
   const animatedStyle = useAnimatedStyle(() => {
-    // const rotX = rotationShared.value.x * 10;
-    // const rotY = rotationShared.value.y * 10;
+    const rotX = rotation.value.x * 10;
+    const rotY = rotation.value.y * 10;
 
     return {
       transform: [
         { perspective: 300 },
-        // { rotateX: `${-rotX}deg` },
-        // { rotateY: `${rotY}deg` },
+        { rotateX: `${-rotY}deg` },
+        { rotateY: `${rotX}deg` },
         // { rotateZ: `${rotX * 5}deg` },
       ],
     };

@@ -17,7 +17,7 @@ export default function App() {
   const orientation = useOrientation();
   const touchPosition = useSharedValue<V2d>(zeroV2d);
   const rotation = useRef<number>(0);
-  const nh = 0.5;
+  const nh = 0.4;
   const nw = nh;
 
   const currentImage = dedenne;
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   },
   containerColor: {
     // backgroundColor: '#ae78aeff',
-    backgroundColor: '#2c2c2c',
+    // backgroundColor: '#2c2c2c',
   },
   text: {
     color: '#FFFFFF',

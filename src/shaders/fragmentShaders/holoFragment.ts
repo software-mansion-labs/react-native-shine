@@ -14,16 +14,12 @@ export const holoFragment = tgpu['~unstable'].fragmentFn({
 })((input) => {
   const texcoord = d.vec2f(input.uv.x, 1.0 - input.uv.y);
   const uv = texcoord;
-  const centeredCoords = std.sub(std.mul(uv, 2.0), 1.0);
-
   const textureColor = std.textureSample(
     textureBindGroupLayout.$.texture,
     textureBindGroupLayout.$.sampler,
     texcoord
   );
-
   const rot = rotationBindGroupLayout.$.vec;
-  const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y));
 
   const wave = waveCallbackSlot.$(rot.xy);
   const waveX = wave.x;
@@ -31,15 +27,9 @@ export const holoFragment = tgpu['~unstable'].fragmentFn({
 
   const band = std.add(0.2 * waveX * uv.x, 2 * waveY * uv.y);
 
-  const dist = std.distance(centeredCoords, center);
-  // const intensity = std.clamp(1.0 - dist, 0.0, 1.0);
-  // const falloff = std.pow(std.exp(-dist), 1.0 / intensity);
-
   const hueAngle = std.mul(std.abs(band), (10 * Math.PI * rot.x) / 3);
   const rainbowColor = hueShift(d.vec3f(1.0, 1.0, 1.0), hueAngle);
-  // const finalColor = std.mul(rainbowColor, falloff);
   const finalColor = std.mul(rainbowColor, 1.0);
 
-  // return d.vec4f(finalColor, 1 - falloff * dist * textureColor.w);
-  return d.vec4f(finalColor, 1.0 * (0.2 + std.max(0.5, dist)) * textureColor.w);
+  return d.vec4f(finalColor, 0.7 * textureColor.w);
 });
