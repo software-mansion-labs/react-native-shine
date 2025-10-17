@@ -12044,21 +12044,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:^4.0.1":
-  version: 4.1.2
-  resolution: "react-native-reanimated@npm:4.1.2"
-  dependencies:
-    react-native-is-edge-to-edge: ^1.2.1
-    semver: 7.7.2
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-    react: "*"
-    react-native: "*"
-    react-native-worklets: ">=0.5.0"
-  checksum: 681a7e6266fdc44a8bacc88bcce0e7539d851cd30d1f9e7e0ddfb6fc841053e0612182d592a2989b04168042232e62f1560c9d663ad692ef7cd51150a8726c89
-  languageName: node
-  linkType: hard
-
 "react-native-reanimated@npm:^4.1.3":
   version: 4.1.3
   resolution: "react-native-reanimated@npm:4.1.3"
@@ -12087,12 +12072,12 @@ __metadata:
     react-native: 0.81.4
     react-native-builder-bob: ^0.40.13
     react-native-monorepo-config: ^0.1.9
-    react-native-reanimated: ^4.0.1
+    react-native-reanimated: ^4.1.3
     react-native-view-shot: ^4.0.3
     react-native-web: ^0.21.0
     react-native-wgpu: ^0.2.8
-    react-native-worklets: ^0.4.1
-    typegpu: ^0.7.1
+    react-native-worklets: ^0.5.1
+    typegpu: 0.8.0-alpha.1
   languageName: unknown
   linkType: soft
 
@@ -12129,16 +12114,16 @@ __metadata:
     react-native-wgpu: ^0.2.8
     react-native-worklets: ^0.5.1
     release-it: ^17.10.0
-    typegpu: ^0.7.1
+    typegpu: 0.8.0-alpha.1
     typescript: ^5.8.3
-    unplugin-typegpu: ^0.2.2
+    unplugin-typegpu: 0.8.0-alpha.1
   peerDependencies:
     react: "*"
     react-native: "*"
     react-native-reanimated: ^4.1.3
     react-native-wgpu: ^0.2.8
     react-native-worklets: ^0.5.1
-    typegpu: ^0.7.1
+    typegpu: 0.8.0-alpha.1
   languageName: unknown
   linkType: soft
 
@@ -12180,28 +12165,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 09e5a06339bee90754c3d4394fe68295509e6bff85d2a0de360f9a252ebae0988ee854527e9c22d83b9be7121becb925e3b8a37e3f475a524cee4c69cb445083
-  languageName: node
-  linkType: hard
-
-"react-native-worklets@npm:^0.4.1":
-  version: 0.4.2
-  resolution: "react-native-worklets@npm:0.4.2"
-  dependencies:
-    "@babel/plugin-transform-arrow-functions": ^7.0.0-0
-    "@babel/plugin-transform-class-properties": ^7.0.0-0
-    "@babel/plugin-transform-classes": ^7.0.0-0
-    "@babel/plugin-transform-nullish-coalescing-operator": ^7.0.0-0
-    "@babel/plugin-transform-optional-chaining": ^7.0.0-0
-    "@babel/plugin-transform-shorthand-properties": ^7.0.0-0
-    "@babel/plugin-transform-template-literals": ^7.0.0-0
-    "@babel/plugin-transform-unicode-regex": ^7.0.0-0
-    "@babel/preset-typescript": ^7.16.7
-    convert-source-map: ^2.0.0
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-    react: "*"
-    react-native: "*"
-  checksum: 2259a11afdf3d480b69e96ce4630869a9131bf01242bd1cf599365cbcde87eab234c3e4827313b63e90675213eed3f2267ee4d1c970b3929befdf9b93732b7e7
   languageName: node
   linkType: hard
 
@@ -14023,13 +13986,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typegpu@npm:^0.7.1":
-  version: 0.7.1
-  resolution: "typegpu@npm:0.7.1"
+"typegpu@npm:0.8.0-alpha.1":
+  version: 0.8.0-alpha.1
+  resolution: "typegpu@npm:0.8.0-alpha.1"
   dependencies:
     tinyest: ~0.1.1
     typed-binary: ^4.3.1
-  checksum: 8c628b3fa3bd3e649c3a7c67d401c423c2163636cdea08a200c17c28e2effc06d6f000eda56686cc12491b91342a33ded2cfef7b60aa25be235ca0bca01120cc
+  checksum: bb4d7dee47005a6ce48c5e3420c2218fca54e2f555afcf75df6b56d1fe52714bce8781364e10460466f07bdf8bd0420d47ed38910380e5bed84ed91a3371a86f
   languageName: node
   linkType: hard
 
@@ -14190,9 +14153,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unplugin-typegpu@npm:^0.2.2":
-  version: 0.2.2
-  resolution: "unplugin-typegpu@npm:0.2.2"
+"unplugin-typegpu@npm:0.8.0-alpha.1":
+  version: 0.8.0-alpha.1
+  resolution: "unplugin-typegpu@npm:0.8.0-alpha.1"
   dependencies:
     "@babel/standalone": ^7.27.0
     defu: ^6.1.4
@@ -14204,8 +14167,8 @@ __metadata:
     tinyest-for-wgsl: ~0.1.2
     unplugin: ^2.3.5
   peerDependencies:
-    typegpu: ^0.7.0
-  checksum: fd0de3a0948761bb789bf2ff7e11609522647d4eb98541bd3a7c27f4708f3e6aedd5e0e47c2bf08faaf9c9edc67ab51f6977b14703ed3c07d4a24ec741e38dba
+    typegpu: ^0.8.0
+  checksum: a177aa78e23b32f30b9745459b5cd709206e89aad8863a36178d9ecfa7b05bef12c8996e494278d786f51078a16bdf887434fcc99afeb74ba74edf865dc51eac
   languageName: node
   linkType: hard
 

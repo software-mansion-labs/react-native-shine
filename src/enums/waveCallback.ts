@@ -4,7 +4,7 @@ import * as d from 'typegpu/data';
 
 export const WAVE_CALLBACKS = {
   default: (pos: d.v2f) => {
-    'kernel';
+    'use gpu';
 
     const x = pos.x;
     const y = pos.y;
