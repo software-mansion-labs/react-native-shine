@@ -83,7 +83,7 @@ export default function Index() {
       }}
     >
       <Shine
-        imageURI="https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/dp7/dp7-101.png?signature=1354344def4514e05080d064310884cdd6a27ef93692d9656eda9ae84ae1b2e1"
+        imageURI="https://example.com/card_image.png"
         width={300}
         height={400}
       />
@@ -92,7 +92,7 @@ export default function Index() {
 }
 ```
 
-For more thorough usage examples and docs click [here](https://github.com/wojtus7/react-native-shine/blob/main/USAGE.md)
+For more thorough usage examples and docs click [here](https://github.com/software-mansion-labs/react-native-shine/blob/main/USAGE.md)
 
 ---
 
@@ -152,10 +152,10 @@ can help you build your next dream product –
 <!-- automd:contributors author="software-mansion" -->
 
 Made by [@software-mansion](https://github.com/software-mansion) and
-[community](https://github.com/wojtus7/react-native-shine/graphs/contributors) 💛
+[community](https://github.com/software-mansion-labs/react-native-shine/graphs/contributors) 💛
 <br><br>
-<a href="https://github.com/wojtus7/react-native-shine/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=wojtus7/react-native-shine" />
+<a href="https://github.com/software-mansion-labs/react-native-shine/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=software-mansion-labs/react-native-shine" />
 </a>
 
 <!-- /automd -->
