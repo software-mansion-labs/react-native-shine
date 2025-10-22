@@ -11,7 +11,6 @@ import {
   type V2d,
   zeroV2d,
 } from 'react-native-shine';
-import { dedenne, dedenneFoilHolo } from './img';
 
 export default function App() {
   const orientation = useOrientation();
@@ -19,9 +18,6 @@ export default function App() {
   const rotation = useRef<number>(0);
   const nh = 0.4;
   const nw = nh;
-
-  const currentImage = dedenne;
-  const currentMask = dedenneFoilHolo;
 
   const [glareOptions /*setGlareOptions*/] = useState({
     glowPower: 0.9,
@@ -46,12 +42,11 @@ export default function App() {
         styles.containerColor,
       ]}
     >
-      <Shine
+      {/* <Shine
         width={734 * nw}
         height={1024 * nh}
         imageURI={
-          // 'https://assets.pkmn.gg/fit-in/600x836/filters:format(webp)/images/cards/sm115/sm115-007.png?signature=d614178b139f5ebebe4d0009310f1b76678b6d3924c7218e28bf61d139097482'
-          currentImage
+          // 'imgsrc'
         }
         colorMaskOptions={{
           baseColor: [0, 0, 0],
@@ -62,10 +57,9 @@ export default function App() {
         addReverseHolo={true}
         addTextureMask={true}
         glareOptions={glareOptions}
-        maskURI={currentMask}
         useTouchControl={true}
         touchPosition={touchPosition}
-      />
+      /> */}
       <ShineGroup
         glareOptions={glareOptions}
         // addHolo={true}

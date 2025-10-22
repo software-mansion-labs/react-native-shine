@@ -72,30 +72,6 @@ Used to control the effects based on user input rather than gravity vector:
 
 ## Additive Visual Effect Comparison
 
-#### No effects
-
-<img src="/example/assets/dedenne_pokemon.png" alt="img_glare" width="300"/>
-
-#### +Glare
-
-<img src="/example/assets/glare_ex.png" alt="img_glare" width="300"/>
-
-#### +Texture Mask
-
-<img src="/example/assets/texture_mask_ex.png" alt="img_glare" width="300"/>
-
-#### +Reverse holo
-
-<img src="/example/assets/reverse_holo_ex.png" alt="img_glare" width="300"/>
-
-#### +Holo
-
-<img src="/example/assets/holo_ex.png" alt="img_glare" width="300"/>
-
-#### +Color Mask
-
-<img src="/example/assets/color_mask_ex.png" alt="img_glare" width="300"/>
-
 ## Usage Example
 
 ```tsx
