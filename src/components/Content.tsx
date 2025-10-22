@@ -237,7 +237,15 @@ export default function Content({
     const sampler = device.createSampler({
       magFilter: 'linear',
       minFilter: 'linear',
+      mipmapFilter: 'linear',
     });
+
+    // TODO: revert to this one after version bump
+    // const sampler = root['~unstable'].createSampler({
+    //   magFilter: 'linear',
+    //   minFilter: 'linear',
+    //   mipmapFilter: 'linear',
+    // }) as any as GPUSampler; //TODO: delete this cast when TgpuFixedSampler gets exposed
 
     const imageTextureBindGroup = root.createBindGroup(textureBindGroupLayout, {
       texture: root.unwrap(imageTexture).createView(),
@@ -385,11 +393,7 @@ export default function Content({
       >
         <Canvas
           ref={ref}
-          style={[
-            { width, height },
-            // aspectRatio: pixelWidth / pixelHeight,
-            // { transform: [{ scaleX: 1 / dpr }, { scaleY: 1 / dpr }] },
-          ]}
+          style={[{ width, height }]}
           transparent={Platform.OS === 'ios'}
           // transparent={true}
         />
@@ -397,7 +401,3 @@ export default function Content({
     </Animated.View>
   );
 }
-
-// const styles = StyleSheet.create({
-//   container: { overflow: 'hidden' },
-// });

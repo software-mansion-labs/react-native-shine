@@ -7,13 +7,12 @@ export const createTexture = async (
     width: number;
     height: number;
   }
+  //TODO: check why the error message screams about 'texture_2d' and 'texture_multisampled_2d'
 ): Promise<TgpuTexture> => {
-  const texture = root['~unstable']
-    .createTexture({
-      size: [size.width, size.height],
-      format: 'rgba8unorm',
-    })
-    .$usage('sampled', 'render');
+  const texture = root['~unstable'].createTexture({
+    size: [size.width, size.height, 1],
+    format: 'rgba8unorm',
+  });
 
   return texture;
 };
@@ -33,10 +32,20 @@ export const loadTexture = async (
 export async function loadBitmap(
   root: TgpuRoot,
   imageURI: string,
-  setTexture: (texture: TgpuTexture<TextureProps>) => void
+  setTexture: (texture: TgpuTexture<TextureProps>) => void,
+  usage: ('sampled' | 'render')[] = ['sampled', 'render']
 ) {
   const bitmap = await getBitmapFromURI(imageURI);
-  const texture = await createTexture(root, bitmap);
+  let texture = await createTexture(root, bitmap);
+  texture = await addTextureUsage(texture, usage);
+
   setTexture(texture);
   await loadTexture(root, bitmap, texture);
+}
+
+export async function addTextureUsage(
+  texture: TgpuTexture,
+  usage: ('sampled' | 'render')[]
+) {
+  return texture.$usage(...usage);
 }

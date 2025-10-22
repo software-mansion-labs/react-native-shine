@@ -3,11 +3,13 @@ import * as d from 'typegpu/data';
 import type { BufferUsageType } from './resourceManagement/bufferManager';
 
 export const textureBindGroupLayout = tgpu.bindGroupLayout({
+  // texture: { texture: d.texture2d(d.f32) } //TODO: revert this change after bumping typegpu version (currently there is a bug with texture formats)
   texture: { texture: 'float', dimension: '2d', sampleType: 'float' },
   sampler: { sampler: 'filtering' },
 });
 
 export const maskTextureBindGroupLayout = tgpu.bindGroupLayout({
+  // texture: { texture: d.texture2d(d.f32) }, //TODO: same as above
   texture: { texture: 'float', dimension: '2d', sampleType: 'float' },
   sampler: { sampler: 'filtering' },
 });

@@ -12077,7 +12077,7 @@ __metadata:
     react-native-web: ^0.21.0
     react-native-wgpu: ^0.2.8
     react-native-worklets: ^0.5.1
-    typegpu: 0.8.0-alpha.1
+    typegpu: 0.7.1
   languageName: unknown
   linkType: soft
 
@@ -12114,9 +12114,9 @@ __metadata:
     react-native-wgpu: ^0.2.8
     react-native-worklets: ^0.5.1
     release-it: ^17.10.0
-    typegpu: 0.8.0-alpha.1
+    typegpu: 0.7.1
     typescript: ^5.8.3
-    unplugin-typegpu: 0.8.0-alpha.1
+    unplugin-typegpu: 0.2.2
   peerDependencies:
     react: "*"
     react-native: "*"
@@ -13986,13 +13986,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typegpu@npm:0.8.0-alpha.1":
-  version: 0.8.0-alpha.1
-  resolution: "typegpu@npm:0.8.0-alpha.1"
+"typegpu@npm:0.7.1":
+  version: 0.7.1
+  resolution: "typegpu@npm:0.7.1"
   dependencies:
     tinyest: ~0.1.1
     typed-binary: ^4.3.1
-  checksum: bb4d7dee47005a6ce48c5e3420c2218fca54e2f555afcf75df6b56d1fe52714bce8781364e10460466f07bdf8bd0420d47ed38910380e5bed84ed91a3371a86f
+  checksum: 8c628b3fa3bd3e649c3a7c67d401c423c2163636cdea08a200c17c28e2effc06d6f000eda56686cc12491b91342a33ded2cfef7b60aa25be235ca0bca01120cc
   languageName: node
   linkType: hard
 
@@ -14153,9 +14153,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unplugin-typegpu@npm:0.8.0-alpha.1":
-  version: 0.8.0-alpha.1
-  resolution: "unplugin-typegpu@npm:0.8.0-alpha.1"
+"unplugin-typegpu@npm:0.2.2":
+  version: 0.2.2
+  resolution: "unplugin-typegpu@npm:0.2.2"
   dependencies:
     "@babel/standalone": ^7.27.0
     defu: ^6.1.4
@@ -14167,8 +14167,8 @@ __metadata:
     tinyest-for-wgsl: ~0.1.2
     unplugin: ^2.3.5
   peerDependencies:
-    typegpu: ^0.8.0
-  checksum: a177aa78e23b32f30b9745459b5cd709206e89aad8863a36178d9ecfa7b05bef12c8996e494278d786f51078a16bdf887434fcc99afeb74ba74edf865dc51eac
+    typegpu: ^0.7.0
+  checksum: fd0de3a0948761bb789bf2ff7e11609522647d4eb98541bd3a7c27f4708f3e6aedd5e0e47c2bf08faaf9c9edc67ab51f6977b14703ed3c07d4a24ec741e38dba
   languageName: node
   linkType: hard
 

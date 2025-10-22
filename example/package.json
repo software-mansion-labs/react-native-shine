@@ -20,7 +20,7 @@
     "react-native-web": "^0.21.0",
     "react-native-wgpu": "^0.2.8",
     "react-native-worklets": "^0.5.1",
-    "typegpu": "0.8.0-alpha.1"
+    "typegpu": "0.7.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
