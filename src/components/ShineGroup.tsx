@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   type LayoutChangeEvent,
-  Image,
   PixelRatio,
 } from 'react-native';
 import ViewShot, { captureRef } from 'react-native-view-shot';
@@ -66,14 +65,12 @@ export function ShineGroup({
 
   return (
     <View style={styles.container}>
-      <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1 }}>
-        <View onLayout={onInnerLayout} style={styles.inner}>
-          {children}
-        </View>
-      </ViewShot>
-
-      {capturedURI && size && (
-        <Image src={capturedURI} {...sizeFromV2d(size)} />
+      {!capturedURI && (
+        <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1 }}>
+          <View onLayout={onInnerLayout} style={styles.inner}>
+            {children}
+          </View>
+        </ViewShot>
       )}
 
       {capturedURI && size && (
