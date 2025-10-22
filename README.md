@@ -54,23 +54,12 @@ npx install-peerdeps react-native-shine
 
 ---
 
-### Update Your `babel.config.js`
-
-For this library to work, you need to add the `unplugin-typegpu/babel` plugin. It comes bundled as a dependency, so you just need to add it in your Babel config.
-
-```js
-plugins: ['unplugin-typegpu/babel'];
-```
-
-For additional instructions, please follow the [TypeGPU Unplugin docs](https://docs.swmansion.com/TypeGPU/tooling/unplugin-typegpu/).
-
----
-
 ## 📋 Requirements
 
 - React Native ≥ 0.71
 - `react-native-reanimated` ≥ 4.0.0
 - `react-native-webgpu` ≥ 0.2.0
+- `typegpu` ~= 0.7.1
 - WebGPU-compatible device/emulator
 
 > [!NOTE]
