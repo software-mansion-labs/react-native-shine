@@ -66,7 +66,7 @@ export const createMaskPipeline = (
   root: TgpuRoot,
   maskTexture: TgpuTexture | undefined,
   bindGroups: TgpuBindGroup[],
-  sampler: GPUSampler,
+  sampler: GPUSampler, //TODO: change GPUSampler to TgpuFixedSampler when this type gets exposed
   presentationFormat: GPUTextureFormat
 ): TgpuRenderPipeline | void => {
   if (!maskTexture) return;
