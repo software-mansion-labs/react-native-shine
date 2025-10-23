@@ -11,6 +11,7 @@ import {
   type V2d,
   zeroV2d,
 } from 'react-native-shine';
+import { tree_img } from './img';
 
 export default function App() {
   const orientation = useOrientation();
@@ -40,26 +41,24 @@ export default function App() {
       style={[
         orientation === 'PORTRAIT' ? styles.containerCol : styles.containerRow,
         styles.containerColor,
+        { backgroundColor: '#2c2c2c' },
       ]}
     >
-      {/* <Shine
+      <Shine
         width={734 * nw}
         height={1024 * nh}
-        imageURI={
-          // 'imgsrc'
-        }
-        colorMaskOptions={{
-          baseColor: [0, 0, 0],
-          // baseColor: [200, 110, 70],
-          rgbToleranceRange: { upper: [75, 80, 80] },
-        }}
-        addHolo={true} //change how holo effect works (not really a holo rn, should be global for the card too)
+        imageURI={tree_img}
+        maskURI={tree_img}
+        addHolo={true}
         addReverseHolo={true}
-        addTextureMask={true}
         glareOptions={glareOptions}
         useTouchControl={true}
         touchPosition={touchPosition}
-      /> */}
+        colorMaskOptions={{
+          baseColor: [80, 80, 80],
+          rgbToleranceRange: { lower: [30, 30, 30], upper: [40, 40, 40] },
+        }}
+      />
       <ShineGroup
         glareOptions={glareOptions}
         // addHolo={true}

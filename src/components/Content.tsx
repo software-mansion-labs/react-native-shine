@@ -75,7 +75,6 @@ export interface SharedProps {
   colorMaskOptions?: DeepPartiallyOptional<ColorMask, 'baseColor'>;
   useTouchControl?: boolean;
   touchPosition?: SharedValue<V2d>;
-  addTextureMask?: boolean;
   addReverseHolo?: boolean;
   addHolo?: boolean;
 }
@@ -97,7 +96,6 @@ interface PipelineMap {
 export default function Content({
   addHolo,
   addReverseHolo,
-  addTextureMask,
   colorMaskOptions,
   glareOptions,
   height,
@@ -344,7 +342,7 @@ export default function Content({
 
       const pairs: PipelineAttachmentPair[] = [[glare, initialAttachment]];
 
-      if (addTextureMask && mask) pairs.push([mask, loadingAttachment]);
+      if (mask) pairs.push([mask, loadingAttachment]);
       if (addReverseHolo && reverseHolo)
         pairs.push([reverseHolo, loadingAttachment]);
       if (addHolo && holo) pairs.push([holo, loadingAttachment]);
@@ -375,29 +373,31 @@ export default function Content({
     colorMaskOptions,
     addHolo,
     addReverseHolo,
-    addTextureMask,
     pixelSize,
   ]);
 
   useAnimationFrame(() => renderRef.current?.());
 
   return (
-    <Animated.View style={[animatedStyle]}>
-      <View
-        style={
-          [
-            // styles.container,
-            // { width, height },
-          ]
-        }
-      >
-        <Canvas
-          ref={ref}
-          style={[{ width, height }]}
-          transparent={Platform.OS === 'ios'}
-          // transparent={true}
-        />
-      </View>
-    </Animated.View>
+    <View
+      style={{
+        transform: [
+          {
+            matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 50, 1],
+          },
+        ],
+      }}
+    >
+      <Animated.View style={[animatedStyle]}>
+        <View>
+          <Canvas
+            ref={ref}
+            style={[{ width, height }]}
+            transparent={Platform.OS === 'ios'}
+            // transparent={true}
+          />
+        </View>
+      </Animated.View>
+    </View>
   );
 }

@@ -31,5 +31,5 @@ export const holoFragment = tgpu['~unstable'].fragmentFn({
   const rainbowColor = hueShift(d.vec3f(1.0, 1.0, 1.0), hueAngle);
   const finalColor = std.mul(rainbowColor, 1.0);
 
-  return d.vec4f(finalColor, 0.7 * textureColor.w);
+  return d.vec4f(finalColor, 0.9 * textureColor.w);
 });

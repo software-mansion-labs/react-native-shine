@@ -29,7 +29,7 @@ const colorMaskFragment = tgpu['~unstable'].fragmentFn({
   if (upperCheck && lowerCheck) {
     return d.vec4f(color.xyz, 0.0);
   }
-  return d.vec4f(1.0);
+  return d.vec4f(color.xyz, color.w);
 });
 
 export default colorMaskFragment;
