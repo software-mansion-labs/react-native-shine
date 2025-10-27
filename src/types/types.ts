@@ -27,6 +27,15 @@ export type ColorMask = {
   };
 };
 
+export type ReverseHoloDetectionChannelFlags = {
+  redChannel: number;
+  greenChannel: number;
+  blueChannel: number;
+  hue: number;
+  saturation: number;
+  value: number;
+};
+
 export type HoloOptions = {
   intensity: number;
   waveCallback: WaveCallbackFn;

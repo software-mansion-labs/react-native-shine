@@ -5,9 +5,9 @@ import {
   textureBindGroupLayout,
   maskTextureBindGroupLayout,
   rotationBindGroupLayout,
-  glareBindGroupLayout,
+  reverseHoloDetectionChannelFlagsBindGroupLayout,
 } from '../bindGroupLayouts';
-import { hueShift } from '../tgpuUtils';
+import { hueShift, rgbToHSV } from '../tgpuUtils';
 
 export const reverseHoloFragment = tgpu['~unstable'].fragmentFn({
   in: { uv: d.vec2f },
@@ -20,13 +20,26 @@ export const reverseHoloFragment = tgpu['~unstable'].fragmentFn({
   const rot = rotationBindGroupLayout.$.vec;
   const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y)); // center from device orientation/touch
 
-  const opts = glareBindGroupLayout.$.glareOptions;
+  // glare options---------------------------------
+  const opts = reverseHoloDetectionChannelFlagsBindGroupLayout.$.glareOptions;
   const glareIntensity = opts.glareIntensity;
   const glowPower = opts.glowPower;
   const hueBlendPower = opts.hueBlendPower;
   const hueShiftAngleMin = opts.hueShiftAngleMin;
   const hueShiftAngleMax = opts.hueShiftAngleMax;
   const lightIntensity = opts.lightIntensity;
+  //-----------------------------------------------
+
+  // detection channel flags-----------------------
+  const detectionChannelFlags =
+    reverseHoloDetectionChannelFlagsBindGroupLayout.$.channelFlags;
+  const redChannelFlag = detectionChannelFlags.redChannel;
+  const greenChannelFlag = detectionChannelFlags.greenChannel;
+  const blueChannelFlag = detectionChannelFlags.blueChannel;
+  const hueFlag = detectionChannelFlags.hue;
+  const saturationFlag = detectionChannelFlags.saturation;
+  const valueFlag = detectionChannelFlags.value;
+  //------------------------------------------------
 
   const cardColor = std.textureSample(
     textureBindGroupLayout.$.texture,
@@ -49,9 +62,25 @@ export const reverseHoloFragment = tgpu['~unstable'].fragmentFn({
   const influence = std.smoothstep(0.0, 1.0, scaledRadial);
   const curvePower = std.clamp(glowPower, 0.05, 64.0);
   const glowMask = std.pow(influence, std.div(1.0, curvePower));
+  const holoMaskColorHSV = rgbToHSV(holoMaskColor.xyz);
+
+  const rgbSelection = d.vec3f(
+    redChannelFlag,
+    greenChannelFlag,
+    blueChannelFlag
+  );
+  const channelFactor = std.dot(holoMaskColor.xyz, rgbSelection);
+
+  const hsvSelection = d.vec3f(hueFlag, saturationFlag, valueFlag);
+  const channelFactorHSV = std.dot(holoMaskColorHSV.xyz, hsvSelection);
+  //TODO: delete this combination to have separate RGB and HSV controls,
+  //      maybe add weights later or choice of combination method
+  const channelFactorCombined = std.mix(channelFactor, channelFactorHSV, 0.0);
 
   const holoFactor =
-    (1.0 - holoMaskColor.x) * holoMaskColor.w * std.pow(scaledRadial, 1.5);
+    (1.0 - channelFactorCombined) *
+    holoMaskColor.w *
+    std.pow(scaledRadial, 1.5);
 
   const maskedGlow = std.mul(glowMask, holoFactor); // only affect masked areas
 

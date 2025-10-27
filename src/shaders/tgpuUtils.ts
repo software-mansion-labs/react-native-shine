@@ -33,6 +33,46 @@ export const hueShift = tgpu.fn(
   return d.vec3f(r, g, b);
 });
 
+export const rgbToHSV = tgpu.fn(
+  [d.vec3f],
+  d.vec3f
+)((rgb) => {
+  const cMax = std.max(std.max(rgb.x, rgb.y), rgb.z);
+  const cMin = std.min(std.min(rgb.x, rgb.y), rgb.z);
+  const delta = std.sub(cMax, cMin);
+
+  const hueDeltaZero = d.f32(0.0);
+  const hueRmax = d.f32(60.0) * fmod((rgb.y - rgb.z) / delta, d.f32(6.0));
+  const hueGmax = d.f32(60.0) * ((rgb.z - rgb.x) / delta + d.f32(2.0));
+  const hueBmax = d.f32(60.0) * ((rgb.x - rgb.y) / delta + d.f32(4.0));
+
+  let hue = std.select(
+    hueDeltaZero,
+    hueRmax,
+    cMax === rgb.x && delta !== d.f32(0.0)
+  );
+  hue = std.select(hue, hueGmax, cMax === rgb.y && delta !== d.f32(0.0));
+  hue = std.select(hue, hueBmax, cMax === rgb.z && delta !== d.f32(0.0));
+  hue = std.select(hue, d.f32(0.0), delta === d.f32(0.0));
+
+  hue = std.mod(hue, d.f32(360.0));
+  const saturation = std.select(delta / cMax, d.f32(0.0), cMax === d.f32(0.0));
+  const value = cMax;
+
+  return d.vec3f(hue, saturation, value);
+});
+
+export const fmod = tgpu.fn(
+  [d.f32, d.f32],
+  d.f32
+)((number, md) => {
+  const dv = std.div(number, md);
+  const val = std.mul(md, std.floor(dv));
+  const c = std.sub(number, val);
+
+  return c;
+});
+
 export const glareColorShift = tgpu.fn(
   [d.vec3f, d.f32],
   d.vec3f

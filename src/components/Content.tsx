@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { PixelRatio, Platform, View } from 'react-native';
+import { PixelRatio, View } from 'react-native';
 import Animated, {
   SensorType,
   type SharedValue,
@@ -26,6 +26,7 @@ import { TypedBufferMap } from '../shaders/resourceManagement/bufferManager';
 import {
   createColorMaskBindGroup,
   createGlareBindGroup,
+  createReverseHoloDetectionChannelFlagsBindGroup,
   createRotationValuesBindGroup,
 } from '../shaders/bindGroupUtils';
 import colorMaskFragment from '../shaders/fragmentShaders/colorMaskFragment';
@@ -46,11 +47,13 @@ import type {
   DeepPartiallyOptional,
   GlareOptions,
   PipelineAttachmentPair,
+  ReverseHoloDetectionChannelFlags,
 } from '../types/types';
 import {
   colorMaskToTyped,
   createColorMask,
   createGlareOptions,
+  createReverseHoloDetectionChannelFlags,
 } from '../types/typeUtils';
 import type { V2d, V3d } from '../types/vector';
 import {
@@ -76,7 +79,9 @@ export interface SharedProps {
   useTouchControl?: boolean;
   touchPosition?: SharedValue<V2d>;
   addReverseHolo?: boolean;
+  reverseHoloDetectionChannelOptions?: Partial<ReverseHoloDetectionChannelFlags>;
   addHolo?: boolean;
+  translateViewIn3d?: boolean;
 }
 
 interface ContentProps extends SharedProps {
@@ -96,6 +101,7 @@ interface PipelineMap {
 export default function Content({
   addHolo,
   addReverseHolo,
+  reverseHoloDetectionChannelOptions,
   colorMaskOptions,
   glareOptions,
   height,
@@ -105,6 +111,7 @@ export default function Content({
   touchPosition,
   useTouchControl,
   width,
+  translateViewIn3d = false,
 }: ContentProps) {
   const { device } = root;
   const { ref, context } = useGPUContext();
@@ -144,7 +151,6 @@ export default function Content({
         { perspective: 300 },
         { rotateX: `${-rotY}deg` },
         { rotateY: `${rotX}deg` },
-        // { rotateZ: `${rotX * 5}deg` },
       ],
     };
   });
@@ -273,6 +279,18 @@ export default function Content({
     );
     const colorMaskBindGroup = createColorMaskBindGroup(root, colorMaskBuffer);
 
+    const reverseHoloDetectionChannelFlagsBuffer = bufferMap.addBuffer(
+      root,
+      'reverseHoloDetectionChannelFlags',
+      createReverseHoloDetectionChannelFlags(reverseHoloDetectionChannelOptions)
+    );
+    const reverseHoloDetectionChannelFlagsBindGroup =
+      createReverseHoloDetectionChannelFlagsBindGroup(
+        root,
+        reverseHoloDetectionChannelFlagsBuffer,
+        glareBuffer
+      );
+
     const pipelineMap: PipelineMap = {
       glare: attachBindGroups(
         root['~unstable']
@@ -306,7 +324,11 @@ export default function Content({
       reverseHolo: createReverseHoloPipeline(
         root,
         maskTexture,
-        [imageTextureBindGroup, rotationBindGroup, glareBindGroup],
+        [
+          imageTextureBindGroup,
+          rotationBindGroup,
+          reverseHoloDetectionChannelFlagsBindGroup,
+        ],
         sampler,
         presentationFormat
       ),
@@ -360,6 +382,9 @@ export default function Content({
       renderPipelines();
       presentContext();
     };
+
+    // const res = tgpu.resolve({ externals: { reverseHoloFragment } });
+    // console.log('reverseHoloFragment resolve:', res);
   }, [
     device,
     context,
@@ -373,6 +398,7 @@ export default function Content({
     colorMaskOptions,
     addHolo,
     addReverseHolo,
+    reverseHoloDetectionChannelOptions,
     pixelSize,
   ]);
 
@@ -388,14 +414,9 @@ export default function Content({
         ],
       }}
     >
-      <Animated.View style={[animatedStyle]}>
+      <Animated.View style={[translateViewIn3d && animatedStyle]}>
         <View>
-          <Canvas
-            ref={ref}
-            style={[{ width, height }]}
-            transparent={Platform.OS === 'ios'}
-            // transparent={true}
-          />
+          <Canvas ref={ref} style={[{ width, height }]} transparent={true} />
         </View>
       </Animated.View>
     </View>

@@ -11,7 +11,7 @@ import {
   type V2d,
   zeroV2d,
 } from 'react-native-shine';
-import { tree_img } from './img';
+import { watch_img } from './img';
 
 export default function App() {
   const orientation = useOrientation();
@@ -29,6 +29,14 @@ export default function App() {
     hueShiftAngleMax: -1.5,
   });
 
+  //bigger values make the channels less reflective
+  //smaller values make the channels more reflective
+  const [detectionChannelState /*setDetectionChannelState*/] = useState({
+    redChannel: 1.0, //reflect less on red
+    greenChannel: -0.2, //reflect more on green
+    blueChannel: -1.0,
+  });
+
   useFrameCallback(() => {
     touchPosition.value = addV2d(
       zeroV2d,
@@ -41,23 +49,26 @@ export default function App() {
       style={[
         orientation === 'PORTRAIT' ? styles.containerCol : styles.containerRow,
         styles.containerColor,
-        { backgroundColor: '#2c2c2c' },
+        { backgroundColor: '#0a2e3bff' },
       ]}
     >
       <Shine
         width={734 * nw}
         height={1024 * nh}
-        imageURI={tree_img}
-        maskURI={tree_img}
-        addHolo={true}
+        imageURI={watch_img}
+        maskURI={watch_img}
+        // addHolo={true}
         addReverseHolo={true}
+        reverseHoloDetectionChannelOptions={detectionChannelState}
         glareOptions={glareOptions}
         useTouchControl={true}
         touchPosition={touchPosition}
-        colorMaskOptions={{
-          baseColor: [80, 80, 80],
-          rgbToleranceRange: { lower: [30, 30, 30], upper: [40, 40, 40] },
-        }}
+        // colorMaskOptions={
+        //   {
+        // baseColor: [80, 80, 80],
+        // rgbToleranceRange: { lower: [30, 30, 30], upper: [40, 40, 40] },
+        // }
+        // }
       />
       <ShineGroup
         glareOptions={glareOptions}

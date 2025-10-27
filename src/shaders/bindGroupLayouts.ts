@@ -47,6 +47,24 @@ export const colorMaskBindGroupLayout = tgpu.bindGroupLayout({
   mask: { uniform: colorMaskSchema },
 });
 
+export const reverseHoloDetectionChannelFlagsSchema = d.struct({
+  redChannel: d.align(16, d.f32),
+  greenChannel: d.f32,
+  blueChannel: d.f32,
+  hue: d.f32,
+  saturation: d.f32,
+  value: d.f32,
+});
+
+export type ReverseHoloDetectionChannelFlagsSchema =
+  typeof reverseHoloDetectionChannelFlagsSchema;
+
+export const reverseHoloDetectionChannelFlagsBindGroupLayout =
+  tgpu.bindGroupLayout({
+    channelFlags: { uniform: reverseHoloDetectionChannelFlagsSchema },
+    glareOptions: { uniform: glareSchema },
+  });
+
 export const bufferData = {
   rotation: {
     schema: d.vec3f,
@@ -58,6 +76,10 @@ export const bufferData = {
   },
   colorMask: {
     schema: colorMaskSchema,
+    usage: 'uniform',
+  },
+  reverseHoloDetectionChannelFlags: {
+    schema: reverseHoloDetectionChannelFlagsSchema,
     usage: 'uniform',
   },
 } as const satisfies Record<

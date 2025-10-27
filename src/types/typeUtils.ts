@@ -1,10 +1,12 @@
 import { f32, vec2f, vec3f, vec4f } from 'typegpu/data';
+import * as d from 'typegpu/data';
 import type {
   GlareOptions,
   ColorMask,
   DeepPartiallyOptional,
   vec3,
   HoloOptions,
+  ReverseHoloDetectionChannelFlags,
 } from './types';
 import { div } from 'typegpu/std';
 import { WAVE_CALLBACKS } from '../enums/waveCallback';
@@ -85,6 +87,37 @@ export const createHoloOptions = (
   };
 
   return holoOpt;
+};
+
+export const createReverseHoloDetectionChannelFlags = (
+  options?: Partial<ReverseHoloDetectionChannelFlags>
+) => {
+  let channelFlags;
+  if (options) {
+    const { redChannel, greenChannel, blueChannel, hue, saturation, value } =
+      options;
+
+    channelFlags = {
+      redChannel: redChannel ?? d.f32(0.0),
+      greenChannel: greenChannel ?? d.f32(0.0),
+      blueChannel: blueChannel ?? d.f32(0.0),
+      hue: hue ?? d.f32(0.0),
+      saturation: saturation ?? d.f32(0.0),
+      value: value ?? d.f32(0.0),
+    };
+  } else {
+    channelFlags = {
+      redChannel: d.f32(1.0),
+      greenChannel: d.f32(0.0),
+      blueChannel: d.f32(0.0),
+      hue: d.f32(0.0),
+      saturation: d.f32(0.0),
+      value: d.f32(0.0),
+    };
+  }
+
+  console.log('createReverseHoloDetectionChannelFlags:', channelFlags);
+  return channelFlags;
 };
 
 export const numberArrToTyped = (vec: number[]) => {

@@ -8,6 +8,8 @@ import {
   rotationBindGroupLayout,
   type GlareSchema,
   colorMaskSchema,
+  type ReverseHoloDetectionChannelFlagsSchema,
+  reverseHoloDetectionChannelFlagsBindGroupLayout,
 } from './bindGroupLayouts';
 import type {
   GlareOptions,
@@ -68,6 +70,17 @@ export const createColorMaskBindGroup = (
 ) =>
   root.createBindGroup(colorMaskBindGroupLayout, {
     mask: buffer,
+  });
+
+export const createReverseHoloDetectionChannelFlagsBindGroup = (
+  root: TgpuRoot,
+  detectionChannelBuffer: TgpuBuffer<ReverseHoloDetectionChannelFlagsSchema> &
+    UniformFlag,
+  glareOptionsBuffer: TgpuBuffer<GlareSchema> & UniformFlag
+) =>
+  root.createBindGroup(reverseHoloDetectionChannelFlagsBindGroupLayout, {
+    channelFlags: detectionChannelBuffer,
+    glareOptions: glareOptionsBuffer,
   });
 
 // export const crateHoloBuffer = (
