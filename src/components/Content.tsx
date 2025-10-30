@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PixelRatio, View } from 'react-native';
 import Animated, {
   SensorType,
@@ -8,7 +8,11 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated';
-import { Canvas, useGPUContext } from 'react-native-wgpu';
+import {
+  Canvas,
+  type CanvasRef,
+  type RNCanvasContext,
+} from 'react-native-wgpu';
 import * as d from 'typegpu/data';
 import type {
   TextureProps,
@@ -114,7 +118,15 @@ export default function Content({
   translateViewIn3d = false,
 }: ContentProps) {
   const { device } = root;
-  const { ref, context } = useGPUContext();
+  // const { ref, context } = useGPUContext();
+  const ref = useRef<CanvasRef>(null);
+  const [context, setContext] = useState<RNCanvasContext | null>(null);
+  // const context = ref.current!.getContext('webgpu')!;
+
+  useEffect(() => {
+    if (ref) setContext(ref.current?.getContext('webgpu')!);
+  }, [ref]);
+
   const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
   const renderRef = useRef<() => void>(null);
 

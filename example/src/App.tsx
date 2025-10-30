@@ -11,7 +11,7 @@ import {
   type V2d,
   zeroV2d,
 } from 'react-native-shine';
-import { watch_img } from './img';
+import { tree_img } from './img';
 
 export default function App() {
   const orientation = useOrientation();
@@ -21,18 +21,18 @@ export default function App() {
   const nw = nh;
 
   const [glareOptions /*setGlareOptions*/] = useState({
-    glowPower: 0.9,
+    glowPower: 0.7,
     glareIntensity: 0.6,
-    lightIntensity: 0.9,
-    hueBlendPower: 0.3,
-    hueShiftAngleMin: -10,
-    hueShiftAngleMax: -1.5,
+    lightIntensity: 0.6,
+    hueBlendPower: 1.0,
+    hueShiftAngleMin: -Math.PI,
+    hueShiftAngleMax: Math.PI,
   });
 
   //bigger values make the channels less reflective
   //smaller values make the channels more reflective
   const [detectionChannelState /*setDetectionChannelState*/] = useState({
-    redChannel: 1.0, //reflect less on red
+    redChannel: 1.3, //reflect less on red
     greenChannel: -0.2, //reflect more on green
     blueChannel: -1.0,
   });
@@ -40,7 +40,7 @@ export default function App() {
   useFrameCallback(() => {
     touchPosition.value = addV2d(
       zeroV2d,
-      multiplyV2d(angleToV2d((rotation.current += 0.01)), 0.5)
+      multiplyV2d(angleToV2d((rotation.current += 0.025)), 0.5)
     );
   });
 
@@ -55,14 +55,15 @@ export default function App() {
       <Shine
         width={734 * nw}
         height={1024 * nh}
-        imageURI={watch_img}
-        maskURI={watch_img}
+        imageURI={tree_img}
+        maskURI={tree_img}
         // addHolo={true}
         addReverseHolo={true}
         reverseHoloDetectionChannelOptions={detectionChannelState}
         glareOptions={glareOptions}
         useTouchControl={true}
         touchPosition={touchPosition}
+        translateViewIn3d
         // colorMaskOptions={
         //   {
         // baseColor: [80, 80, 80],
@@ -76,7 +77,7 @@ export default function App() {
         useTouchControl={true}
         touchPosition={touchPosition}
       >
-        <View style={{ backgroundColor: 'red' }}>
+        <View style={{ backgroundColor: 'blue' }}>
           <View>
             <Text>some example text inside the inner View</Text>
           </View>
