@@ -18,9 +18,9 @@ const colorMaskFragment = tgpu['~unstable'].fragmentFn({
   const rgbToleranceRange = mask.rgbToleranceRange;
   const useHSV = mask.useHSV;
 
-  // const hueToleranceRange = mask.hueToleranceRange;
-  const hueUpper = mask.hueToleranceAngleUpper;
-  const hueLower = mask.hueToleranceAngleLower;
+  const hueToleranceRange = mask.hueToleranceRange;
+  const hueUpper = hueToleranceRange.upper;
+  const hueLower = hueToleranceRange.lower;
 
   const brightnessTolerance = mask.brightnessTolerance;
   const saturationTolerance = mask.saturationTolerance;

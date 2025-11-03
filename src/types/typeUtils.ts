@@ -55,9 +55,7 @@ export const createColorMask = (
     baseColor,
     rgbToleranceRange,
     useHSV,
-    // hueToleranceRange,
-    hueToleranceAngleLower,
-    hueToleranceAngleUpper,
+    hueToleranceRange,
     brightnessTolerance,
     saturationTolerance,
     lowBrightnessThreshold,
@@ -72,7 +70,7 @@ export const createColorMask = (
     lower: 20,
   };
   const tolerance = { ...baseTolerance, ...rgbToleranceRange };
-  // const hueTolerance = { ...baseHueTolerance, ...hueToleranceRange };
+  const hueTolerance = { ...baseHueTolerance, ...hueToleranceRange };
 
   // TODO: add radian and degree angle handling
   // '123deg' <- interpret as a numeric angle value
@@ -81,8 +79,7 @@ export const createColorMask = (
     baseColor: baseColor,
     rgbToleranceRange: tolerance,
     useHSV: useHSV!!,
-    hueToleranceAngleLower: hueToleranceAngleLower ?? 20,
-    hueToleranceAngleUpper: hueToleranceAngleUpper ?? 20,
+    hueToleranceRange: hueTolerance,
     brightnessTolerance: brightnessTolerance ?? 1.0,
     saturationTolerance: saturationTolerance ?? 1.0,
     lowBrightnessThreshold: lowBrightnessThreshold ?? 0.0,
@@ -100,13 +97,10 @@ export const colorMaskToTyped = (colorMask: ColorMask) => {
       lower: div(numberArrToTyped(colorMask.rgbToleranceRange.lower), 255),
     },
     useHSV: d.u32(colorMask.useHSV ? 1 : 0),
-    // hueToleranceRange: {
-    //   lower: div(f32(colorMask.hueToleranceRange.lower), 360),
-    //   upper: div(f32(colorMask.hueToleranceRange.upper), 360),
-    // },
-    hueToleranceAngleLower: div(f32(colorMask.hueToleranceAngleLower), 360),
-    hueToleranceAngleUpper: div(f32(colorMask.hueToleranceAngleUpper), 360),
-
+    hueToleranceRange: {
+      lower: div(f32(colorMask.hueToleranceRange.lower), 360),
+      upper: div(f32(colorMask.hueToleranceRange.upper), 360),
+    },
     brightnessTolerance: f32(colorMask.brightnessTolerance),
     saturationTolerance: f32(colorMask.saturationTolerance),
     lowSaturationThreshold: f32(colorMask.lowSaturationThreshold),
