@@ -21,6 +21,13 @@ export type GlareOptions = {
 
 export type ColorMask = {
   baseColor: vec3;
+  useHSV?: boolean;
+  hueToleranceAngleLower: number;
+  hueToleranceAngleUpper: number;
+  brightnessTolerance?: number;
+  lowBrightnessThreshold?: number;
+  saturationTolerance?: number;
+  lowSaturationThreshold?: number;
   rgbToleranceRange: {
     upper: vec3;
     lower: vec3;

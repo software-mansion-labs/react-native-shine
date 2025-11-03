@@ -12,6 +12,7 @@ import {
   zeroV2d,
 } from 'react-native-shine';
 import { tree_img } from './img';
+import type { ColorMask, DeepPartiallyOptional } from '../../src/types/types';
 
 export default function App() {
   const orientation = useOrientation();
@@ -23,7 +24,7 @@ export default function App() {
   const [glareOptions /*setGlareOptions*/] = useState({
     glowPower: 0.7,
     glareIntensity: 0.6,
-    lightIntensity: 0.6,
+    lightIntensity: 0.7,
     hueBlendPower: 1.0,
     hueShiftAngleMin: -Math.PI,
     hueShiftAngleMax: Math.PI,
@@ -35,6 +36,16 @@ export default function App() {
     redChannel: 1.3, //reflect less on red
     greenChannel: -0.2, //reflect more on green
     blueChannel: -1.0,
+  });
+
+  const [colorMaskOptions /*setColorMaskOptions*/] = useState<
+    DeepPartiallyOptional<ColorMask, 'baseColor'>
+  >({
+    baseColor: [80, 60, 30],
+    useHSV: true,
+    hueToleranceRange: { upper: 20, lower: 20 },
+    lowBrightnessThreshold: 0.1,
+    lowSaturationThreshold: 0.1,
   });
 
   useFrameCallback(() => {
@@ -59,22 +70,15 @@ export default function App() {
         maskURI={tree_img}
         // addHolo={true}
         addReverseHolo={true}
-        reverseHoloDetectionChannelOptions={detectionChannelState}
-        glareOptions={glareOptions}
-        useTouchControl={true}
+        // reverseHoloDetectionChannelOptions={detectionChannelState}
+        // glareOptions={glareOptions}
         touchPosition={touchPosition}
         translateViewIn3d
-        // colorMaskOptions={
-        //   {
-        // baseColor: [80, 80, 80],
-        // rgbToleranceRange: { lower: [30, 30, 30], upper: [40, 40, 40] },
-        // }
-        // }
+        colorMaskOptions={colorMaskOptions}
       />
-      <ShineGroup
+      {/* <ShineGroup
         glareOptions={glareOptions}
         // addHolo={true}
-        useTouchControl={true}
         touchPosition={touchPosition}
       >
         <View style={{ backgroundColor: 'blue' }}>
@@ -83,7 +87,7 @@ export default function App() {
           </View>
           <Text>some example text outside the inner View</Text>
         </View>
-      </ShineGroup>
+      </ShineGroup> */}
     </View>
   );
 }

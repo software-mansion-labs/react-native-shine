@@ -129,4 +129,8 @@ export function degToRad(deg: number): number {
   return (deg * Math.PI) / 180;
 }
 
+export function createV3d(x: number, y: number, z: number): V3d {
+  return { x: x, y: y, z: z };
+}
+
 export const zeroV3d = { x: 0, y: 0, z: 0 };

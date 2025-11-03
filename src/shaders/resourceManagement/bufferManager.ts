@@ -49,7 +49,12 @@ export class TypedBufferMap<
 
     const { schema, usage } = entry;
     if (this.buffers[key]) {
-      console.warn(`Buffer "${String(key)}" already exists. Skipping...`);
+      console.warn(`Buffer "${String(key)}" already exists.`);
+
+      if (initValues) {
+        (this.buffers[key] as TgpuBuffer<any>).write(initValues);
+        console.log(`Buffer "${String(key)}" updated with new initial values.`);
+      }
       return this.buffers[key]!;
     }
 

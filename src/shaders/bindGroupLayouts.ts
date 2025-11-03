@@ -39,6 +39,13 @@ export const colorMaskSchema = d.struct({
     upper: d.vec3f,
     lower: d.vec3f,
   }),
+  useHSV: d.u32,
+  hueToleranceAngleLower: d.f32,
+  hueToleranceAngleUpper: d.f32,
+  brightnessTolerance: d.f32,
+  saturationTolerance: d.f32,
+  lowSaturationThreshold: d.f32,
+  lowBrightnessThreshold: d.f32,
 });
 
 export type ColorMaskSchema = typeof colorMaskSchema;

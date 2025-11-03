@@ -51,16 +51,42 @@ export const mapToF32 = <T extends Record<string, number>>(
 export const createColorMask = (
   colorMask: DeepPartiallyOptional<ColorMask, 'baseColor'>
 ): ColorMask => {
-  const { baseColor, rgbToleranceRange } = colorMask;
+  const {
+    baseColor,
+    rgbToleranceRange,
+    useHSV,
+    // hueToleranceRange,
+    hueToleranceAngleLower,
+    hueToleranceAngleUpper,
+    brightnessTolerance,
+    saturationTolerance,
+    lowBrightnessThreshold,
+    lowSaturationThreshold,
+  } = colorMask;
   const baseTolerance = {
     upper: [20, 20, 20] as vec3,
     lower: [20, 20, 20] as vec3,
   };
+  const baseHueTolerance = {
+    upper: 20,
+    lower: 20,
+  };
   const tolerance = { ...baseTolerance, ...rgbToleranceRange };
+  // const hueTolerance = { ...baseHueTolerance, ...hueToleranceRange };
 
+  // TODO: add radian and degree angle handling
+  // '123deg' <- interpret as a numeric angle value
+  //     2     <- interpret as a radian value
   const mask: ColorMask = {
     baseColor: baseColor,
     rgbToleranceRange: tolerance,
+    useHSV: useHSV!!,
+    hueToleranceAngleLower: hueToleranceAngleLower ?? 20,
+    hueToleranceAngleUpper: hueToleranceAngleUpper ?? 20,
+    brightnessTolerance: brightnessTolerance ?? 1.0,
+    saturationTolerance: saturationTolerance ?? 1.0,
+    lowBrightnessThreshold: lowBrightnessThreshold ?? 0.0,
+    lowSaturationThreshold: lowSaturationThreshold ?? 0.0,
   };
 
   return mask;
@@ -73,6 +99,18 @@ export const colorMaskToTyped = (colorMask: ColorMask) => {
       upper: div(numberArrToTyped(colorMask.rgbToleranceRange.upper), 255),
       lower: div(numberArrToTyped(colorMask.rgbToleranceRange.lower), 255),
     },
+    useHSV: d.u32(colorMask.useHSV ? 1 : 0),
+    // hueToleranceRange: {
+    //   lower: div(f32(colorMask.hueToleranceRange.lower), 360),
+    //   upper: div(f32(colorMask.hueToleranceRange.upper), 360),
+    // },
+    hueToleranceAngleLower: div(f32(colorMask.hueToleranceAngleLower), 360),
+    hueToleranceAngleUpper: div(f32(colorMask.hueToleranceAngleUpper), 360),
+
+    brightnessTolerance: f32(colorMask.brightnessTolerance),
+    saturationTolerance: f32(colorMask.saturationTolerance),
+    lowSaturationThreshold: f32(colorMask.lowSaturationThreshold),
+    lowBrightnessThreshold: f32(colorMask.lowBrightnessThreshold),
   };
   return result;
 };
@@ -116,7 +154,6 @@ export const createReverseHoloDetectionChannelFlags = (
     };
   }
 
-  console.log('createReverseHoloDetectionChannelFlags:', channelFlags);
   return channelFlags;
 };
 

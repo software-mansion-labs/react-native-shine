@@ -80,7 +80,6 @@ export interface SharedProps {
   height: number;
   glareOptions?: Partial<GlareOptions>;
   colorMaskOptions?: DeepPartiallyOptional<ColorMask, 'baseColor'>;
-  useTouchControl?: boolean;
   touchPosition?: SharedValue<V2d>;
   addReverseHolo?: boolean;
   reverseHoloDetectionChannelOptions?: Partial<ReverseHoloDetectionChannelFlags>;
@@ -113,7 +112,6 @@ export default function Content({
   maskTexture,
   root,
   touchPosition,
-  useTouchControl,
   width,
   translateViewIn3d = false,
 }: ContentProps) {
@@ -179,7 +177,7 @@ export default function Content({
   useDerivedValue(() => {
     'worklet';
 
-    if (useTouchControl) {
+    if (touchPosition) {
       rotation.value = touchPosition
         ? { x: touchPosition.value.x, y: touchPosition.value.y, z: 0 }
         : zeroV3d;
@@ -286,7 +284,9 @@ export default function Content({
       root,
       'colorMask',
       colorMaskToTyped(
-        createColorMask(colorMaskOptions ?? { baseColor: [-20, -20, -20] })
+        createColorMask(
+          colorMaskOptions ?? { baseColor: [-20, -20, -20], useHSV: false }
+        )
       )
     );
     const colorMaskBindGroup = createColorMaskBindGroup(root, colorMaskBuffer);
@@ -389,6 +389,7 @@ export default function Content({
 
     const presentContext = () => context.present();
 
+    // TODO: write new init values to the buffer after reloading if the buffer exists
     renderRef.current = () => {
       modifyBuffers();
       renderPipelines();

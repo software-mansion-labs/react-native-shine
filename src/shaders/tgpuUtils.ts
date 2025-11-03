@@ -33,33 +33,50 @@ export const hueShift = tgpu.fn(
   return d.vec3f(r, g, b);
 });
 
-export const rgbToHSV = tgpu.fn(
+export const rgbToHSV = tgpu['~unstable'].fn(
   [d.vec3f],
   d.vec3f
 )((rgb) => {
-  const cMax = std.max(std.max(rgb.x, rgb.y), rgb.z);
-  const cMin = std.min(std.min(rgb.x, rgb.y), rgb.z);
-  const delta = std.sub(cMax, cMin);
-
-  const hueDeltaZero = d.f32(0.0);
-  const hueRmax = d.f32(60.0) * fmod((rgb.y - rgb.z) / delta, d.f32(6.0));
-  const hueGmax = d.f32(60.0) * ((rgb.z - rgb.x) / delta + d.f32(2.0));
-  const hueBmax = d.f32(60.0) * ((rgb.x - rgb.y) / delta + d.f32(4.0));
-
-  let hue = std.select(
-    hueDeltaZero,
-    hueRmax,
-    cMax === rgb.x && delta !== d.f32(0.0)
+  const K = d.vec4f(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+  const p = std.mix(
+    d.vec4f(rgb.y, rgb.z, K.w, K.z),
+    d.vec4f(rgb.z, rgb.y, K.x, K.y),
+    std.step(rgb.z, rgb.y)
   );
-  hue = std.select(hue, hueGmax, cMax === rgb.y && delta !== d.f32(0.0));
-  hue = std.select(hue, hueBmax, cMax === rgb.z && delta !== d.f32(0.0));
-  hue = std.select(hue, d.f32(0.0), delta === d.f32(0.0));
+  const q = std.mix(
+    d.vec4f(p.x, p.y, p.w, rgb.x),
+    d.vec4f(rgb.x, p.y, p.z, p.x),
+    std.step(p.x, rgb.x)
+  );
 
-  hue = std.mod(hue, d.f32(360.0));
-  const saturation = std.select(delta / cMax, d.f32(0.0), cMax === d.f32(0.0));
-  const value = cMax;
+  const d_val = std.sub(q.x, std.min(q.w, q.y));
+  const epsilon = d.f32(1.0e-10);
 
-  return d.vec3f(hue, saturation, value);
+  const h = std.abs(
+    std.add(
+      q.z,
+      std.div(std.sub(q.w, q.y), std.add(std.mul(6.0, d_val), epsilon))
+    )
+  );
+  const s = std.div(d_val, std.add(q.x, epsilon));
+  const v = q.x;
+
+  return d.vec3f(h, s, v);
+});
+
+export const hsvToRGB = tgpu['~unstable'].fn(
+  [d.vec3f],
+  d.vec3f
+)((hsv) => {
+  const K = d.vec4f(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  const p = std.abs(
+    std.sub(std.mul(std.fract(std.add(hsv.xxx, K.xxx)), 6.0), K.zzz)
+  );
+  const rgb = std.mul(
+    hsv.z,
+    std.mix(K.xxx, std.saturate(std.sub(p, K.xxx)), hsv.y)
+  );
+  return rgb;
 });
 
 export const fmod = tgpu.fn(

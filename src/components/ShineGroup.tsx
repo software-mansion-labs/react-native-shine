@@ -19,7 +19,6 @@ export function ShineGroup({
   colorMaskOptions,
   maskURI,
   touchPosition,
-  useTouchControl = false,
   addHolo = false,
   addReverseHolo = false,
 }: ShineGroupProps) {
@@ -80,7 +79,6 @@ export function ShineGroup({
           colorMaskOptions={colorMaskOptions}
           maskURI={maskURI}
           touchPosition={touchPosition}
-          useTouchControl={useTouchControl}
           addReverseHolo={addReverseHolo}
           addHolo={addHolo}
         />
