@@ -4,6 +4,7 @@ import { useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import {
   addV2d,
   angleToV2d,
+  ColorPresets,
   multiplyV2d,
   Shine,
   ShineGroup,
@@ -41,7 +42,7 @@ export default function App() {
   const [colorMaskOptions /*setColorMaskOptions*/] = useState<
     DeepPartiallyOptional<ColorMask, 'baseColor'>
   >({
-    baseColor: [80, 60, 30],
+    baseColor: ColorPresets.POTATO, //[80, 60, 30],
     useHSV: true,
     hueToleranceRange: { upper: 20, lower: 20 },
     lowBrightnessThreshold: 0.1,
@@ -70,13 +71,13 @@ export default function App() {
         maskURI={tree_img}
         // addHolo={true}
         addReverseHolo={true}
-        // reverseHoloDetectionChannelOptions={detectionChannelState}
+        reverseHoloDetectionChannelOptions={detectionChannelState}
         // glareOptions={glareOptions}
         touchPosition={touchPosition}
         translateViewIn3d
         colorMaskOptions={colorMaskOptions}
       />
-      {/* <ShineGroup
+      <ShineGroup
         glareOptions={glareOptions}
         // addHolo={true}
         touchPosition={touchPosition}
@@ -87,7 +88,7 @@ export default function App() {
           </View>
           <Text>some example text outside the inner View</Text>
         </View>
-      </ShineGroup> */}
+      </ShineGroup>
     </View>
   );
 }

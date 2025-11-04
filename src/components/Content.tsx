@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { PixelRatio, View } from 'react-native';
+import { PixelRatio, View, type ViewStyle } from 'react-native';
 import Animated, {
   SensorType,
   type SharedValue,
@@ -85,6 +85,8 @@ export interface SharedProps {
   reverseHoloDetectionChannelOptions?: Partial<ReverseHoloDetectionChannelFlags>;
   addHolo?: boolean;
   translateViewIn3d?: boolean;
+  style?: ViewStyle;
+  containerStyle?: ViewStyle;
 }
 
 interface ContentProps extends SharedProps {
@@ -114,6 +116,8 @@ export default function Content({
   touchPosition,
   width,
   translateViewIn3d = false,
+  style,
+  containerStyle,
 }: ContentProps) {
   const { device } = root;
   // const { ref, context } = useGPUContext();
@@ -150,8 +154,6 @@ export default function Content({
     []
   );
 
-  //TODO: add once again, when the wgpu issues are fixed :3
-
   const animatedStyle = useAnimatedStyle(() => {
     const rotX = rotation.value.x * 10;
     const rotY = rotation.value.y * 10;
@@ -164,6 +166,7 @@ export default function Content({
       ],
     };
   });
+
   // Subscribe to orientation changes and reset calibration on change
   useEffect(
     () =>
@@ -227,6 +230,7 @@ export default function Content({
       1
     );
   });
+
   // Render loop
   useEffect(() => {
     if (!context) return;
@@ -389,7 +393,6 @@ export default function Content({
 
     const presentContext = () => context.present();
 
-    // TODO: write new init values to the buffer after reloading if the buffer exists
     renderRef.current = () => {
       modifyBuffers();
       renderPipelines();
@@ -425,11 +428,16 @@ export default function Content({
             matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 50, 1],
           },
         ],
+        ...containerStyle,
       }}
     >
       <Animated.View style={[translateViewIn3d && animatedStyle]}>
         <View>
-          <Canvas ref={ref} style={[{ width, height }]} transparent={true} />
+          <Canvas
+            ref={ref}
+            style={[{ width, height }, style]}
+            transparent={true}
+          />
         </View>
       </Animated.View>
     </View>

@@ -1,4 +1,5 @@
 import type { TgpuRoot, TgpuBuffer, ValidateBufferSchema } from 'typegpu';
+import { debug } from '../../config/debugMode';
 
 export type BufferUsageType = 'uniform' | 'storage' | 'vertex';
 
@@ -49,11 +50,14 @@ export class TypedBufferMap<
 
     const { schema, usage } = entry;
     if (this.buffers[key]) {
-      console.warn(`Buffer "${String(key)}" already exists.`);
+      if (debug) console.warn(`Buffer "${String(key)}" already exists.`);
 
       if (initValues) {
         (this.buffers[key] as TgpuBuffer<any>).write(initValues);
-        console.log(`Buffer "${String(key)}" updated with new initial values.`);
+        if (debug)
+          console.log(
+            `Buffer "${String(key)}" updated with new initial values.`
+          );
       }
       return this.buffers[key]!;
     }
