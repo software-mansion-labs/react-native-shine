@@ -11782,7 +11782,7 @@ __metadata:
     react-native-web: ^0.21.0
     react-native-wgpu: ^0.3.1
     react-native-worklets: ^0.5.2
-    typegpu: 0.7.1
+    typegpu: ^0.8.2
   languageName: unknown
   linkType: soft
 
@@ -11819,16 +11819,16 @@ __metadata:
     react-native-wgpu: ^0.3.1
     react-native-worklets: ^0.5.2
     release-it: ^17.10.0
-    typegpu: 0.7.1
+    typegpu: ^0.8.2
     typescript: ^5.8.3
-    unplugin-typegpu: 0.2.2
+    unplugin-typegpu: ^0.8.0
   peerDependencies:
     react: "*"
     react-native: "*"
     react-native-reanimated: ^4.1.3
     react-native-wgpu: ^0.3.1
     react-native-worklets: ^0.5.2
-    typegpu: 0.7.1
+    typegpu: ^0.8.2
   languageName: unknown
   linkType: soft
 
@@ -13394,12 +13394,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tinyest-for-wgsl@npm:~0.1.2":
-  version: 0.1.2
-  resolution: "tinyest-for-wgsl@npm:0.1.2"
+"tinyest-for-wgsl@npm:~0.1.3":
+  version: 0.1.3
+  resolution: "tinyest-for-wgsl@npm:0.1.3"
   dependencies:
     tinyest: ~0.1.1
-  checksum: b3e908e05378f66d1f0f72fb81d001c832c69a067889c136c27824bbdec0dc84ca09fe329c18c742d4172ce80d3b36fbdda23e8300987b951a74ae6780dcd04c
+  checksum: 8b8bb12277cb7aceecdd76f0a43d1c3bf019e91ba18ed7b39c2996a7cb90ea7b00004a66b6fe4684f2677c557967a458253aeb840ee54c5d305c596dd932adb2
   languageName: node
   linkType: hard
 
@@ -13407,6 +13407,13 @@ __metadata:
   version: 0.1.1
   resolution: "tinyest@npm:0.1.1"
   checksum: 8f3352dc071cd146fdbd6e498af68588d20d283b26c2453f0f71dcbe609538cf296f1b189a94ead2cca8e2385c7ae4f2041eacfc5eab0e048fa8987ebbdf7bbf
+  languageName: node
+  linkType: hard
+
+"tinyest@npm:~0.1.2":
+  version: 0.1.2
+  resolution: "tinyest@npm:0.1.2"
+  checksum: b40e8d444a5801ae813694a35cb843549d45afc26c3302c741ef2b95fbe9f393eb25403a5c6eed2ea05a25118ccbf372e3d996c87b3c5da363399afe60763302
   languageName: node
   linkType: hard
 
@@ -13639,13 +13646,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typegpu@npm:0.7.1":
-  version: 0.7.1
-  resolution: "typegpu@npm:0.7.1"
+"typegpu@npm:^0.8.2":
+  version: 0.8.2
+  resolution: "typegpu@npm:0.8.2"
   dependencies:
-    tinyest: ~0.1.1
+    tinyest: ~0.1.2
     typed-binary: ^4.3.1
-  checksum: 8c628b3fa3bd3e649c3a7c67d401c423c2163636cdea08a200c17c28e2effc06d6f000eda56686cc12491b91342a33ded2cfef7b60aa25be235ca0bca01120cc
+  checksum: 14e47279285ee03befe887d965ed9a46c763000bfb3280833d4617bcfdc5eb2e3510d10166c4fd5888623536ff8c3569e90afc15c9785128340ab7f731b0cf44
   languageName: node
   linkType: hard
 
@@ -13806,9 +13813,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unplugin-typegpu@npm:0.2.2":
-  version: 0.2.2
-  resolution: "unplugin-typegpu@npm:0.2.2"
+"unplugin-typegpu@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "unplugin-typegpu@npm:0.8.0"
   dependencies:
     "@babel/standalone": ^7.27.0
     defu: ^6.1.4
@@ -13816,12 +13823,12 @@ __metadata:
     magic-string-ast: ^1.0.0
     pathe: ^2.0.3
     picomatch: ^4.0.3
-    tinyest: ~0.1.1
-    tinyest-for-wgsl: ~0.1.2
+    tinyest: ~0.1.2
+    tinyest-for-wgsl: ~0.1.3
     unplugin: ^2.3.5
   peerDependencies:
-    typegpu: ^0.7.0
-  checksum: fd0de3a0948761bb789bf2ff7e11609522647d4eb98541bd3a7c27f4708f3e6aedd5e0e47c2bf08faaf9c9edc67ab51f6977b14703ed3c07d4a24ec741e38dba
+    typegpu: ^0.8.0
+  checksum: 05e52328dfb26d8ec52ae42dd0de809fedff9050f452f79f6bbf16482d0b106435a9873beb8fb3f17e3ca77c7aaccc96bddb8b14718b3ccb1ad63322b56dc9ab
   languageName: node
   linkType: hard
 

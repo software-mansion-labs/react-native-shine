@@ -7,8 +7,8 @@ export const createTexture = async (
     width: number;
     height: number;
   }
-  //TODO: check why the error message screams about 'texture_2d' and 'texture_multisampled_2d'
-): Promise<TgpuTexture> => {
+  //TODO: change any to the texture types (make a type that includes a union of all texture formats that are used)
+): Promise<TgpuTexture<any>> => {
   const texture = root['~unstable'].createTexture({
     size: [size.width, size.height, 1],
     format: 'rgba8unorm',
@@ -20,7 +20,7 @@ export const createTexture = async (
 export const loadTexture = async (
   root: TgpuRoot,
   imageBitmap: ImageBitmap,
-  texture: TgpuTexture
+  texture: TgpuTexture<any>
 ) => {
   root.device.queue.copyExternalImageToTexture(
     { source: imageBitmap },

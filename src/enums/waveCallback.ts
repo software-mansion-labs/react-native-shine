@@ -3,7 +3,7 @@ import * as std from 'typegpu/std';
 import * as d from 'typegpu/data';
 
 const defaultWave = (pos: d.v2f) => {
-  'kernel';
+  'use gpu';
 
   const x = pos.x;
   const y = pos.y;

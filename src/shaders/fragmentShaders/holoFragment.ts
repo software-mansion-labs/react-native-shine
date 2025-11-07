@@ -29,10 +29,13 @@ export const holoFragment = tgpu['~unstable'].fragmentFn({
 
   //TODO: fix holo
   const hueAngle =
-    // (d.f32(180) / (2 * Math.PI)) *
-    std.mul(std.abs(band), (10 * Math.PI * rot.x) / 3);
+    d.f32(180) * std.mul(std.abs(band), (10 * Math.PI * rot.x) / 3);
   const rainbowColor = hueShift(d.vec3f(1.0, 1.0, 1.0), hueAngle);
   const finalColor = std.mul(rainbowColor, 1.0);
+
+  // console.log('\ncurrentColor = (', rainbowColor.xyz, ')');
+  // console.log('hueAngle = ', hueAngle);
+  // console.clear();
 
   return d.vec4f(finalColor, 0.9 * textureColor.w);
 });

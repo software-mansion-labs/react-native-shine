@@ -70,12 +70,12 @@ export default function App() {
         imageURI={watch_img}
         maskURI={watch_img}
         addHolo={true}
-        // addReverseHolo={true}
-        // reverseHoloDetectionChannelOptions={detectionChannelState}
+        addReverseHolo={true}
+        reverseHoloDetectionChannelOptions={detectionChannelState}
         glareOptions={glareOptions}
         touchPosition={touchPosition}
         // translateViewIn3d
-        // colorMaskOptions={colorMaskOptions}
+        colorMaskOptions={colorMaskOptions}
       />
       <ShineGroup
         glareOptions={glareOptions}

@@ -254,18 +254,17 @@ export default function Content({
       alphaMode: 'premultiplied',
     });
 
-    const sampler = device.createSampler({
-      magFilter: 'linear',
-      minFilter: 'linear',
-      mipmapFilter: 'linear',
-    });
-
-    // TODO: revert to this one after version bump
-    // const sampler = root['~unstable'].createSampler({
+    // const sampler = device.createSampler({
     //   magFilter: 'linear',
     //   minFilter: 'linear',
     //   mipmapFilter: 'linear',
-    // }) as any as GPUSampler; //TODO: delete this cast when TgpuFixedSampler gets exposed
+    // });
+
+    const sampler = root['~unstable'].createSampler({
+      magFilter: 'linear',
+      minFilter: 'linear',
+      mipmapFilter: 'linear',
+    }) as any as GPUSampler; //TODO: delete this cast when TgpuFixedSampler gets exposed
 
     const imageTextureBindGroup = root.createBindGroup(textureBindGroupLayout, {
       texture: root.unwrap(imageTexture).createView(),
