@@ -10,6 +10,7 @@ import type {
 } from './types';
 import { div } from 'typegpu/std';
 import { WAVE_CALLBACKS } from '../enums/waveCallback';
+import { colorMaskDebug } from '../config/debugMode';
 
 export const createGlareOptions = (
   options: Partial<GlareOptions>
@@ -84,6 +85,7 @@ export const createColorMask = (
     saturationTolerance: saturationTolerance ?? 1.0,
     lowBrightnessThreshold: lowBrightnessThreshold ?? 0.0,
     lowSaturationThreshold: lowSaturationThreshold ?? 0.0,
+    debugMode: colorMaskDebug,
   };
 
   return mask;
@@ -105,6 +107,7 @@ export const colorMaskToTyped = (colorMask: ColorMask) => {
     saturationTolerance: f32(colorMask.saturationTolerance),
     lowSaturationThreshold: f32(colorMask.lowSaturationThreshold),
     lowBrightnessThreshold: f32(colorMask.lowBrightnessThreshold),
+    debugMode: d.u32(colorMask.debugMode ? d.u32(1) : d.u32(0)),
   };
   return result;
 };

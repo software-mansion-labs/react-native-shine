@@ -74,6 +74,7 @@ import {
   transformV2d,
   zeroV3d,
 } from '../utils/vector';
+import { baseTextureFragment } from '../shaders/fragmentShaders/baseTextureFragment';
 
 export interface SharedProps {
   width: number;
@@ -96,8 +97,9 @@ interface ContentProps extends SharedProps {
 }
 
 interface PipelineMap {
-  glare: TgpuRenderPipeline;
-  colorMask: TgpuRenderPipeline;
+  baseTexture: TgpuRenderPipeline;
+  glare: TgpuRenderPipeline | void;
+  colorMask: TgpuRenderPipeline | void;
   mask: TgpuRenderPipeline | void;
   reverseHolo: TgpuRenderPipeline | void;
   holo: TgpuRenderPipeline | void;
@@ -308,6 +310,16 @@ export default function Content({
       );
 
     const pipelineMap: PipelineMap = {
+      baseTexture: attachBindGroups(
+        root['~unstable']
+          .withVertex(mainVertex, {})
+          .withFragment(
+            baseTextureFragment,
+            getDefaultTarget(presentationFormat)
+          )
+          .createPipeline(),
+        [imageTextureBindGroup, rotationBindGroup]
+      ),
       glare: attachBindGroups(
         root['~unstable']
           .withVertex(mainVertex, {})
@@ -376,15 +388,21 @@ export default function Content({
         storeOp: 'store',
       };
 
-      const { glare, mask, colorMask, holo, reverseHolo } = pipelineMap;
+      const { baseTexture, glare, mask, colorMask, holo, reverseHolo } =
+        pipelineMap;
 
-      const pairs: PipelineAttachmentPair[] = [[glare, initialAttachment]];
+      const pairs: PipelineAttachmentPair[] = [
+        [baseTexture, initialAttachment],
+      ];
 
+      if (glareOptions && glare) {
+        pairs.push([glare, loadingAttachment]);
+      }
       if (mask) pairs.push([mask, loadingAttachment]);
       if (addReverseHolo && reverseHolo)
         pairs.push([reverseHolo, loadingAttachment]);
       if (addHolo && holo) pairs.push([holo, loadingAttachment]);
-      pairs.push([colorMask, loadingAttachment]);
+      if (colorMask) pairs.push([colorMask, loadingAttachment]);
 
       pairs.forEach(([pipeline, attachment]) =>
         pipeline.withColorAttachment(attachment).draw(6)

@@ -31,6 +31,7 @@ export type ColorMask = {
     upper: vec3;
     lower: vec3;
   };
+  debugMode?: boolean;
 };
 
 export type ReverseHoloDetectionChannelFlags = {

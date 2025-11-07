@@ -6,41 +6,20 @@ export const hueShift = tgpu.fn(
   [d.vec3f, d.f32],
   d.vec3f
 )((rgb, angle) => {
-  const yiqY = std.add(
-    std.mul(rgb.x, 0.299),
-    std.add(std.mul(rgb.y, 0.587), std.mul(rgb.z, 0.114))
-  );
-  const yiqI = std.add(
-    std.mul(rgb.x, 0.596),
-    std.sub(std.mul(rgb.y, -0.274), std.mul(rgb.z, 0.322))
-  );
-  const yiqQ = std.add(
-    std.mul(rgb.x, 0.211),
-    std.sub(std.mul(rgb.y, -0.523), std.mul(rgb.z, 0.311))
-  );
-
-  // Rotate hue
-  const cosA = std.cos(angle);
-  const sinA = std.sin(angle);
-  const i = std.sub(std.mul(yiqI, cosA), std.mul(yiqQ, sinA));
-  const q = std.add(std.mul(yiqI, sinA), std.mul(yiqQ, cosA));
-
-  // Convert back to RGB
-  const r = std.add(std.add(yiqY, std.mul(i, 0.956)), std.mul(q, 0.621));
-  const g = std.add(std.add(yiqY, std.mul(i, -0.272)), std.mul(q, -0.647));
-  const b = std.add(std.add(yiqY, std.mul(i, -1.105)), std.mul(q, 1.702));
-
-  return d.vec3f(r, g, b);
+  const hsv = rgbToHSV(rgb);
+  const shiftedH = std.fract(std.add(hsv.x, angle / 360.0));
+  const shiftedRGB = hsvToRGB(d.vec3f(shiftedH, hsv.y, hsv.z));
+  return shiftedRGB;
 });
 
-export const rgbToHSV = tgpu['~unstable'].fn(
+export const rgbToHSV = tgpu.fn(
   [d.vec3f],
   d.vec3f
 )((rgb) => {
   const K = d.vec4f(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
   const p = std.mix(
-    d.vec4f(rgb.y, rgb.z, K.w, K.z),
-    d.vec4f(rgb.z, rgb.y, K.x, K.y),
+    d.vec4f(rgb.z, rgb.y, K.w, K.z),
+    d.vec4f(rgb.y, rgb.z, K.x, K.y),
     std.step(rgb.z, rgb.y)
   );
   const q = std.mix(
@@ -49,34 +28,50 @@ export const rgbToHSV = tgpu['~unstable'].fn(
     std.step(p.x, rgb.x)
   );
 
-  const d_val = std.sub(q.x, std.min(q.w, q.y));
+  const v = std.max(q.x, q.y);
+  const d_val = std.sub(v, std.min(q.y, q.w));
   const epsilon = d.f32(1.0e-10);
 
-  const h = std.abs(
-    std.add(
-      q.z,
-      std.div(std.sub(q.w, q.y), std.add(std.mul(6.0, d_val), epsilon))
-    )
+  const h_temp = std.add(
+    q.z,
+    std.div(std.sub(q.w, q.y), std.add(std.mul(6.0, d_val), epsilon))
   );
-  const s = std.div(d_val, std.add(q.x, epsilon));
-  const v = q.x;
+  const h = std.fract(h_temp);
+  const s = std.div(d_val, std.add(v, epsilon));
 
   return d.vec3f(h, s, v);
 });
 
-export const hsvToRGB = tgpu['~unstable'].fn(
+export const hsvToRGB = tgpu.fn(
   [d.vec3f],
   d.vec3f
 )((hsv) => {
-  const K = d.vec4f(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-  const p = std.abs(
-    std.sub(std.mul(std.fract(std.add(hsv.xxx, K.xxx)), 6.0), K.zzz)
-  );
-  const rgb = std.mul(
-    hsv.z,
-    std.mix(K.xxx, std.saturate(std.sub(p, K.xxx)), hsv.y)
-  );
-  return rgb;
+  const h = hsv.x;
+  const s = hsv.y;
+  const v = hsv.z;
+
+  // Multiply by 6.0 to convert [0,1] hue range to [0,6] sector range
+  const h2 = h * d.f32(6.0);
+
+  const i = std.floor(h2);
+  const f = h2 - i;
+
+  const p = v * (d.f32(1) - s);
+  const q = v * (d.f32(1) - s * f);
+  const t = v * (d.f32(1) - s * (d.f32(1) - f));
+
+  const i1 = d.f32(i === 1);
+  const i2 = d.f32(i === 2);
+  const i3 = d.f32(i === 3);
+  const i4 = d.f32(i === 4);
+  const i5 = d.f32(i === 5);
+  const i0 = d.f32(d.u32(i5 + i1 + i2 + i3 + i4) === d.u32(0)); //doesnt work, clamps on 300
+
+  const r = i0 * v + i1 * q + i2 * p + i3 * p + i4 * t + i5 * v;
+  const g = i0 * t + i1 * v + i2 * v + i3 * q + i4 * p + i5 * p;
+  const b = i0 * p + i1 * p + i2 * t + i3 * v + i4 * v + i5 * q;
+
+  return d.vec3f(r, g, b);
 });
 
 export const fmod = tgpu.fn(

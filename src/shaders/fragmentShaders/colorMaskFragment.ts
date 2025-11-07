@@ -27,6 +27,8 @@ const colorMaskFragment = tgpu['~unstable'].fragmentFn({
   const lowSaturationThreshold = mask.lowSaturationThreshold;
   const lowBrightnessThreshold = mask.lowBrightnessThreshold;
 
+  const colorMaskDebug = mask.debugMode;
+
   let color = std.textureSample(
     textureBindGroupLayout.$.texture,
     textureBindGroupLayout.$.sampler,
@@ -71,6 +73,13 @@ const colorMaskFragment = tgpu['~unstable'].fragmentFn({
   const maskCheck = std.select(rgbCheck, hsvCheck, useHSV === d.u32(1));
 
   color = std.select(color, d.vec4f(color.xyz, 0.0), maskCheck);
+
+  //debug - shows masked areas coloring them red
+  color = std.select(
+    color,
+    d.vec4f(1.0, 0.0, 0.0, 0.0),
+    maskCheck && colorMaskDebug === d.u32(1)
+  );
   return color;
 });
 

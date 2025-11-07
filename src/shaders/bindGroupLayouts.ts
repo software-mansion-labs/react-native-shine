@@ -48,6 +48,7 @@ export const colorMaskSchema = d.struct({
   saturationTolerance: d.f32,
   lowSaturationThreshold: d.f32,
   lowBrightnessThreshold: d.f32,
+  debugMode: d.u32,
 });
 
 export type ColorMaskSchema = typeof colorMaskSchema;

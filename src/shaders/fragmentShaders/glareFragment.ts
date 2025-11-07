@@ -95,8 +95,8 @@ export const newGlareFragment = tgpu['~unstable'].fragmentFn({
   const glareIntensity = opts.glareIntensity; // [0..∞): bigger → wider/stronger area
   const glowPower = opts.glowPower; // (0..∞): curve shaping; bigger → softer/wider glow
   const hueBlendPower = opts.hueBlendPower; // [0..1+]: how much hue-shifted color blends in
-  const hueShiftAngleMin = opts.hueShiftAngleMin; // radians
-  const hueShiftAngleMax = opts.hueShiftAngleMax; // radians
+  const hueShiftAngleMin = opts.hueShiftAngleMin; // degrees
+  const hueShiftAngleMax = opts.hueShiftAngleMax; // degrees
   const lightIntensity = opts.lightIntensity / 1.3; // [0..∞): brightness boost of the glare/bloom
 
   let color = std.textureSample(
@@ -136,8 +136,6 @@ export const newGlareFragment = tgpu['~unstable'].fragmentFn({
   const finalRGB = std.mix(chromaMixed, overlaidRGB, d.vec3f(maskedGlow));
 
   const outRGB = std.clamp(finalRGB, d.vec3f(0.0), d.vec3f(1.0));
-
-  // if (maskedGlow > 0.6) return d.vec4f(0.0, 0.0, 0.0, 0.0);
 
   return d.vec4f(outRGB, color.w);
 });

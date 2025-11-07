@@ -12,7 +12,7 @@ import {
   type V2d,
   zeroV2d,
 } from 'react-native-shine';
-import { tree_img } from './img';
+import { watch_img } from './img';
 import type { ColorMask, DeepPartiallyOptional } from '../../src/types/types';
 
 export default function App() {
@@ -34,17 +34,17 @@ export default function App() {
   //bigger values make the channels less reflective
   //smaller values make the channels more reflective
   const [detectionChannelState /*setDetectionChannelState*/] = useState({
-    redChannel: 1.3, //reflect less on red
-    greenChannel: -0.2, //reflect more on green
-    blueChannel: -1.0,
+    redChannel: -0.2, //reflect more on red
+    greenChannel: 0.5, //reflect less on green
+    blueChannel: 1.0,
   });
 
   const [colorMaskOptions /*setColorMaskOptions*/] = useState<
     DeepPartiallyOptional<ColorMask, 'baseColor'>
   >({
-    baseColor: ColorPresets.POTATO, //[80, 60, 30],
+    baseColor: ColorPresets.BLUE, //[80, 60, 30],
     useHSV: true,
-    hueToleranceRange: { upper: 20, lower: 20 },
+    hueToleranceRange: { upper: 0, lower: 45 },
     lowBrightnessThreshold: 0.1,
     lowSaturationThreshold: 0.1,
   });
@@ -67,15 +67,15 @@ export default function App() {
       <Shine
         width={734 * nw}
         height={1024 * nh}
-        imageURI={tree_img}
-        maskURI={tree_img}
-        // addHolo={true}
-        addReverseHolo={true}
-        reverseHoloDetectionChannelOptions={detectionChannelState}
-        // glareOptions={glareOptions}
+        imageURI={watch_img}
+        maskURI={watch_img}
+        addHolo={true}
+        // addReverseHolo={true}
+        // reverseHoloDetectionChannelOptions={detectionChannelState}
+        glareOptions={glareOptions}
         touchPosition={touchPosition}
-        translateViewIn3d
-        colorMaskOptions={colorMaskOptions}
+        // translateViewIn3d
+        // colorMaskOptions={colorMaskOptions}
       />
       <ShineGroup
         glareOptions={glareOptions}
