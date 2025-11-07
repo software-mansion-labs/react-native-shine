@@ -69,7 +69,7 @@ export default function App() {
         height={1024 * nh}
         imageURI={watch_img}
         maskURI={watch_img}
-        addHolo={true}
+        // addHolo={true}
         addReverseHolo={true}
         reverseHoloDetectionChannelOptions={detectionChannelState}
         glareOptions={glareOptions}

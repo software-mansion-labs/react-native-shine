@@ -82,19 +82,23 @@ export const reverseHoloFragment = tgpu['~unstable'].fragmentFn({
     holoMaskColor.w *
     std.pow(scaledRadial, 1.5);
 
-  const maskedGlow = std.mul(glowMask, holoFactor); // only affect masked areas
+  // const decayedGlowMask = std.exp(1.0 - glowMask);
+  const maskedGlow = std.pow(std.mul(glowMask, holoFactor), 2.0); // only affect masked areas
 
   const hueAmount = std.mix(
     hueShiftAngleMin,
     hueShiftAngleMax,
     std.clamp(maskedGlow, 0.0, 1.0)
   );
-  const sparkleHue = hueShift(cardColor.xyz, hueAmount);
+  const sparkleHue = hueShift(
+    d.vec3f(cardColor.x, cardColor.y, cardColor.z),
+    hueAmount
+  );
   const hueMixAmt = std.clamp((hueBlendPower / 5.0) * maskedGlow, 0.0, 1.0);
   const chromaMix = std.mix(cardColor.xyz, sparkleHue, hueMixAmt);
 
   const shineStrength = std.clamp(lightIntensity, 1.0, 100.0);
   const shineLayer = std.mul(chromaMix, 1.5 * shineStrength * maskedGlow);
 
-  return d.vec4f(shineLayer, 1 - maskedGlow);
+  return d.vec4f(d.vec3f(shineLayer), d.f32(1.0) - maskedGlow);
 });
