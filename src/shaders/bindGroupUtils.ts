@@ -4,24 +4,14 @@ import {
   glareBindGroupLayout,
   glareSchema,
   colorMaskBindGroupLayout,
-  type ColorMaskSchema,
   rotationBindGroupLayout,
   type GlareSchema,
-  colorMaskSchema,
   type ReverseHoloDetectionChannelFlagsSchema,
   reverseHoloDetectionChannelFlagsBindGroupLayout,
+  type ColorMaskArraySchema,
 } from './bindGroupLayouts';
-import type {
-  GlareOptions,
-  ColorMask,
-  PartiallyOptional,
-} from '../types/types';
-import {
-  colorMaskToTyped,
-  createGlareOptions,
-  createColorMask,
-  mapToF32,
-} from '../types/typeUtils';
+import type { GlareOptions } from '../types/types';
+import { createGlareOptions, glareOptionsToTyped } from '../types/typeUtils';
 import { componentsFromV3d, zeroV3d } from '../utils/vector';
 
 export const createRotationBuffer = (root: TgpuRoot, initValues = zeroV3d) =>
@@ -42,7 +32,10 @@ export const createGlareOptionsBuffer = (
   initValues?: Partial<GlareOptions>
 ) =>
   root
-    .createBuffer(glareSchema, mapToF32(createGlareOptions({ ...initValues })))
+    .createBuffer(
+      glareSchema,
+      glareOptionsToTyped(createGlareOptions({ ...initValues }))
+    )
     .$usage('uniform');
 
 export const createGlareBindGroup = (
@@ -53,23 +46,23 @@ export const createGlareBindGroup = (
     glareOptions: buffer,
   });
 
-export const createColorMaskBuffer = (
-  root: TgpuRoot,
-  initValues: PartiallyOptional<ColorMask, 'baseColor'>
-) =>
-  root
-    .createBuffer(
-      colorMaskSchema,
-      colorMaskToTyped(createColorMask({ ...initValues }))
-    )
-    .$usage('uniform');
+// export const createColorMaskBuffer = (
+//   root: TgpuRoot,
+//   initValues: PartiallyOptional<ColorMask, 'baseColor'>[]
+// ) =>
+//   root
+//     .createBuffer(
+//       colorMaskSchema,
+//       colorMasksToTyped(createColorMasks(initValues))
+//     )
+//     .$usage('uniform');
 
 export const createColorMaskBindGroup = (
   root: TgpuRoot,
-  buffer: TgpuBuffer<ColorMaskSchema> & UniformFlag
+  buffer: TgpuBuffer<ColorMaskArraySchema> & UniformFlag
 ) =>
   root.createBindGroup(colorMaskBindGroupLayout, {
-    mask: buffer,
+    masks: buffer,
   });
 
 export const createReverseHoloDetectionChannelFlagsBindGroup = (

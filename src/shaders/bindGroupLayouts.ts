@@ -3,14 +3,12 @@ import * as d from 'typegpu/data';
 import type { BufferUsageType } from './resourceManagement/bufferManager';
 
 export const textureBindGroupLayout = tgpu.bindGroupLayout({
-  // texture: { texture: d.texture2d(d.f32) } //TODO: revert this change after bumping typegpu version (currently there is a bug with texture formats)
-  texture: { texture: 'float', dimension: '2d', sampleType: 'float' },
+  texture: { texture: d.texture2d(d.f32) },
   sampler: { sampler: 'filtering' },
 });
 
 export const maskTextureBindGroupLayout = tgpu.bindGroupLayout({
-  // texture: { texture: d.texture2d(d.f32) }, //TODO: same as above
-  texture: { texture: 'float', dimension: '2d', sampleType: 'float' },
+  texture: { texture: d.texture2d(d.f32) },
   sampler: { sampler: 'filtering' },
 });
 
@@ -19,10 +17,12 @@ export const rotationBindGroupLayout = tgpu.bindGroupLayout({
 });
 
 export const glareSchema = d.struct({
-  glowPower: d.f32,
-  hueShiftAngleMax: d.f32,
-  hueShiftAngleMin: d.f32,
-  hueBlendPower: d.f32,
+  glareColor: d.struct({
+    hueShiftAngleMax: d.f32,
+    hueShiftAngleMin: d.f32,
+    hueBlendPower: d.f32,
+  }),
+  glowPower: d.align(16, d.f32),
   lightIntensity: d.f32,
   glareIntensity: d.f32,
 });
@@ -33,6 +33,7 @@ export const glareBindGroupLayout = tgpu.bindGroupLayout({
   glareOptions: { uniform: glareSchema },
 });
 
+//TODO: change the buffer so it reserves memory for an array of colorMaskSchemas
 export const colorMaskSchema = d.struct({
   baseColor: d.vec3f,
   rgbToleranceRange: d.struct({
@@ -53,8 +54,17 @@ export const colorMaskSchema = d.struct({
 
 export type ColorMaskSchema = typeof colorMaskSchema;
 
+export const COLOR_MASK_MAX_COUNT = 16;
+
+export const colorMaskArraySchema = d.arrayOf(
+  colorMaskSchema,
+  COLOR_MASK_MAX_COUNT
+);
+
+export type ColorMaskArraySchema = typeof colorMaskArraySchema;
+
 export const colorMaskBindGroupLayout = tgpu.bindGroupLayout({
-  mask: { uniform: colorMaskSchema },
+  masks: { uniform: colorMaskArraySchema },
 });
 
 export const reverseHoloDetectionChannelFlagsSchema = d.struct({
@@ -75,6 +85,11 @@ export const reverseHoloDetectionChannelFlagsBindGroupLayout =
     glareOptions: { uniform: glareSchema },
   });
 
+export type BufferSchemas =
+  | ReverseHoloDetectionChannelFlagsSchema
+  | ColorMaskSchema
+  | GlareSchema;
+
 export const bufferData = {
   rotation: {
     schema: d.vec3f,
@@ -85,7 +100,7 @@ export const bufferData = {
     usage: 'uniform',
   },
   colorMask: {
-    schema: colorMaskSchema,
+    schema: colorMaskArraySchema,
     usage: 'uniform',
   },
   reverseHoloDetectionChannelFlags: {

@@ -54,8 +54,8 @@ import type {
   ReverseHoloDetectionChannelFlags,
 } from '../types/types';
 import {
-  colorMaskToTyped,
-  createColorMask,
+  colorMasksToTyped,
+  createColorMasks,
   createGlareOptions,
   createReverseHoloDetectionChannelFlags,
 } from '../types/typeUtils';
@@ -80,12 +80,18 @@ export interface SharedProps {
   width: number;
   height: number;
   glareOptions?: Partial<GlareOptions>;
-  colorMaskOptions?: DeepPartiallyOptional<ColorMask, 'baseColor'>;
-  touchPosition?: SharedValue<V2d>;
+  enableGlare?: boolean;
+  highlightColors?: DeepPartiallyOptional<ColorMask, 'baseColor'>[];
+  lightPosition?: SharedValue<V2d>;
   addReverseHolo?: boolean;
   reverseHoloDetectionChannelOptions?: Partial<ReverseHoloDetectionChannelFlags>;
   addHolo?: boolean;
-  translateViewIn3d?: boolean;
+  translateViewIn3d?:
+    | boolean
+    | {
+        perspective?: number;
+        intensity?: number;
+      };
   style?: ViewStyle;
   containerStyle?: ViewStyle;
 }
@@ -109,13 +115,14 @@ export default function Content({
   addHolo,
   addReverseHolo,
   reverseHoloDetectionChannelOptions,
-  colorMaskOptions,
+  highlightColors,
   glareOptions,
+  enableGlare = true,
   height,
   imageTexture,
   maskTexture,
   root,
-  touchPosition,
+  lightPosition: touchPosition,
   width,
   translateViewIn3d = false,
   style,
@@ -157,12 +164,19 @@ export default function Content({
   );
 
   const animatedStyle = useAnimatedStyle(() => {
-    const rotX = rotation.value.x * 10;
-    const rotY = rotation.value.y * 10;
+    let perspective: number = 300;
+    let intensity: number = 10;
+    if (typeof translateViewIn3d === 'object') {
+      perspective = translateViewIn3d.perspective ?? perspective;
+      intensity = translateViewIn3d.intensity ?? intensity;
+    }
+
+    const rotX = rotation.value.x * intensity;
+    const rotY = rotation.value.y * intensity;
 
     return {
       transform: [
-        { perspective: 300 },
+        { perspective: perspective },
         { rotateX: `${-rotY}deg` },
         { rotateY: `${rotX}deg` },
       ],
@@ -288,12 +302,13 @@ export default function Content({
     const colorMaskBuffer = bufferMap.addBuffer(
       root,
       'colorMask',
-      colorMaskToTyped(
-        createColorMask(
-          colorMaskOptions ?? { baseColor: [-20, -20, -20], useHSV: false }
+      colorMasksToTyped(
+        createColorMasks(
+          highlightColors ?? [{ baseColor: [-20, -20, -20], useHSV: false }]
         )
       )
     );
+    console.log(colorMaskBuffer);
     const colorMaskBindGroup = createColorMaskBindGroup(root, colorMaskBuffer);
 
     const reverseHoloDetectionChannelFlagsBuffer = bufferMap.addBuffer(
@@ -394,7 +409,7 @@ export default function Content({
         [baseTexture, initialAttachment],
       ];
 
-      if (glareOptions && glare) {
+      if ((glareOptions || !enableGlare) && glare) {
         pairs.push([glare, loadingAttachment]);
       }
       if (mask) pairs.push([mask, loadingAttachment]);
@@ -428,7 +443,8 @@ export default function Content({
     rotation,
     bufferMap,
     glareOptions,
-    colorMaskOptions,
+    enableGlare,
+    highlightColors,
     addHolo,
     addReverseHolo,
     reverseHoloDetectionChannelOptions,

@@ -24,10 +24,12 @@ export const reverseHoloFragment = tgpu['~unstable'].fragmentFn({
   const opts = reverseHoloDetectionChannelFlagsBindGroupLayout.$.glareOptions;
   const glareIntensity = opts.glareIntensity;
   const glowPower = opts.glowPower;
-  const hueBlendPower = opts.hueBlendPower;
-  const hueShiftAngleMin = opts.hueShiftAngleMin;
-  const hueShiftAngleMax = opts.hueShiftAngleMax;
   const lightIntensity = opts.lightIntensity;
+
+  const glareColor = opts.glareColor;
+  const hueBlendPower = glareColor.hueBlendPower;
+  const hueShiftAngleMin = glareColor.hueShiftAngleMin;
+  const hueShiftAngleMax = glareColor.hueShiftAngleMax;
   //-----------------------------------------------
 
   // detection channel flags-----------------------
@@ -90,15 +92,14 @@ export const reverseHoloFragment = tgpu['~unstable'].fragmentFn({
     hueShiftAngleMax,
     std.clamp(maskedGlow, 0.0, 1.0)
   );
-  const sparkleHue = hueShift(
-    d.vec3f(cardColor.x, cardColor.y, cardColor.z),
-    hueAmount
-  );
+  const sparkleHue = hueShift(cardColor.xyz, hueAmount);
+  const shineStrength = std.clamp(lightIntensity, 1.0, 100.0);
+  const shineIntensity = 1.5 * shineStrength * maskedGlow;
+
   const hueMixAmt = std.clamp((hueBlendPower / 5.0) * maskedGlow, 0.0, 1.0);
   const chromaMix = std.mix(cardColor.xyz, sparkleHue, hueMixAmt);
 
-  const shineStrength = std.clamp(lightIntensity, 1.0, 100.0);
-  const shineLayer = std.mul(chromaMix, 1.5 * shineStrength * maskedGlow);
+  const shineLayer = std.mul(chromaMix, shineIntensity);
 
-  return d.vec4f(d.vec3f(shineLayer), d.f32(1.0) - maskedGlow);
+  return d.vec4f(d.vec3f(shineLayer), 1.0 - maskedGlow);
 });

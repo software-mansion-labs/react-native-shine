@@ -12,12 +12,12 @@ import {
   type V2d,
   zeroV2d,
 } from 'react-native-shine';
-import { watch_img } from './img';
+import { tree_img, watch_img } from './img';
 import type { ColorMask, DeepPartiallyOptional } from '../../src/types/types';
 
 export default function App() {
   const orientation = useOrientation();
-  const touchPosition = useSharedValue<V2d>(zeroV2d);
+  const lightPosition = useSharedValue<V2d>(zeroV2d);
   const rotation = useRef<number>(0);
   const nh = 0.4;
   const nw = nh;
@@ -26,31 +26,36 @@ export default function App() {
     glowPower: 0.7,
     glareIntensity: 0.6,
     lightIntensity: 0.7,
-    hueBlendPower: 1.0,
-    hueShiftAngleMin: -Math.PI,
-    hueShiftAngleMax: Math.PI,
+    glareColor: {
+      hueBlendPower: 1.0,
+      hueShiftAngleMin: -30,
+      hueShiftAngleMax: 30,
+    },
   });
 
   //bigger values make the channels less reflective
   //smaller values make the channels more reflective
   const [detectionChannelState /*setDetectionChannelState*/] = useState({
-    redChannel: -0.2, //reflect more on red
-    greenChannel: 0.5, //reflect less on green
-    blueChannel: 1.0,
+    // redChannel: -0.2, //reflect more on red
+    // greenChannel: 0.5, //reflect less on green
+    // blueChannel: 1.0,
+    redChannel: 1.5, //reflect more on red
+    greenChannel: -1.0,
+    blueChannel: -0.4,
   });
 
   const [colorMaskOptions /*setColorMaskOptions*/] = useState<
     DeepPartiallyOptional<ColorMask, 'baseColor'>
   >({
-    baseColor: ColorPresets.BLUE, //[80, 60, 30],
+    baseColor: ColorPresets.NAVY, //[80, 60, 30],
     useHSV: true,
-    hueToleranceRange: { upper: 0, lower: 45 },
+    hueToleranceRange: { upper: 30, lower: 30 },
     lowBrightnessThreshold: 0.1,
     lowSaturationThreshold: 0.1,
   });
 
   useFrameCallback(() => {
-    touchPosition.value = addV2d(
+    lightPosition.value = addV2d(
       zeroV2d,
       multiplyV2d(angleToV2d((rotation.current += 0.025)), 0.5)
     );
@@ -73,14 +78,21 @@ export default function App() {
         addReverseHolo={true}
         reverseHoloDetectionChannelOptions={detectionChannelState}
         glareOptions={glareOptions}
-        touchPosition={touchPosition}
-        // translateViewIn3d
-        colorMaskOptions={colorMaskOptions}
+        lightPosition={lightPosition}
+        translateViewIn3d={{}}
+        highlightColors={[
+          colorMaskOptions,
+          // {
+          //   ...colorMaskOptions,
+          //   baseColor: ColorPresets.BEIGE,
+          //   hueToleranceRange: { upper: 30, lower: 30 },
+          // },
+        ]}
       />
       <ShineGroup
         glareOptions={glareOptions}
         // addHolo={true}
-        touchPosition={touchPosition}
+        lightPosition={lightPosition}
       >
         <View style={{ backgroundColor: 'blue' }}>
           <View>

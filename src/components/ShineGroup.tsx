@@ -16,9 +16,9 @@ type ShineGroupProps = PropsWithChildren<Partial<ShineProps>>;
 export function ShineGroup({
   children,
   glareOptions,
-  colorMaskOptions,
+  highlightColors: colorMaskOptions,
   maskURI,
-  touchPosition,
+  lightPosition: touchPosition,
   addHolo = false,
   addReverseHolo = false,
 }: ShineGroupProps) {
@@ -76,9 +76,9 @@ export function ShineGroup({
           {...sizeFromV2d(size)}
           imageURI={capturedURI}
           glareOptions={glareOptions}
-          colorMaskOptions={colorMaskOptions}
+          highlightColors={colorMaskOptions}
           maskURI={maskURI}
-          touchPosition={touchPosition}
+          lightPosition={touchPosition}
           addReverseHolo={addReverseHolo}
           addHolo={addHolo}
         />

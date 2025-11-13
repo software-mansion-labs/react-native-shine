@@ -11,84 +11,112 @@ import type {
 import { div } from 'typegpu/std';
 import { WAVE_CALLBACKS } from '../enums/waveCallback';
 import { colorMaskDebug } from '../config/debugMode';
+import { COLOR_MASK_MAX_COUNT } from '../shaders/bindGroupLayouts';
 
 export const createGlareOptions = (
   options: Partial<GlareOptions>
 ): GlareOptions => {
-  const {
-    glowPower,
-    hueShiftAngleMax,
-    hueShiftAngleMin,
-    hueBlendPower,
-    lightIntensity,
-    glareIntensity,
-  } = options;
+  const { glowPower, glareColor, lightIntensity, glareIntensity } = options;
+  const { hueBlendPower, hueShiftAngleMax, hueShiftAngleMin } =
+    glareColor || {};
 
   const glareOp = {
     glowPower: glowPower ?? 1.0,
-    hueShiftAngleMax: hueShiftAngleMax ?? 1.0,
-    hueShiftAngleMin: hueShiftAngleMin ?? 0.0,
-    hueBlendPower: hueBlendPower ?? 1.0,
     lightIntensity: lightIntensity ?? 1.0,
     glareIntensity: glareIntensity ?? 1.0,
+    glareColor: {
+      hueShiftAngleMax: hueShiftAngleMax ?? 1.0,
+      hueShiftAngleMin: hueShiftAngleMin ?? 0.0,
+      hueBlendPower: hueBlendPower ?? 1.0,
+    },
   };
 
   return glareOp;
 };
 
-export const mapToF32 = <T extends Record<string, number>>(
-  obj: T
-): {
-  [K in keyof T]: ReturnType<typeof f32>;
-} => {
-  const result = {} as any;
-  for (const key in obj) {
-    result[key] = f32(obj[key]);
-  }
-
-  return result;
+export const glareOptionsToTyped = (glareOptions: GlareOptions) => {
+  return {
+    glowPower: f32(glareOptions.glowPower),
+    lightIntensity: f32(glareOptions.lightIntensity),
+    glareIntensity: f32(glareOptions.glareIntensity),
+    glareColor: {
+      hueShiftAngleMax: f32(glareOptions.glareColor.hueShiftAngleMax),
+      hueShiftAngleMin: f32(glareOptions.glareColor.hueShiftAngleMin),
+      hueBlendPower: f32(glareOptions.glareColor.hueBlendPower),
+    },
+  };
 };
 
-export const createColorMask = (
-  colorMask: DeepPartiallyOptional<ColorMask, 'baseColor'>
-): ColorMask => {
-  const {
-    baseColor,
-    rgbToleranceRange,
-    useHSV,
-    hueToleranceRange,
-    brightnessTolerance,
-    saturationTolerance,
-    lowBrightnessThreshold,
-    lowSaturationThreshold,
-  } = colorMask;
-  const baseTolerance = {
-    upper: [20, 20, 20] as vec3,
-    lower: [20, 20, 20] as vec3,
-  };
-  const baseHueTolerance = {
-    upper: 20,
-    lower: 20,
-  };
-  const tolerance = { ...baseTolerance, ...rgbToleranceRange };
-  const hueTolerance = { ...baseHueTolerance, ...hueToleranceRange };
+export const createColorMasks = (
+  colorMasks: DeepPartiallyOptional<ColorMask, 'baseColor'>[]
+): ColorMask[] => {
+  const newColorMasks: ColorMask[] = new Array(16);
+  for (const i in colorMasks) {
+    const {
+      baseColor,
+      rgbToleranceRange,
+      useHSV,
+      hueToleranceRange,
+      brightnessTolerance,
+      saturationTolerance,
+      lowBrightnessThreshold,
+      lowSaturationThreshold,
+    } = colorMasks[i]!;
+    const baseTolerance = {
+      upper: [20, 20, 20] as vec3,
+      lower: [20, 20, 20] as vec3,
+    };
+    const baseHueTolerance = {
+      upper: 20,
+      lower: 20,
+    };
+    const tolerance = { ...baseTolerance, ...rgbToleranceRange };
+    const hueTolerance = { ...baseHueTolerance, ...hueToleranceRange };
+    const newColorMask: ColorMask = {
+      baseColor: baseColor,
+      rgbToleranceRange: tolerance,
+      useHSV: useHSV!!,
+      hueToleranceRange: hueTolerance,
+      brightnessTolerance: brightnessTolerance ?? 1.0,
+      saturationTolerance: saturationTolerance ?? 1.0,
+      lowBrightnessThreshold: lowBrightnessThreshold ?? 0.0,
+      lowSaturationThreshold: lowSaturationThreshold ?? 0.0,
+      debugMode: colorMaskDebug,
+    };
+
+    newColorMasks[i] = newColorMask;
+  }
+
+  for (let i = 0; i < newColorMasks.length; i++) {
+    if (newColorMasks[i]) continue;
+    newColorMasks[i] = {
+      baseColor: [0, 0, 0],
+      useHSV: false,
+      rgbToleranceRange: {
+        upper: [0, 0, 0],
+        lower: [0, 0, 0],
+      },
+      hueToleranceRange: {
+        upper: 0,
+        lower: 0,
+      },
+    };
+  }
 
   // TODO: add radian and degree angle handling
   // '123deg' <- interpret as a numeric angle value
   //     2     <- interpret as a radian value
-  const mask: ColorMask = {
-    baseColor: baseColor,
-    rgbToleranceRange: tolerance,
-    useHSV: useHSV!!,
-    hueToleranceRange: hueTolerance,
-    brightnessTolerance: brightnessTolerance ?? 1.0,
-    saturationTolerance: saturationTolerance ?? 1.0,
-    lowBrightnessThreshold: lowBrightnessThreshold ?? 0.0,
-    lowSaturationThreshold: lowSaturationThreshold ?? 0.0,
-    debugMode: colorMaskDebug,
-  };
 
-  return mask;
+  return newColorMasks;
+};
+
+export const colorMasksToTyped = (colorMasks: ColorMask[]) => {
+  const typedColorMasks = new Array(COLOR_MASK_MAX_COUNT);
+  for (let i = 0; i < colorMasks.length; i++) {
+    typedColorMasks[i] = colorMaskToTyped(colorMasks[i]!);
+  }
+
+  return typedColorMasks;
 };
 
 export const colorMaskToTyped = (colorMask: ColorMask) => {

@@ -12,11 +12,13 @@ export type quaternion = vec4;
 
 export type GlareOptions = {
   glowPower: number;
-  hueShiftAngleMax: number;
-  hueShiftAngleMin: number;
-  hueBlendPower: number;
   lightIntensity: number;
   glareIntensity: number;
+  glareColor: {
+    hueBlendPower: number;
+    hueShiftAngleMax: number;
+    hueShiftAngleMin: number;
+  };
 };
 
 export type ColorMask = {
@@ -24,8 +26,8 @@ export type ColorMask = {
   useHSV?: boolean;
   hueToleranceRange: { upper: number; lower: number };
   brightnessTolerance?: number;
-  lowBrightnessThreshold?: number;
   saturationTolerance?: number;
+  lowBrightnessThreshold?: number;
   lowSaturationThreshold?: number;
   rgbToleranceRange: {
     upper: vec3;
@@ -33,6 +35,26 @@ export type ColorMask = {
   };
   debugMode?: boolean;
 };
+
+//TODO: figure out how to tell compiler that im sure that it's long enough ;-;
+export type ColorMaskArrayShaderAssert = [
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+];
 
 export type ReverseHoloDetectionChannelFlags = {
   redChannel: number;
