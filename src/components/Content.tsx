@@ -95,7 +95,7 @@ export interface SharedProps {
       };
   style?: ViewStyle;
   containerStyle?: ViewStyle;
-  effects: Effect[];
+  effects?: Effect[];
 }
 
 interface ContentProps extends SharedProps {

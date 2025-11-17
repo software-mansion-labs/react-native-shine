@@ -16,11 +16,15 @@ type ShineGroupProps = PropsWithChildren<Partial<ShineProps>>;
 export function ShineGroup({
   children,
   glareOptions,
-  highlightColors: colorMaskOptions,
+  highlightColors,
   maskURI,
   lightPosition: touchPosition,
-  addHolo = false,
-  addReverseHolo = false,
+  effects,
+  enableGlare = true,
+  isHighlightInclusive = true,
+  translateViewIn3d = false,
+  containerStyle,
+  style,
 }: ShineGroupProps) {
   const viewShotRef = useRef<ViewShot>(null);
   const [capturedURI, setCapturedURI] = useState<string | null>(null);
@@ -76,11 +80,15 @@ export function ShineGroup({
           {...sizeFromV2d(size)}
           imageURI={capturedURI}
           glareOptions={glareOptions}
-          highlightColors={colorMaskOptions}
+          highlightColors={highlightColors}
           maskURI={maskURI}
           lightPosition={touchPosition}
-          addReverseHolo={addReverseHolo}
-          addHolo={addHolo}
+          effects={effects}
+          translateViewIn3d={translateViewIn3d}
+          enableGlare={enableGlare}
+          containerStyle={containerStyle}
+          isHighlightInclusive={isHighlightInclusive}
+          style={style}
         />
       )}
     </View>

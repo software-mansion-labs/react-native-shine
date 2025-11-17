@@ -90,6 +90,7 @@ export default function App() {
         highlightColors={colorMaskOptions}
       />
       <ShineGroup
+        translateViewIn3d={{}}
         glareOptions={glareOptions}
         lightPosition={lightPosition}
         effects={[Effects.HOLO]}
