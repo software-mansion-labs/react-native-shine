@@ -50,7 +50,7 @@ export const glareOptionsToTyped = (glareOptions: GlareOptions) => {
 export const createColorMasks = (
   colorMasks: DeepPartiallyOptional<ColorMask, 'baseColor'>[]
 ): ColorMask[] => {
-  const newColorMasks: ColorMask[] = new Array(16);
+  const newColorMasks: ColorMask[] = [];
   for (const i in colorMasks) {
     const {
       baseColor,
@@ -87,22 +87,6 @@ export const createColorMasks = (
     newColorMasks[i] = newColorMask;
   }
 
-  for (let i = 0; i < newColorMasks.length; i++) {
-    if (newColorMasks[i]) continue;
-    newColorMasks[i] = {
-      baseColor: [0, 0, 0],
-      useHSV: false,
-      rgbToleranceRange: {
-        upper: [0, 0, 0],
-        lower: [0, 0, 0],
-      },
-      hueToleranceRange: {
-        upper: 0,
-        lower: 0,
-      },
-    };
-  }
-
   // TODO: add radian and degree angle handling
   // '123deg' <- interpret as a numeric angle value
   //     2     <- interpret as a radian value
@@ -110,13 +94,43 @@ export const createColorMasks = (
   return newColorMasks;
 };
 
-export const colorMasksToTyped = (colorMasks: ColorMask[]) => {
-  const typedColorMasks = new Array(COLOR_MASK_MAX_COUNT);
-  for (let i = 0; i < colorMasks.length; i++) {
-    typedColorMasks[i] = colorMaskToTyped(colorMasks[i]!);
+const fillColorMaskBufferWithDummies = (
+  colorMasks: ColorMask[]
+): ColorMask[] => {
+  const dummyFilledColorMasks = new Array(COLOR_MASK_MAX_COUNT);
+  for (let i = 0; i < dummyFilledColorMasks.length; i++) {
+    if (i < colorMasks.length) {
+      dummyFilledColorMasks[i] = colorMasks[i];
+    } else {
+      dummyFilledColorMasks[i] = {
+        baseColor: [0, 0, 0],
+        useHSV: false,
+        rgbToleranceRange: {
+          upper: [0, 0, 0],
+          lower: [0, 0, 0],
+        },
+        hueToleranceRange: {
+          upper: 0,
+          lower: 0,
+        },
+      };
+    }
   }
+  return dummyFilledColorMasks;
+};
 
-  return typedColorMasks;
+export const colorMasksToTyped = (
+  colorMasks: ColorMask[],
+  reverseHighlight: boolean
+) => {
+  const typedColorMasks = fillColorMaskBufferWithDummies(colorMasks).map(
+    (mask) => colorMaskToTyped(mask)
+  );
+  return {
+    masks: typedColorMasks,
+    usedMaskCount: colorMasks.length,
+    reverseHighlight: reverseHighlight ? 1 : 0,
+  };
 };
 
 export const colorMaskToTyped = (colorMask: ColorMask) => {
@@ -137,6 +151,7 @@ export const colorMaskToTyped = (colorMask: ColorMask) => {
     lowBrightnessThreshold: f32(colorMask.lowBrightnessThreshold),
     debugMode: d.u32(colorMask.debugMode ? d.u32(1) : d.u32(0)),
   };
+
   return result;
 };
 

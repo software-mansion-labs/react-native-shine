@@ -49,9 +49,9 @@ import type {
   ColorAttachment,
   ColorMask,
   DeepPartiallyOptional,
+  Effect,
   GlareOptions,
   PipelineAttachmentPair,
-  ReverseHoloDetectionChannelFlags,
 } from '../types/types';
 import {
   colorMasksToTyped,
@@ -82,10 +82,11 @@ export interface SharedProps {
   glareOptions?: Partial<GlareOptions>;
   enableGlare?: boolean;
   highlightColors?: DeepPartiallyOptional<ColorMask, 'baseColor'>[];
+  isHighlightInclusive?: boolean;
   lightPosition?: SharedValue<V2d>;
-  addReverseHolo?: boolean;
-  reverseHoloDetectionChannelOptions?: Partial<ReverseHoloDetectionChannelFlags>;
-  addHolo?: boolean;
+  // addReverseHolo?: boolean;
+  // reverseHoloDetectionChannelOptions?: Partial<ReverseHoloDetectionChannelFlags>;
+  // addHolo?: boolean;
   translateViewIn3d?:
     | boolean
     | {
@@ -94,6 +95,7 @@ export interface SharedProps {
       };
   style?: ViewStyle;
   containerStyle?: ViewStyle;
+  effects: Effect[];
 }
 
 interface ContentProps extends SharedProps {
@@ -112,10 +114,12 @@ interface PipelineMap {
 }
 
 export default function Content({
-  addHolo,
-  addReverseHolo,
-  reverseHoloDetectionChannelOptions,
+  // addHolo,
+  // addReverseHolo,
+  // reverseHoloDetectionChannelOptions,
+  effects,
   highlightColors,
+  isHighlightInclusive = true,
   glareOptions,
   enableGlare = true,
   height,
@@ -305,16 +309,19 @@ export default function Content({
       colorMasksToTyped(
         createColorMasks(
           highlightColors ?? [{ baseColor: [-20, -20, -20], useHSV: false }]
-        )
+        ),
+        isHighlightInclusive
       )
     );
-    console.log(colorMaskBuffer);
     const colorMaskBindGroup = createColorMaskBindGroup(root, colorMaskBuffer);
 
+    const reverseHoloEffect = effects
+      ? effects.find((e) => e.name === 'reverseHolo')
+      : undefined;
     const reverseHoloDetectionChannelFlagsBuffer = bufferMap.addBuffer(
       root,
       'reverseHoloDetectionChannelFlags',
-      createReverseHoloDetectionChannelFlags(reverseHoloDetectionChannelOptions)
+      createReverseHoloDetectionChannelFlags(reverseHoloEffect?.options)
     );
     const reverseHoloDetectionChannelFlagsBindGroup =
       createReverseHoloDetectionChannelFlagsBindGroup(
@@ -322,6 +329,10 @@ export default function Content({
         reverseHoloDetectionChannelFlagsBuffer,
         glareBuffer
       );
+
+    const holoEffect = effects
+      ? effects.find((e) => e.name === 'holo')
+      : undefined;
 
     const pipelineMap: PipelineMap = {
       baseTexture: attachBindGroups(
@@ -413,9 +424,9 @@ export default function Content({
         pairs.push([glare, loadingAttachment]);
       }
       if (mask) pairs.push([mask, loadingAttachment]);
-      if (addReverseHolo && reverseHolo)
+      if (reverseHoloEffect && reverseHolo)
         pairs.push([reverseHolo, loadingAttachment]);
-      if (addHolo && holo) pairs.push([holo, loadingAttachment]);
+      if (holoEffect && holo) pairs.push([holo, loadingAttachment]);
       if (colorMask) pairs.push([colorMask, loadingAttachment]);
 
       pairs.forEach(([pipeline, attachment]) =>
@@ -445,10 +456,9 @@ export default function Content({
     glareOptions,
     enableGlare,
     highlightColors,
-    addHolo,
-    addReverseHolo,
-    reverseHoloDetectionChannelOptions,
     pixelSize,
+    effects,
+    isHighlightInclusive,
   ]);
 
   useAnimationFrame(() => renderRef.current?.());
@@ -456,11 +466,13 @@ export default function Content({
   return (
     <View
       style={{
-        transform: [
-          {
-            matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 50, 1],
-          },
-        ],
+        transform: translateViewIn3d
+          ? [
+              {
+                matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 50, 1],
+              },
+            ]
+          : [],
         ...containerStyle,
       }}
     >

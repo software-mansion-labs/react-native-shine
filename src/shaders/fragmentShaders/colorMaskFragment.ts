@@ -14,16 +14,25 @@ const colorMaskFragment = tgpu['~unstable'].fragmentFn({
 })((input) => {
   const texcoord = d.vec2f(input.uv.x, 1.0 - input.uv.y);
 
-  const masks = colorMaskBindGroupLayout.$.masks as ColorMaskArrayShaderAssert;
   let color = std.textureSample(
     textureBindGroupLayout.$.texture,
     textureBindGroupLayout.$.sampler,
     texcoord
   );
+  const masks = colorMaskBindGroupLayout.$.colorMasks
+    .masks as ColorMaskArrayShaderAssert;
+  const usedMaskCount = colorMaskBindGroupLayout.$.colorMasks.usedMaskCount;
+  const reverseHighlight =
+    colorMaskBindGroupLayout.$.colorMasks.reverseHighlight;
 
   let colorMaskDebug = d.u32(0);
-  let cumulativeMaskCheck = false;
-  for (let i = 0; i < masks.length; i++) {
+  let cumulativeMaskCheck = d.u32(0);
+  const colorHSV = rgbToHSV(color.xyz);
+
+  //TODO: optimize this more
+  for (let i = 0; i < 16; i++) {
+    if (usedMaskCount <= i) break;
+
     const mask = masks[i];
     const maskedColor = mask.baseColor;
     const rgbToleranceRange = mask.rgbToleranceRange;
@@ -45,7 +54,6 @@ const colorMaskFragment = tgpu['~unstable'].fragmentFn({
     const rgbCheck = upperCheck && lowerCheck;
 
     const maskedHSV = rgbToHSV(maskedColor);
-    const colorHSV = rgbToHSV(color.xyz);
 
     let hueDiff = std.sub(colorHSV.x, maskedHSV.x);
     hueDiff = std.select(hueDiff, std.sub(hueDiff, 1.0), hueDiff > d.f32(0.5));
@@ -67,6 +75,7 @@ const colorMaskFragment = tgpu['~unstable'].fragmentFn({
     const targetIsBlack = maskedHSV.z < lowBrightnessThreshold;
 
     //hue is unstable when either color is gray or black (low saturation or low brightness)
+    //TODO: investigate the '||' operator usage, it seems to severely slow down the shader?
     const hueIsUnstable =
       pixelIsGray || targetIsGray || pixelIsBlack || targetIsBlack;
 
@@ -74,16 +83,21 @@ const colorMaskFragment = tgpu['~unstable'].fragmentFn({
 
     const hsvCheck = hueCheck && saturationCheck && brightnessCheck;
     const maskCheck = std.select(rgbCheck, hsvCheck, useHSV === d.u32(1));
-    cumulativeMaskCheck = cumulativeMaskCheck || maskCheck;
-    colorMaskDebug = std.select(0.0, mask.debugMode, mask.debugMode === 1.0);
+    cumulativeMaskCheck = cumulativeMaskCheck + d.u32(maskCheck);
+    colorMaskDebug = colorMaskDebug + mask.debugMode;
   }
 
-  color = std.select(color, d.vec4f(color.xyz, 0.0), cumulativeMaskCheck);
+  const maskingLogic = std.select(
+    cumulativeMaskCheck > 0,
+    cumulativeMaskCheck === 0,
+    reverseHighlight === 1
+  );
+  color = std.select(color, d.vec4f(color.xyz, 0.0), maskingLogic);
   //debug - shows masked areas coloring them red
   color = std.select(
     color,
     d.vec4f(1.0, 0.0, 0.0, 0.0),
-    cumulativeMaskCheck && colorMaskDebug === d.u32(1)
+    maskingLogic && colorMaskDebug > 0
   );
   return color;
 });

@@ -56,6 +56,16 @@ export type ColorMaskArrayShaderAssert = [
   any,
 ];
 
+export type Effect =
+  | {
+      name: 'reverseHolo';
+      options: Partial<ReverseHoloDetectionChannelFlags>;
+    }
+  | {
+      name: 'holo';
+      options?: HoloOptions;
+    };
+
 export type ReverseHoloDetectionChannelFlags = {
   redChannel: number;
   greenChannel: number;

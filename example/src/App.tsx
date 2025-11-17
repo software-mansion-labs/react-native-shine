@@ -5,6 +5,7 @@ import {
   addV2d,
   angleToV2d,
   ColorPresets,
+  Effects,
   multiplyV2d,
   Shine,
   ShineGroup,
@@ -12,7 +13,7 @@ import {
   type V2d,
   zeroV2d,
 } from 'react-native-shine';
-import { tree_img, watch_img } from './img';
+import { tree_img } from './img';
 import type { ColorMask, DeepPartiallyOptional } from '../../src/types/types';
 
 export default function App() {
@@ -45,14 +46,23 @@ export default function App() {
   });
 
   const [colorMaskOptions /*setColorMaskOptions*/] = useState<
-    DeepPartiallyOptional<ColorMask, 'baseColor'>
-  >({
-    baseColor: ColorPresets.NAVY, //[80, 60, 30],
-    useHSV: true,
-    hueToleranceRange: { upper: 30, lower: 30 },
-    lowBrightnessThreshold: 0.1,
-    lowSaturationThreshold: 0.1,
-  });
+    DeepPartiallyOptional<ColorMask, 'baseColor'>[]
+  >([
+    {
+      baseColor: ColorPresets.NAVY, //[80, 60, 30],
+      useHSV: true,
+      hueToleranceRange: { upper: 30, lower: 30 },
+      lowBrightnessThreshold: 0.1,
+      lowSaturationThreshold: 0.1,
+    },
+    {
+      baseColor: ColorPresets.BEIGE, //[80, 60, 30],
+      useHSV: true,
+      hueToleranceRange: { upper: 50, lower: 15 },
+      lowBrightnessThreshold: 0.1,
+      lowSaturationThreshold: 0.1,
+    },
+  ]);
 
   useFrameCallback(() => {
     lightPosition.value = addV2d(
@@ -72,27 +82,17 @@ export default function App() {
       <Shine
         width={734 * nw}
         height={1024 * nh}
-        imageURI={watch_img}
-        maskURI={watch_img}
-        // addHolo={true}
-        addReverseHolo={true}
-        reverseHoloDetectionChannelOptions={detectionChannelState}
+        imageURI={tree_img}
+        maskURI={tree_img}
+        effects={[{ ...Effects.REVERSE_HOLO, options: detectionChannelState }]}
         glareOptions={glareOptions}
         lightPosition={lightPosition}
-        translateViewIn3d={{}}
-        highlightColors={[
-          colorMaskOptions,
-          // {
-          //   ...colorMaskOptions,
-          //   baseColor: ColorPresets.BEIGE,
-          //   hueToleranceRange: { upper: 30, lower: 30 },
-          // },
-        ]}
+        highlightColors={colorMaskOptions}
       />
       <ShineGroup
         glareOptions={glareOptions}
-        // addHolo={true}
         lightPosition={lightPosition}
+        effects={[Effects.HOLO]}
       >
         <View style={{ backgroundColor: 'blue' }}>
           <View>

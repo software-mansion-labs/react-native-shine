@@ -17,3 +17,5 @@ export type { ShineProps } from './components/Shine';
 export * from './utils/vector';
 export type { V2d, V3d } from './types/vector';
 export * from './enums/colorPresets';
+export * from './enums/effectPresets';
+export * from './enums/colorHighlightPresets';

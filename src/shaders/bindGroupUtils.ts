@@ -62,7 +62,7 @@ export const createColorMaskBindGroup = (
   buffer: TgpuBuffer<ColorMaskArraySchema> & UniformFlag
 ) =>
   root.createBindGroup(colorMaskBindGroupLayout, {
-    masks: buffer,
+    colorMasks: buffer,
   });
 
 export const createReverseHoloDetectionChannelFlagsBindGroup = (

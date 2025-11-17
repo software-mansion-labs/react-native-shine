@@ -56,15 +56,16 @@ export type ColorMaskSchema = typeof colorMaskSchema;
 
 export const COLOR_MASK_MAX_COUNT = 16;
 
-export const colorMaskArraySchema = d.arrayOf(
-  colorMaskSchema,
-  COLOR_MASK_MAX_COUNT
-);
+export const colorMaskArraySchema = d.struct({
+  masks: d.arrayOf(colorMaskSchema, COLOR_MASK_MAX_COUNT),
+  usedMaskCount: d.i32,
+  reverseHighlight: d.i32,
+});
 
 export type ColorMaskArraySchema = typeof colorMaskArraySchema;
 
 export const colorMaskBindGroupLayout = tgpu.bindGroupLayout({
-  masks: { uniform: colorMaskArraySchema },
+  colorMasks: { uniform: colorMaskArraySchema },
 });
 
 export const reverseHoloDetectionChannelFlagsSchema = d.struct({
