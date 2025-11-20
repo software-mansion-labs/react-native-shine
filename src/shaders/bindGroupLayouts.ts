@@ -87,8 +87,9 @@ export const reverseHoloDetectionChannelFlagsBindGroupLayout =
   });
 
 export type BufferSchemas =
+  | d.Vec3f
   | ReverseHoloDetectionChannelFlagsSchema
-  | ColorMaskSchema
+  | ColorMaskArraySchema
   | GlareSchema;
 
 export const bufferData = {
@@ -110,7 +111,7 @@ export const bufferData = {
   },
 } as const satisfies Record<
   string,
-  { schema: ValidateBufferSchema<any>; usage: BufferUsageType }
+  { schema: ValidateBufferSchema<BufferSchemas>; usage: BufferUsageType }
 >;
 
 export type BufferData = typeof bufferData;

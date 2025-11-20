@@ -58,9 +58,9 @@ PODS:
     - ReactNativeDependencies
     - Yoga
   - FBLazyVector (0.81.0)
-  - hermes-engine (0.81.4):
-    - hermes-engine/Pre-built (= 0.81.4)
-  - hermes-engine/Pre-built (0.81.4)
+  - hermes-engine (0.81.0):
+    - hermes-engine/Pre-built (= 0.81.0)
+  - hermes-engine/Pre-built (0.81.0)
   - RCTDeprecation (0.81.0)
   - RCTRequired (0.81.0)
   - RCTTypeSafety (0.81.0):
@@ -100,7 +100,7 @@ PODS:
     - React-utils
     - ReactNativeDependencies
     - Yoga
-  - React-Core-prebuilt (0.81.4):
+  - React-Core-prebuilt (0.81.0):
     - ReactNativeDependencies
   - React-Core/CoreModulesHeaders (0.81.0):
     - hermes-engine
@@ -2106,14 +2106,14 @@ SPEC CHECKSUMS:
   ExpoKeepAwake: 1a2e820692e933c94a565ec3fbbe38ac31658ffe
   ExpoModulesCore: e646280de9e06297a3668c568ddc6b8564fa2896
   FBLazyVector: ab4b9b95d08c7d60f758a8ec05e83803eea069b4
-  hermes-engine: 35c763d57c9832d0eef764316ca1c4d043581394
+  hermes-engine: e7491a2038f2618c8cd444ed411a6deb350a3742
   RCTDeprecation: 368edec96c3f4e20f89b5ee10b694e2103b33511
   RCTRequired: b72d606f27bbc2428967eea01da57c33e1e8909e
   RCTTypeSafety: c1a121340f401122046012dc32d5f31d63782c3c
   React: 1000c0e96d8fb9fbdaf13f7d31d0b09db3cbb4ac
   React-callinvoker: 26dc5861f10a25d89d2f5f976bf280c6adcf365d
   React-Core: bfd0c56a31d99c7a3e6cad33ec708115fef84f9d
-  React-Core-prebuilt: dde79b89f8863efebb1d532a3335f472927da669
+  React-Core-prebuilt: bf9b8f4d22972e9a4c1163efd405625ac8b1043e
   React-CoreModules: e6944eda15b49da4af28081173aaddf28579998e
   React-cxxreact: 2a19c06995834bcd216a0645a599e288d1e7ea97
   React-debug: 87a7f77deb10d7022bee2af6c232ca6903482b1f

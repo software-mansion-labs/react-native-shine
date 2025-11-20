@@ -310,7 +310,9 @@ export default function Content({
         createColorMasks(
           highlightColors ?? [{ baseColor: [-20, -20, -20], useHSV: false }]
         ),
-        isHighlightInclusive
+        highlightColors && highlightColors.length
+          ? isHighlightInclusive
+          : !isHighlightInclusive
       )
     );
     const colorMaskBindGroup = createColorMaskBindGroup(root, colorMaskBuffer);
@@ -420,7 +422,7 @@ export default function Content({
         [baseTexture, initialAttachment],
       ];
 
-      if ((glareOptions || !enableGlare) && glare) {
+      if ((glareOptions || enableGlare) && glare) {
         pairs.push([glare, loadingAttachment]);
       }
       if (mask) pairs.push([mask, loadingAttachment]);

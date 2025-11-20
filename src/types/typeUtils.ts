@@ -1,4 +1,4 @@
-import { f32, vec2f, vec3f, vec4f } from 'typegpu/data';
+import { vec2f, vec3f, vec4f } from 'typegpu/data';
 import * as d from 'typegpu/data';
 import type {
   GlareOptions,
@@ -7,11 +7,16 @@ import type {
   vec3,
   HoloOptions,
   ReverseHoloDetectionChannelFlags,
+  vec2,
+  vec4,
 } from './types';
 import { div } from 'typegpu/std';
 import { WAVE_CALLBACKS } from '../enums/waveCallback';
 import { colorMaskDebug } from '../config/debugMode';
-import { COLOR_MASK_MAX_COUNT } from '../shaders/bindGroupLayouts';
+import {
+  COLOR_MASK_MAX_COUNT,
+  type ColorMaskSchema,
+} from '../shaders/bindGroupLayouts';
 
 export const createGlareOptions = (
   options: Partial<GlareOptions>
@@ -36,13 +41,13 @@ export const createGlareOptions = (
 
 export const glareOptionsToTyped = (glareOptions: GlareOptions) => {
   return {
-    glowPower: f32(glareOptions.glowPower),
-    lightIntensity: f32(glareOptions.lightIntensity),
-    glareIntensity: f32(glareOptions.glareIntensity),
+    glowPower: glareOptions.glowPower,
+    lightIntensity: glareOptions.lightIntensity,
+    glareIntensity: glareOptions.glareIntensity,
     glareColor: {
-      hueShiftAngleMax: f32(glareOptions.glareColor.hueShiftAngleMax),
-      hueShiftAngleMin: f32(glareOptions.glareColor.hueShiftAngleMin),
-      hueBlendPower: f32(glareOptions.glareColor.hueBlendPower),
+      hueShiftAngleMax: glareOptions.glareColor.hueShiftAngleMax,
+      hueShiftAngleMin: glareOptions.glareColor.hueShiftAngleMin,
+      hueBlendPower: glareOptions.glareColor.hueBlendPower,
     },
   };
 };
@@ -140,17 +145,17 @@ export const colorMaskToTyped = (colorMask: ColorMask) => {
       upper: div(numberArrToTyped(colorMask.rgbToleranceRange.upper), 255),
       lower: div(numberArrToTyped(colorMask.rgbToleranceRange.lower), 255),
     },
-    useHSV: d.u32(colorMask.useHSV ? 1 : 0),
+    useHSV: colorMask.useHSV ? 1 : 0,
     hueToleranceRange: {
-      lower: div(f32(colorMask.hueToleranceRange.lower), 360),
-      upper: div(f32(colorMask.hueToleranceRange.upper), 360),
+      lower: div(colorMask.hueToleranceRange.lower, 360),
+      upper: div(colorMask.hueToleranceRange.upper, 360),
     },
-    brightnessTolerance: f32(colorMask.brightnessTolerance),
-    saturationTolerance: f32(colorMask.saturationTolerance),
-    lowSaturationThreshold: f32(colorMask.lowSaturationThreshold),
-    lowBrightnessThreshold: f32(colorMask.lowBrightnessThreshold),
-    debugMode: d.u32(colorMask.debugMode ? d.u32(1) : d.u32(0)),
-  };
+    brightnessTolerance: colorMask.brightnessTolerance,
+    saturationTolerance: colorMask.saturationTolerance,
+    lowSaturationThreshold: colorMask.lowSaturationThreshold,
+    lowBrightnessThreshold: colorMask.lowBrightnessThreshold,
+    debugMode: colorMask.debugMode ? 1 : 0,
+  } as d.Infer<ColorMaskSchema>;
 
   return result;
 };
@@ -176,29 +181,33 @@ export const createReverseHoloDetectionChannelFlags = (
       options;
 
     channelFlags = {
-      redChannel: redChannel ?? d.f32(0.0),
-      greenChannel: greenChannel ?? d.f32(0.0),
-      blueChannel: blueChannel ?? d.f32(0.0),
-      hue: hue ?? d.f32(0.0),
-      saturation: saturation ?? d.f32(0.0),
-      value: value ?? d.f32(0.0),
+      redChannel: redChannel ?? 0.0,
+      greenChannel: greenChannel ?? 0.0,
+      blueChannel: blueChannel ?? 0.0,
+      hue: hue ?? 0.0,
+      saturation: saturation ?? 0.0,
+      value: value ?? 0.0,
     };
   } else {
     channelFlags = {
-      redChannel: d.f32(1.0),
-      greenChannel: d.f32(0.0),
-      blueChannel: d.f32(0.0),
-      hue: d.f32(0.0),
-      saturation: d.f32(0.0),
-      value: d.f32(0.0),
+      redChannel: 1.0,
+      greenChannel: 0.0,
+      blueChannel: 0.0,
+      hue: 0.0,
+      saturation: 0.0,
+      value: 0.0,
     };
   }
 
   return channelFlags;
 };
 
-export const numberArrToTyped = (vec: number[]) => {
-  let convFn: ((...args: number[]) => any) | null = null;
+export function numberArrToTyped(vec: vec2): d.v2f;
+export function numberArrToTyped(vec: vec3): d.v3f;
+export function numberArrToTyped(vec: vec4): d.v4f;
+export function numberArrToTyped(vec: number[]): d.v2f | d.v3f | d.v4f;
+export function numberArrToTyped(vec: number[]) {
+  let convFn: ((...args: number[]) => d.v2f | d.v3f | d.v4f) | null = null;
   switch (vec.length) {
     case 2:
       convFn = vec2f;
@@ -215,4 +224,4 @@ export const numberArrToTyped = (vec: number[]) => {
 
   const typed = convFn(...vec);
   return typed;
-};
+}

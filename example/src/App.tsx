@@ -87,7 +87,8 @@ export default function App() {
         effects={[{ ...Effects.REVERSE_HOLO, options: detectionChannelState }]}
         glareOptions={glareOptions}
         lightPosition={lightPosition}
-        highlightColors={colorMaskOptions}
+        enableGlare={false}
+        highlightColors={[]}
       />
       <ShineGroup
         translateViewIn3d={{}}

@@ -1,10 +1,15 @@
+import { type BufferSchemas } from './../bindGroupLayouts';
 import type { TgpuRoot, TgpuBuffer, ValidateBufferSchema } from 'typegpu';
 import { debug } from '../../config/debugMode';
+import type { Infer } from 'typegpu/data';
 
 export type BufferUsageType = 'uniform' | 'storage' | 'vertex';
 
 type BufferWithUsageFromEntry<
-  TEntry extends { schema: ValidateBufferSchema<any>; usage: BufferUsageType },
+  TEntry extends {
+    schema: ValidateBufferSchema<BufferSchemas>;
+    usage: BufferUsageType;
+  },
 > = TEntry['usage'] extends 'uniform'
   ? TgpuBuffer<TEntry['schema']> & { usableAsUniform: true }
   : TEntry['usage'] extends 'storage'
@@ -16,7 +21,7 @@ type BufferWithUsageFromEntry<
 export class TypedBufferMap<
   TSchemas extends Record<
     string,
-    { schema: ValidateBufferSchema<any>; usage: BufferUsageType }
+    { schema: ValidateBufferSchema<BufferSchemas>; usage: BufferUsageType }
   >,
 > {
   private buffers: {
@@ -41,7 +46,7 @@ export class TypedBufferMap<
   addBuffer<K extends keyof TSchemas>(
     root: TgpuRoot,
     key: K,
-    initValues?: TSchemas[K]['schema']['_TSType']
+    initValues?: Infer<TSchemas[K]['schema']>
   ): BufferWithUsageFromEntry<TSchemas[K]> {
     const entry = this.schemas[key];
     if (!entry) {
