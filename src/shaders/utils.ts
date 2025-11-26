@@ -57,3 +57,32 @@ export function subscribeToOrientationChange(
 
   return () => subscription.remove();
 }
+
+export function deepMerge<T>(target: T, source: unknown): T {
+  if (
+    typeof target !== 'object' ||
+    target === null ||
+    typeof source !== 'object' ||
+    source === null
+  ) {
+    return source as T;
+  }
+
+  const result = { ...target } as any;
+  const src = source as any;
+
+  for (const key in src) {
+    if (Object.prototype.hasOwnProperty.call(src, key)) {
+      if (
+        key in result &&
+        typeof result[key] === 'object' &&
+        result[key] !== null
+      ) {
+        result[key] = deepMerge(result[key], src[key]);
+      } else {
+        result[key] = src[key];
+      }
+    }
+  }
+  return result;
+}

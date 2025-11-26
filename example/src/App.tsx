@@ -5,7 +5,6 @@ import {
   addV2d,
   angleToV2d,
   ColorPresets,
-  Effects,
   multiplyV2d,
   Shine,
   ShineGroup,
@@ -84,17 +83,17 @@ export default function App() {
         height={1024 * nh}
         imageURI={tree_img}
         maskURI={tree_img}
-        effects={[{ ...Effects.REVERSE_HOLO, options: detectionChannelState }]}
-        glareOptions={glareOptions}
+        effects={[
+          { name: 'glare', options: glareOptions },
+          { name: 'reverseHolo', options: detectionChannelState },
+        ]}
         lightPosition={lightPosition}
-        enableGlare={false}
-        highlightColors={[]}
+        highlightColors={colorMaskOptions}
       />
       <ShineGroup
         translateViewIn3d={{}}
-        glareOptions={glareOptions}
+        effects={[{ name: 'glare', options: glareOptions }]}
         lightPosition={lightPosition}
-        effects={[Effects.HOLO]}
       >
         <View style={{ backgroundColor: 'blue' }}>
           <View>

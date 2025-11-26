@@ -14,51 +14,14 @@ import {
   type RNCanvasContext,
 } from 'react-native-wgpu';
 import * as d from 'typegpu/data';
-import type {
-  TextureProps,
-  TgpuRenderPipeline,
-  TgpuRoot,
-  TgpuTexture,
-} from 'typegpu';
+import type { TextureProps, TgpuRoot, TgpuTexture } from 'typegpu';
 import {
-  bufferData,
-  type BufferData,
-  textureBindGroupLayout,
+  colorMaskArraySchema,
+  rotationSchema,
 } from '../shaders/bindGroupLayouts';
 import useAnimationFrame from '../hooks/useAnimationFrame';
-import { TypedBufferMap } from '../shaders/resourceManagement/bufferManager';
-import {
-  createColorMaskBindGroup,
-  createGlareBindGroup,
-  createReverseHoloDetectionChannelFlagsBindGroup,
-  createRotationValuesBindGroup,
-} from '../shaders/bindGroupUtils';
-import colorMaskFragment from '../shaders/fragmentShaders/colorMaskFragment';
-import { newGlareFragment } from '../shaders/fragmentShaders/glareFragment';
-import {
-  attachBindGroups,
-  blend,
-  createMaskPipeline,
-  createRainbowHoloPipeline as createHoloPipeline,
-  createReverseHoloPipeline,
-  getDefaultTarget,
-} from '../shaders/pipelineSetups';
-import mainVertex from '../shaders/vertexShaders/mainVertex';
 import { subscribeToOrientationChange } from '../shaders/utils';
-import type {
-  ColorAttachment,
-  ColorMask,
-  DeepPartiallyOptional,
-  Effect,
-  GlareOptions,
-  PipelineAttachmentPair,
-} from '../types/types';
-import {
-  colorMasksToTyped,
-  createColorMasks,
-  createGlareOptions,
-  createReverseHoloDetectionChannelFlags,
-} from '../types/typeUtils';
+import type { ColorMask, DeepPartiallyOptional } from '../types/types';
 import type { V2d, V3d } from '../types/vector';
 import {
   addV3d,
@@ -75,18 +38,18 @@ import {
   zeroV3d,
 } from '../utils/vector';
 import { baseTextureFragment } from '../shaders/fragmentShaders/baseTextureFragment';
+import { PipelineManager } from '../shaders/resourceManagement/pipelineMap';
+import { blend, Effects, type Effect } from '../enums/effectPresets';
+import { colorMasksToTyped, createColorMasks } from '../types/typeUtils';
+import { createColorMaskBindGroup } from '../shaders/bindGroupUtils';
+import colorMaskFragment from '../shaders/fragmentShaders/colorMaskFragment';
 
 export interface SharedProps {
   width: number;
   height: number;
-  glareOptions?: Partial<GlareOptions>;
-  enableGlare?: boolean;
   highlightColors?: DeepPartiallyOptional<ColorMask, 'baseColor'>[];
   isHighlightInclusive?: boolean;
   lightPosition?: SharedValue<V2d>;
-  // addReverseHolo?: boolean;
-  // reverseHoloDetectionChannelOptions?: Partial<ReverseHoloDetectionChannelFlags>;
-  // addHolo?: boolean;
   translateViewIn3d?:
     | boolean
     | {
@@ -104,24 +67,10 @@ interface ContentProps extends SharedProps {
   maskTexture?: TgpuTexture<TextureProps>;
 }
 
-interface PipelineMap {
-  baseTexture: TgpuRenderPipeline;
-  glare: TgpuRenderPipeline | void;
-  colorMask: TgpuRenderPipeline | void;
-  mask: TgpuRenderPipeline | void;
-  reverseHolo: TgpuRenderPipeline | void;
-  holo: TgpuRenderPipeline | void;
-}
-
 export default function Content({
-  // addHolo,
-  // addReverseHolo,
-  // reverseHoloDetectionChannelOptions,
-  effects,
+  effects = [{ name: 'glare' }],
   highlightColors,
   isHighlightInclusive = true,
-  glareOptions,
-  enableGlare = true,
   height,
   imageTexture,
   maskTexture,
@@ -136,7 +85,6 @@ export default function Content({
   // const { ref, context } = useGPUContext();
   const ref = useRef<CanvasRef>(null);
   const [context, setContext] = useState<RNCanvasContext | null>(null);
-  // const context = ref.current!.getContext('webgpu')!;
 
   useEffect(() => {
     if (ref) setContext(ref.current?.getContext('webgpu')!);
@@ -162,9 +110,10 @@ export default function Content({
   const calibrated = useSharedValue<boolean>(false);
   const gravitySensor = useAnimatedSensor(SensorType.GRAVITY, { interval: 20 });
 
-  const bufferMap = useMemo(
-    () => new TypedBufferMap<BufferData>(bufferData),
-    []
+  const pipelineCache = useMemo(
+    () =>
+      new PipelineManager(root, presentationFormat, imageTexture, maskTexture),
+    [imageTexture, maskTexture, presentationFormat, root]
   );
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -271,169 +220,41 @@ export default function Content({
       format: presentationFormat,
       alphaMode: 'premultiplied',
     });
+    pipelineCache.addPipeline(baseTextureFragment);
 
-    // const sampler = device.createSampler({
-    //   magFilter: 'linear',
-    //   minFilter: 'linear',
-    //   mipmapFilter: 'linear',
-    // });
-
-    const sampler = root['~unstable'].createSampler({
-      magFilter: 'linear',
-      minFilter: 'linear',
-      mipmapFilter: 'linear',
-    }) as any as GPUSampler; //TODO: delete this cast when TgpuFixedSampler gets exposed
-
-    const imageTextureBindGroup = root.createBindGroup(textureBindGroupLayout, {
-      texture: root.unwrap(imageTexture).createView(),
-      sampler,
+    effects.forEach(({ name, options }) => {
+      const effect = Effects[name];
+      pipelineCache.addPipelineWithBuffer(effect, options);
     });
 
-    const rotationBuffer = bufferMap.addBuffer(root, 'rotation', d.vec3f(0.0));
-
-    const rotationBindGroup = createRotationValuesBindGroup(
-      root,
-      rotationBuffer
-    );
-
-    const glareBuffer = bufferMap.addBuffer(
-      root,
-      'glare',
-      createGlareOptions(glareOptions ?? {})
-    );
-    const glareBindGroup = createGlareBindGroup(root, glareBuffer);
-
-    const colorMaskBuffer = bufferMap.addBuffer(
-      root,
-      'colorMask',
-      colorMasksToTyped(
-        createColorMasks(
-          highlightColors ?? [{ baseColor: [-20, -20, -20], useHSV: false }]
-        ),
-        highlightColors && highlightColors.length
-          ? isHighlightInclusive
-          : !isHighlightInclusive
-      )
-    );
-    const colorMaskBindGroup = createColorMaskBindGroup(root, colorMaskBuffer);
-
-    const reverseHoloEffect = effects
-      ? effects.find((e) => e.name === 'reverseHolo')
-      : undefined;
-    const reverseHoloDetectionChannelFlagsBuffer = bufferMap.addBuffer(
-      root,
-      'reverseHoloDetectionChannelFlags',
-      createReverseHoloDetectionChannelFlags(reverseHoloEffect?.options)
-    );
-    const reverseHoloDetectionChannelFlagsBindGroup =
-      createReverseHoloDetectionChannelFlagsBindGroup(
-        root,
-        reverseHoloDetectionChannelFlagsBuffer,
-        glareBuffer
+    //TODO: move to effect definition
+    if (highlightColors) {
+      const colorMaskBuffer = pipelineCache.buffersMap.syncUniformBuffer(
+        colorMaskArraySchema,
+        colorMasksToTyped(
+          createColorMasks(
+            highlightColors ?? [{ baseColor: [-20, -20, -20], useHSV: false }]
+          ),
+          highlightColors && highlightColors.length
+            ? isHighlightInclusive
+            : !isHighlightInclusive
+        )
       );
-
-    const holoEffect = effects
-      ? effects.find((e) => e.name === 'holo')
-      : undefined;
-
-    const pipelineMap: PipelineMap = {
-      baseTexture: attachBindGroups(
-        root['~unstable']
-          .withVertex(mainVertex, {})
-          .withFragment(
-            baseTextureFragment,
-            getDefaultTarget(presentationFormat)
-          )
-          .createPipeline(),
-        [imageTextureBindGroup, rotationBindGroup]
-      ),
-      glare: attachBindGroups(
-        root['~unstable']
-          .withVertex(mainVertex, {})
-          .withFragment(newGlareFragment, getDefaultTarget(presentationFormat))
-          .createPipeline(),
-        [
-          imageTextureBindGroup,
-          rotationBindGroup,
-          glareBindGroup,
-          colorMaskBindGroup,
-        ]
-      ),
-      colorMask: attachBindGroups(
-        root['~unstable']
-          .withVertex(mainVertex, {})
-          .withFragment(
-            colorMaskFragment,
-            getDefaultTarget(presentationFormat, blend)
-          )
-          .createPipeline(),
-        [imageTextureBindGroup, colorMaskBindGroup, rotationBindGroup]
-      ),
-      mask: createMaskPipeline(
+      const colorMaskBindGroup = createColorMaskBindGroup(
         root,
-        maskTexture,
-        [imageTextureBindGroup, rotationBindGroup],
-        sampler,
-        presentationFormat
-      ),
-      reverseHolo: createReverseHoloPipeline(
-        root,
-        maskTexture,
-        [
-          imageTextureBindGroup,
-          rotationBindGroup,
-          reverseHoloDetectionChannelFlagsBindGroup,
-        ],
-        sampler,
-        presentationFormat
-      ),
-      holo: createHoloPipeline(
-        root,
-        imageTexture,
-        [rotationBindGroup],
-        sampler,
-        presentationFormat
-      ),
-    };
-
+        colorMaskBuffer
+      );
+      pipelineCache.addPipeline(colorMaskFragment, [colorMaskBindGroup], blend);
+    }
     const modifyBuffers = () => {
-      rotationBuffer.write(d.vec3f(...componentsFromV3d(rotation.value)));
+      pipelineCache.buffersMap
+        .get(rotationSchema)
+        ?.write(d.vec3f(...componentsFromV3d(rotation.value)));
     };
 
     const renderPipelines = () => {
       const view = context.getCurrentTexture().createView();
-      const initialAttachment: ColorAttachment = {
-        view,
-        clearValue: [0, 0, 0, 0],
-        loadOp: 'clear',
-        storeOp: 'store',
-      };
-      const loadingAttachment: ColorAttachment = {
-        view,
-        clearValue: [0, 0, 0, 0],
-        loadOp: 'load',
-        storeOp: 'store',
-      };
-
-      const { baseTexture, glare, mask, colorMask, holo, reverseHolo } =
-        pipelineMap;
-
-      const pairs: PipelineAttachmentPair[] = [
-        [baseTexture, initialAttachment],
-      ];
-
-      if ((glareOptions || enableGlare) && glare) {
-        pairs.push([glare, loadingAttachment]);
-      }
-      if (mask) pairs.push([mask, loadingAttachment]);
-      if (reverseHoloEffect && reverseHolo)
-        pairs.push([reverseHolo, loadingAttachment]);
-      if (holoEffect && holo) pairs.push([holo, loadingAttachment]);
-      if (colorMask) pairs.push([colorMask, loadingAttachment]);
-
-      pairs.forEach(([pipeline, attachment]) =>
-        pipeline.withColorAttachment(attachment).draw(6)
-      );
+      pipelineCache.renderPipelines(view);
     };
 
     const presentContext = () => context.present();
@@ -443,24 +264,18 @@ export default function Content({
       renderPipelines();
       presentContext();
     };
-
-    // const res = tgpu.resolve({ externals: { reverseHoloFragment } });
-    // console.log('reverseHoloFragment resolve:', res);
   }, [
-    device,
     context,
-    root,
-    presentationFormat,
-    imageTexture,
-    maskTexture,
-    rotation,
-    bufferMap,
-    glareOptions,
-    enableGlare,
-    highlightColors,
-    pixelSize,
+    device,
     effects,
+    highlightColors,
     isHighlightInclusive,
+    pipelineCache,
+    pixelSize.x,
+    pixelSize.y,
+    presentationFormat,
+    root,
+    rotation.value,
   ]);
 
   useAnimationFrame(() => renderRef.current?.());

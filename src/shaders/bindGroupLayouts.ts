@@ -2,18 +2,17 @@ import tgpu, { type ValidateBufferSchema } from 'typegpu';
 import * as d from 'typegpu/data';
 import type { BufferUsageType } from './resourceManagement/bufferManager';
 
-export const textureBindGroupLayout = tgpu.bindGroupLayout({
+export const rotationSchema = d.vec3f;
+
+export const sharedBindGroupLayout = tgpu.bindGroupLayout({
   texture: { texture: d.texture2d(d.f32) },
   sampler: { sampler: 'filtering' },
+  rot: { uniform: rotationSchema },
 });
 
 export const maskTextureBindGroupLayout = tgpu.bindGroupLayout({
   texture: { texture: d.texture2d(d.f32) },
   sampler: { sampler: 'filtering' },
-});
-
-export const rotationBindGroupLayout = tgpu.bindGroupLayout({
-  vec: { uniform: d.vec3f },
 });
 
 export const glareSchema = d.struct({

@@ -1,25 +1,17 @@
 import tgpu from 'typegpu';
 import * as d from 'typegpu/data';
 import * as std from 'typegpu/std';
-import {
-  rotationBindGroupLayout,
-  textureBindGroupLayout,
-} from '../bindGroupLayouts';
-import { hueShift } from '../tgpuUtils';
+import { sharedBindGroupLayout } from '../bindGroupLayouts';
+import { getPixelColorFromVector, hueShift } from '../tgpuUtils';
 import { waveCallbackSlot } from '../../enums/waveCallback';
 
 export const holoFragment = tgpu['~unstable'].fragmentFn({
   in: { uv: d.vec2f },
   out: d.vec4f,
 })((input) => {
-  const texcoord = d.vec2f(input.uv.x, 1.0 - input.uv.y);
-  const uv = texcoord;
-  const textureColor = std.textureSample(
-    textureBindGroupLayout.$.texture,
-    textureBindGroupLayout.$.sampler,
-    texcoord
-  );
-  const rot = rotationBindGroupLayout.$.vec;
+  const uv = d.vec2f(input.uv.x, 1.0 - input.uv.y);
+  const textureColor = getPixelColorFromVector(uv);
+  const rot = sharedBindGroupLayout.$.rot;
 
   const wave = waveCallbackSlot.$(rot.xy);
   const waveX = wave.x;
