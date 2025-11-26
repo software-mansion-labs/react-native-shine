@@ -85,6 +85,23 @@ export const reverseHoloDetectionChannelFlagsBindGroupLayout =
     glareOptions: { uniform: glareSchema },
   });
 
+export const holoSchema = d.struct({
+  directionDegree: d.align(16, d.f32),
+  shift: d.f32,
+  rotationShiftPower: d.f32,
+  holoSize: d.f32,
+  holoMultiplier: d.f32,
+  holoEaseSize: d.f32,
+  holoVisibility: d.f32,
+  holoSaturation: d.f32,
+});
+
+export type HoloSchema = typeof holoSchema;
+
+export const holoBindGroupLayout = tgpu.bindGroupLayout({
+  holoOptions: { uniform: holoSchema },
+});
+
 export type BufferSchemas =
   | d.Vec3f
   | ReverseHoloDetectionChannelFlagsSchema
@@ -114,14 +131,3 @@ export const bufferData = {
 >;
 
 export type BufferData = typeof bufferData;
-
-// export const holoSchema = d.struct({
-//   intensity: d.f32,
-//   waveCallback: WaveCallback, //TgpuFn<(uv: d.Vec2f) => d.Vec2f>,
-// });
-
-// export type holoSchema = typeof holoSchema;
-
-// export const holoBindGroupLayout = tgpu.bindGroupLayout({
-//   holoOptions: { uniform: holoSchema },
-// });

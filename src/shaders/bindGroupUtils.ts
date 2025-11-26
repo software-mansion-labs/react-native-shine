@@ -6,6 +6,8 @@ import {
   reverseHoloDetectionChannelFlagsBindGroupLayout,
   type ColorMaskArraySchema,
   glareBindGroupLayout,
+  holoBindGroupLayout,
+  type HoloSchema,
 } from './bindGroupLayouts';
 import type {
   BindGroupCreatorArgument,
@@ -45,3 +47,12 @@ export const createColorMaskBindGroup = (
   root.createBindGroup(colorMaskBindGroupLayout, {
     colorMasks: buffer,
   });
+
+export const createHoloBindGroup = (
+  { root }: BindGroupCreatorArgument,
+  [buffer]: readonly [buffer: TgpuUniformBuffer<HoloSchema>]
+) => [
+  root.createBindGroup(holoBindGroupLayout, {
+    holoOptions: buffer,
+  }),
+];

@@ -1,9 +1,11 @@
 import {
   glareSchema,
+  holoSchema,
   reverseHoloDetectionChannelFlagsSchema,
 } from '../shaders/bindGroupLayouts';
 import {
   createGlareBindGroup,
+  createHoloBindGroup,
   createReverseHoloDetectionChannelFlagsBindGroup,
 } from '../shaders/bindGroupUtils';
 import {
@@ -13,6 +15,10 @@ import {
 } from '../types/types';
 import { glareFragment } from '../shaders/fragmentShaders/glareFragment';
 import { reverseHoloFragment } from '../shaders/fragmentShaders/reverseHoloFragment';
+import {
+  doubleHoloFragment,
+  holoFragment,
+} from '../shaders/fragmentShaders/holoFragment';
 //TODO: move schema to separate object that would match them with corresponding bindGroups, then they would be defined in the effect
 
 export const blend: GPUBlendState = {
@@ -68,9 +74,34 @@ const REVERSE_HOLO = createEffect({
   blend,
 });
 
+const HOLO = createEffect({
+  fragment: holoFragment,
+  buffers: [
+    {
+      schema: holoSchema,
+      defaultOptions: {
+        directionDegree: 45,
+        shift: 0.1,
+        rotationShiftPower: 0.6,
+        holoSize: 0.12,
+        holoMultiplier: 2.5,
+        holoEaseSize: 0.2,
+        holoVisibility: 0.88,
+        holoSaturation: 0.5,
+      },
+    },
+  ],
+  bindGroupCreator: createHoloBindGroup,
+  blend,
+});
+
+const DOUBLE_HOLO = { ...HOLO, fragment: doubleHoloFragment };
+
 export const Effects = {
   glare: GLARE,
   reverseHolo: REVERSE_HOLO,
+  holo: HOLO,
+  doubleHolo: DOUBLE_HOLO,
 } as const; //todo: add forced typings
 
 export type Effect = {

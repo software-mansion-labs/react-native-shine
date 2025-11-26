@@ -180,3 +180,12 @@ export const getPixelColorFromNonReversedVector = tgpu.fn(
   const coords = d.vec2f(input.x, 1.0 - input.y);
   return getPixelColorFromVector(coords);
 });
+
+export const random = tgpu.fn(
+  [d.vec2f],
+  d.f32
+)((st) => {
+  return std.fract(
+    std.sin(std.dot(st, d.vec2f(12.9898, 78.233))) * 437358.845701
+  );
+});

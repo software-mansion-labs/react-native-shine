@@ -85,10 +85,12 @@ export default function App() {
         maskURI={tree_img}
         effects={[
           { name: 'glare', options: glareOptions },
+          { name: 'doubleHolo' },
           { name: 'reverseHolo', options: detectionChannelState },
         ]}
         lightPosition={lightPosition}
         highlightColors={colorMaskOptions}
+        translateViewIn3d
       />
       <ShineGroup
         translateViewIn3d={{}}

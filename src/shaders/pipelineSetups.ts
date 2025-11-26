@@ -7,12 +7,6 @@ import type {
 import { maskTextureBindGroupLayout } from './bindGroupLayouts';
 import mainVertex from './vertexShaders/mainVertex';
 import maskFragment from './fragmentShaders/maskFragment';
-import { holoFragment } from './fragmentShaders/holoFragment';
-import {
-  WAVE_CALLBACKS,
-  waveCallbackFn,
-  waveCallbackSlot,
-} from '../enums/waveCallback';
 import { blend } from '../enums/effectPresets';
 
 export const attachBindGroups = (
@@ -61,18 +55,4 @@ export const createMaskPipeline = (
   maskPipeline = attachBindGroups(maskPipeline, maskBGP);
 
   return maskPipeline;
-};
-
-export const createRainbowHoloPipeline = (
-  root: TgpuRoot,
-  bindGroups: TgpuBindGroup[],
-  presentationFormat: GPUTextureFormat
-): TgpuRenderPipeline | void => {
-  let rainbowHoloPipeline = root['~unstable']
-    .with(waveCallbackSlot, waveCallbackFn(WAVE_CALLBACKS.default))
-    .withVertex(mainVertex, {})
-    .withFragment(holoFragment, getDefaultTarget(presentationFormat, blend))
-    .createPipeline();
-
-  return attachBindGroups(rainbowHoloPipeline, bindGroups);
 };
