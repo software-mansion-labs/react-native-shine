@@ -8,6 +8,8 @@ import {
   glareBindGroupLayout,
   holoBindGroupLayout,
   type HoloSchema,
+  glareFlareSchema,
+  glareFlareBindGroupLayout,
 } from './bindGroupLayouts';
 import type {
   BindGroupCreatorArgument,
@@ -54,5 +56,14 @@ export const createHoloBindGroup = (
 ) => [
   root.createBindGroup(holoBindGroupLayout, {
     holoOptions: buffer,
+  }),
+];
+
+export const createGlareFlareBindGroup = (
+  { root }: BindGroupCreatorArgument,
+  [buffer]: readonly [buffer: TgpuUniformBuffer<glareFlareSchema>]
+) => [
+  root.createBindGroup(glareFlareBindGroupLayout, {
+    glareFlare: buffer,
   }),
 ];

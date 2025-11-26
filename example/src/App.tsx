@@ -84,7 +84,8 @@ export default function App() {
         imageURI={tree_img}
         maskURI={tree_img}
         effects={[
-          { name: 'glare', options: glareOptions },
+          // { name: 'glare', options: glareOptions },
+          { name: 'glareFlare' },
           { name: 'doubleHolo' },
           { name: 'reverseHolo', options: detectionChannelState },
         ]}

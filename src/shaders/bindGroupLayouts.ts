@@ -102,6 +102,21 @@ export const holoBindGroupLayout = tgpu.bindGroupLayout({
   holoOptions: { uniform: holoSchema },
 });
 
+export const glareFlareSchema = d.struct({
+  flareIntensity: d.f32,
+  spotIntensity: d.f32,
+  ringIntensity: d.f32,
+  rayIntensity: d.f32,
+  falloff: d.f32,
+  rayCount: d.f32,
+});
+
+export type glareFlareSchema = typeof glareFlareSchema;
+
+export const glareFlareBindGroupLayout = tgpu.bindGroupLayout({
+  glareFlare: { uniform: glareFlareSchema },
+});
+
 export type BufferSchemas =
   | d.Vec3f
   | ReverseHoloDetectionChannelFlagsSchema
