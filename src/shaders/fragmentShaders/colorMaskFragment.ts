@@ -1,24 +1,16 @@
 import tgpu from 'typegpu';
 import * as d from 'typegpu/data';
 import * as std from 'typegpu/std';
-import {
-  textureBindGroupLayout,
-  colorMaskBindGroupLayout,
-} from '../bindGroupLayouts';
-import { rgbToHSV } from '../tgpuUtils';
+import { colorMaskBindGroupLayout } from '../bindGroupLayouts';
+import { getPixelColorFromNonReversedVector, rgbToHSV } from '../tgpuUtils';
 import type { ColorMaskArrayShaderAssert } from '../../types/types';
 
 const colorMaskFragment = tgpu['~unstable'].fragmentFn({
   in: { uv: d.vec2f },
   out: d.vec4f,
 })((input) => {
-  const texcoord = d.vec2f(input.uv.x, 1.0 - input.uv.y);
+  let color = getPixelColorFromNonReversedVector(input.uv);
 
-  let color = std.textureSample(
-    textureBindGroupLayout.$.texture,
-    textureBindGroupLayout.$.sampler,
-    texcoord
-  );
   const masks = colorMaskBindGroupLayout.$.colorMasks
     .masks as ColorMaskArrayShaderAssert;
   const usedMaskCount = colorMaskBindGroupLayout.$.colorMasks.usedMaskCount;

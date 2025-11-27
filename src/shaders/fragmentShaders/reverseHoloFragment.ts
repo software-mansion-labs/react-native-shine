@@ -2,12 +2,11 @@ import tgpu from 'typegpu';
 import * as d from 'typegpu/data';
 import * as std from 'typegpu/std';
 import {
-  textureBindGroupLayout,
   maskTextureBindGroupLayout,
-  rotationBindGroupLayout,
   reverseHoloDetectionChannelFlagsBindGroupLayout,
+  sharedBindGroupLayout,
 } from '../bindGroupLayouts';
-import { hueShift, rgbToHSV } from '../tgpuUtils';
+import { getPixelColorFromVector, hueShift, rgbToHSV } from '../tgpuUtils';
 
 export const reverseHoloFragment = tgpu['~unstable'].fragmentFn({
   in: { uv: d.vec2f },
@@ -17,7 +16,7 @@ export const reverseHoloFragment = tgpu['~unstable'].fragmentFn({
   const uv = texcoord;
   const centeredCoords = std.sub(std.mul(uv, 2.0), 1.0);
 
-  const rot = rotationBindGroupLayout.$.vec;
+  const rot = sharedBindGroupLayout.$.rot;
   const center = std.add(d.vec2f(0.0), d.vec2f(rot.x, rot.y)); // center from device orientation/touch
 
   // glare options---------------------------------
@@ -43,11 +42,7 @@ export const reverseHoloFragment = tgpu['~unstable'].fragmentFn({
   const valueFlag = detectionChannelFlags.value;
   //------------------------------------------------
 
-  const cardColor = std.textureSample(
-    textureBindGroupLayout.$.texture,
-    textureBindGroupLayout.$.sampler,
-    texcoord
-  );
+  const cardColor = getPixelColorFromVector(texcoord);
 
   const holoMaskColor = std.textureSample(
     maskTextureBindGroupLayout.$.texture,

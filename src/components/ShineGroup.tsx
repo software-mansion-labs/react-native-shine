@@ -15,12 +15,10 @@ type ShineGroupProps = PropsWithChildren<Partial<ShineProps>>;
 
 export function ShineGroup({
   children,
-  glareOptions,
   highlightColors,
   maskURI,
   lightPosition: touchPosition,
   effects,
-  enableGlare = true,
   isHighlightInclusive = true,
   translateViewIn3d = false,
   containerStyle,
@@ -79,13 +77,11 @@ export function ShineGroup({
         <Shine
           {...sizeFromV2d(size)}
           imageURI={capturedURI}
-          glareOptions={glareOptions}
           highlightColors={highlightColors}
           maskURI={maskURI}
           lightPosition={touchPosition}
           effects={effects}
           translateViewIn3d={translateViewIn3d}
-          enableGlare={enableGlare}
           containerStyle={containerStyle}
           isHighlightInclusive={isHighlightInclusive}
           style={style}

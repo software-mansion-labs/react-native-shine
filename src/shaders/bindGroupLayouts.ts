@@ -2,18 +2,17 @@ import tgpu, { type ValidateBufferSchema } from 'typegpu';
 import * as d from 'typegpu/data';
 import type { BufferUsageType } from './resourceManagement/bufferManager';
 
-export const textureBindGroupLayout = tgpu.bindGroupLayout({
+export const rotationSchema = d.vec3f;
+
+export const sharedBindGroupLayout = tgpu.bindGroupLayout({
   texture: { texture: d.texture2d(d.f32) },
   sampler: { sampler: 'filtering' },
+  rot: { uniform: rotationSchema },
 });
 
 export const maskTextureBindGroupLayout = tgpu.bindGroupLayout({
   texture: { texture: d.texture2d(d.f32) },
   sampler: { sampler: 'filtering' },
-});
-
-export const rotationBindGroupLayout = tgpu.bindGroupLayout({
-  vec: { uniform: d.vec3f },
 });
 
 export const glareSchema = d.struct({
@@ -86,6 +85,38 @@ export const reverseHoloDetectionChannelFlagsBindGroupLayout =
     glareOptions: { uniform: glareSchema },
   });
 
+export const holoSchema = d.struct({
+  directionDegree: d.align(16, d.f32),
+  shift: d.f32,
+  rotationShiftPower: d.f32,
+  holoSize: d.f32,
+  holoMultiplier: d.f32,
+  holoEaseSize: d.f32,
+  holoVisibility: d.f32,
+  holoSaturation: d.f32,
+});
+
+export type HoloSchema = typeof holoSchema;
+
+export const holoBindGroupLayout = tgpu.bindGroupLayout({
+  holoOptions: { uniform: holoSchema },
+});
+
+export const glareFlareSchema = d.struct({
+  flareIntensity: d.f32,
+  spotIntensity: d.f32,
+  ringIntensity: d.f32,
+  rayIntensity: d.f32,
+  falloff: d.f32,
+  rayCount: d.f32,
+});
+
+export type glareFlareSchema = typeof glareFlareSchema;
+
+export const glareFlareBindGroupLayout = tgpu.bindGroupLayout({
+  glareFlare: { uniform: glareFlareSchema },
+});
+
 export const precomputeColorMaskBindGroupLayout = tgpu.bindGroupLayout({
   colorMaskTextureDst: {
     storageTexture: d.textureStorage2d('rgba8unorm', 'read-write'),
@@ -121,14 +152,3 @@ export const bufferData = {
 >;
 
 export type BufferData = typeof bufferData;
-
-// export const holoSchema = d.struct({
-//   intensity: d.f32,
-//   waveCallback: WaveCallback, //TgpuFn<(uv: d.Vec2f) => d.Vec2f>,
-// });
-
-// export type holoSchema = typeof holoSchema;
-
-// export const holoBindGroupLayout = tgpu.bindGroupLayout({
-//   holoOptions: { uniform: holoSchema },
-// });

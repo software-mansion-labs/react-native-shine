@@ -1,12 +1,10 @@
 import { vec2f, vec3f, vec4f } from 'typegpu/data';
 import * as d from 'typegpu/data';
 import type {
-  GlareOptions,
   ColorMask,
   DeepPartiallyOptional,
   vec3,
   HoloOptions,
-  ReverseHoloDetectionChannelFlags,
   vec2,
   vec4,
 } from './types';
@@ -17,40 +15,6 @@ import {
   COLOR_MASK_MAX_COUNT,
   type ColorMaskSchema,
 } from '../shaders/bindGroupLayouts';
-
-export const createGlareOptions = (
-  options: Partial<GlareOptions>
-): GlareOptions => {
-  const { glowPower, glareColor, lightIntensity, glareIntensity } = options;
-  const { hueBlendPower, hueShiftAngleMax, hueShiftAngleMin } =
-    glareColor || {};
-
-  const glareOp = {
-    glowPower: glowPower ?? 1.0,
-    lightIntensity: lightIntensity ?? 1.0,
-    glareIntensity: glareIntensity ?? 1.0,
-    glareColor: {
-      hueShiftAngleMax: hueShiftAngleMax ?? 1.0,
-      hueShiftAngleMin: hueShiftAngleMin ?? 0.0,
-      hueBlendPower: hueBlendPower ?? 1.0,
-    },
-  };
-
-  return glareOp;
-};
-
-export const glareOptionsToTyped = (glareOptions: GlareOptions) => {
-  return {
-    glowPower: glareOptions.glowPower,
-    lightIntensity: glareOptions.lightIntensity,
-    glareIntensity: glareOptions.glareIntensity,
-    glareColor: {
-      hueShiftAngleMax: glareOptions.glareColor.hueShiftAngleMax,
-      hueShiftAngleMin: glareOptions.glareColor.hueShiftAngleMin,
-      hueBlendPower: glareOptions.glareColor.hueBlendPower,
-    },
-  };
-};
 
 export const createColorMasks = (
   colorMasks: DeepPartiallyOptional<ColorMask, 'baseColor'>[]
@@ -170,36 +134,6 @@ export const createHoloOptions = (
   };
 
   return holoOpt;
-};
-
-export const createReverseHoloDetectionChannelFlags = (
-  options?: Partial<ReverseHoloDetectionChannelFlags>
-) => {
-  let channelFlags;
-  if (options) {
-    const { redChannel, greenChannel, blueChannel, hue, saturation, value } =
-      options;
-
-    channelFlags = {
-      redChannel: redChannel ?? 0.0,
-      greenChannel: greenChannel ?? 0.0,
-      blueChannel: blueChannel ?? 0.0,
-      hue: hue ?? 0.0,
-      saturation: saturation ?? 0.0,
-      value: value ?? 0.0,
-    };
-  } else {
-    channelFlags = {
-      redChannel: 1.0,
-      greenChannel: 0.0,
-      blueChannel: 0.0,
-      hue: 0.0,
-      saturation: 0.0,
-      value: 0.0,
-    };
-  }
-
-  return channelFlags;
 };
 
 export function numberArrToTyped(vec: vec2): d.v2f;

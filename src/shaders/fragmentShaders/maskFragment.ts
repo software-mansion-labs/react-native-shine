@@ -1,10 +1,8 @@
 import tgpu from 'typegpu';
 import * as d from 'typegpu/data';
 import * as std from 'typegpu/std';
-import {
-  textureBindGroupLayout,
-  maskTextureBindGroupLayout,
-} from '../bindGroupLayouts';
+import { maskTextureBindGroupLayout } from '../bindGroupLayouts';
+import { getPixelColorFromVector } from '../tgpuUtils';
 
 const maskFragment = tgpu['~unstable'].fragmentFn({
   in: { uv: d.vec2f },
@@ -19,11 +17,7 @@ const maskFragment = tgpu['~unstable'].fragmentFn({
   );
   const reversedMask = d.vec4f(std.sub(1.0, mask.xyz), mask.w);
 
-  let color = std.textureSample(
-    textureBindGroupLayout.$.texture,
-    textureBindGroupLayout.$.sampler,
-    texcoord
-  );
+  let color = getPixelColorFromVector(texcoord);
 
   return d.vec4f(color.xyz, reversedMask.x);
 });

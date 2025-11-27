@@ -1,13 +1,13 @@
 import tgpu from 'typegpu';
 import * as std from 'typegpu/std';
 import * as d from 'typegpu/data';
-import { rotationBindGroupLayout } from '../bindGroupLayouts';
+import { sharedBindGroupLayout } from '../bindGroupLayouts';
 
 const mainRotationEffectVertex = tgpu['~unstable'].vertexFn({
   in: { vertexIndex: d.builtin.vertexIndex },
   out: { position: d.builtin.position, uv: d.vec2f },
 })((input) => {
-  const rot = rotationBindGroupLayout.$.vec;
+  const rot = sharedBindGroupLayout.$.rot;
 
   // Maximum rotation angles in radians
   const maxAngle = d.f32((25.0 * Math.PI) / 180.0);
