@@ -15,6 +15,9 @@ export function Shine({ imageURI, maskURI, ...props }: ShineProps) {
   const root = device && getOrInitRoot(device);
   const [imageTexture, setImageTexture] = useState<TgpuTexture>();
   const [maskTexture, setMaskTexture] = useState<TgpuTexture>();
+  // const [colorMaskStorageTexture, colorMaskStorageTexture] =
+  //   useState<TgpuTexture>();
+  //TODO: complete the work with the compute shader, try out the shader
 
   useEffect(() => {
     if (root) loadBitmap(root, imageURI, setImageTexture);
@@ -23,6 +26,11 @@ export function Shine({ imageURI, maskURI, ...props }: ShineProps) {
   useEffect(() => {
     if (root && maskURI) loadBitmap(root, maskURI, setMaskTexture);
   }, [root, imageURI, maskURI]);
+
+  // useEffect(() => {
+  //   //TODO: write the logic for allocating the storage texture for the precomputed colorMask
+  //   if (root)
+  // }, [root, imageURI]);
 
   return (
     root &&

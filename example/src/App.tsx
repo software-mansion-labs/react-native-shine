@@ -88,7 +88,7 @@ export default function App() {
         glareOptions={glareOptions}
         lightPosition={lightPosition}
         enableGlare={false}
-        highlightColors={[]}
+        highlightColors={colorMaskOptions}
       />
       <ShineGroup
         translateViewIn3d={{}}

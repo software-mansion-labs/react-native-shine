@@ -1,5 +1,6 @@
 import type {
   TgpuBindGroup,
+  TgpuComputePipeline,
   TgpuRenderPipeline,
   TgpuRoot,
   TgpuTexture,
@@ -19,14 +20,22 @@ import {
   waveCallbackSlot,
 } from '../enums/waveCallback';
 
-export const attachBindGroups = (
+export function attachBindGroups(
   pipeline: TgpuRenderPipeline,
   bindGroups: TgpuBindGroup[]
-) =>
-  bindGroups.reduce(
-    (acc, bindGroup) => acc.with(bindGroup.layout, bindGroup),
-    pipeline
-  );
+): TgpuRenderPipeline;
+
+export function attachBindGroups(
+  pipeline: TgpuComputePipeline,
+  bindGroups: TgpuBindGroup[]
+): TgpuComputePipeline;
+
+export function attachBindGroups(
+  pipeline: TgpuRenderPipeline | TgpuComputePipeline,
+  bindGroups: TgpuBindGroup[]
+) {
+  return bindGroups.reduce((acc, bindGroup) => acc.with(bindGroup), pipeline);
+}
 
 export const blend: GPUBlendState = {
   color: {

@@ -86,6 +86,12 @@ export const reverseHoloDetectionChannelFlagsBindGroupLayout =
     glareOptions: { uniform: glareSchema },
   });
 
+export const precomputeColorMaskBindGroupLayout = tgpu.bindGroupLayout({
+  colorMaskTextureDst: {
+    storageTexture: d.textureStorage2d('rgba8unorm', 'read-write'),
+  },
+});
+
 export type BufferSchemas =
   | d.Vec3f
   | ReverseHoloDetectionChannelFlagsSchema

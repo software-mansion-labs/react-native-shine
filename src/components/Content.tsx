@@ -16,6 +16,7 @@ import {
 import * as d from 'typegpu/data';
 import type {
   TextureProps,
+  // TgpuComputePipeline,
   TgpuRenderPipeline,
   TgpuRoot,
   TgpuTexture,
@@ -23,6 +24,7 @@ import type {
 import {
   bufferData,
   type BufferData,
+  // precomputeColorMaskBindGroupLayout,
   textureBindGroupLayout,
 } from '../shaders/bindGroupLayouts';
 import useAnimationFrame from '../hooks/useAnimationFrame';
@@ -75,6 +77,7 @@ import {
   zeroV3d,
 } from '../utils/vector';
 import { baseTextureFragment } from '../shaders/fragmentShaders/baseTextureFragment';
+// import { precomputeColorMask } from '../shaders/computeShaders/precomputeColorMask';
 
 export interface SharedProps {
   width: number;
@@ -111,6 +114,7 @@ interface PipelineMap {
   mask: TgpuRenderPipeline | void;
   reverseHolo: TgpuRenderPipeline | void;
   holo: TgpuRenderPipeline | void;
+  // precomputeColorMaskPipeline: TgpuComputePipeline | void;
 }
 
 export default function Content({
@@ -126,7 +130,7 @@ export default function Content({
   imageTexture,
   maskTexture,
   root,
-  lightPosition: touchPosition,
+  lightPosition,
   width,
   translateViewIn3d = false,
   style,
@@ -200,9 +204,9 @@ export default function Content({
   useDerivedValue(() => {
     'worklet';
 
-    if (touchPosition) {
-      rotation.value = touchPosition
-        ? { x: touchPosition.value.x, y: touchPosition.value.y, z: 0 }
+    if (lightPosition) {
+      rotation.value = lightPosition
+        ? { x: lightPosition.value.x, y: lightPosition.value.y, z: 0 }
         : zeroV3d;
 
       return;
@@ -336,6 +340,13 @@ export default function Content({
       ? effects.find((e) => e.name === 'holo')
       : undefined;
 
+    // const precomputeColorMaskBindGroup = root.createBindGroup(
+    //   precomputeColorMaskBindGroupLayout,
+    //   {
+    //     colorMaskTextureDst: colorMaskStorageTexture,
+    //   }
+    // );
+
     const pipelineMap: PipelineMap = {
       baseTexture: attachBindGroups(
         root['~unstable']
@@ -394,6 +405,14 @@ export default function Content({
         sampler,
         presentationFormat
       ),
+      // precomputeColorMaskPipeline: attachBindGroups(
+      //   root['~unstable'].withCompute(precomputeColorMask).createPipeline(),
+      //   [
+      //     imageTextureBindGroup,
+      //     colorMaskBindGroup,
+      //     precomputeColorMaskBindGroup,
+      //   ]
+      // ),
     };
 
     const modifyBuffers = () => {
@@ -415,8 +434,18 @@ export default function Content({
         storeOp: 'store',
       };
 
-      const { baseTexture, glare, mask, colorMask, holo, reverseHolo } =
-        pipelineMap;
+      const {
+        baseTexture,
+        glare,
+        mask,
+        colorMask,
+        holo,
+        reverseHolo,
+        // precomputeColorMaskPipeline,
+      } = pipelineMap;
+
+      //TODO: delete this from here after testing
+      // precomputeColorMaskPipeline!.dispatchWorkgroups(8, 8);
 
       const pairs: PipelineAttachmentPair[] = [
         [baseTexture, initialAttachment],
