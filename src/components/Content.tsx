@@ -75,7 +75,7 @@ export default function Content({
   imageTexture,
   maskTexture,
   root,
-  lightPosition: touchPosition,
+  lightPosition,
   width,
   translateViewIn3d = false,
   style,
@@ -149,9 +149,9 @@ export default function Content({
   useDerivedValue(() => {
     'worklet';
 
-    if (touchPosition) {
-      rotation.value = touchPosition
-        ? { x: touchPosition.value.x, y: touchPosition.value.y, z: 0 }
+    if (lightPosition) {
+      rotation.value = lightPosition
+        ? { x: lightPosition.value.x, y: lightPosition.value.y, z: 0 }
         : zeroV3d;
 
       return;
