@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PixelRatio, View, type ViewStyle } from 'react-native';
 import Animated, {
   SensorType,
@@ -15,6 +15,7 @@ import {
 } from 'react-native-wgpu';
 import * as d from 'typegpu/data';
 import type { TextureProps, TgpuRoot, TgpuTexture } from 'typegpu';
+import { scheduleOnUI } from 'react-native-worklets';
 import {
   colorMaskArraySchema,
   rotationSchema,
@@ -91,14 +92,7 @@ export default function Content({
   }, [ref]);
 
   const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-  const renderRef = useRef<() => void>(null);
-
-  //changing canvas size to prevent blur
-  const pixelRatio = PixelRatio.get();
-  const size = { x: width, y: height };
-  const pixelSize = transformV2d(scaleV2d(size, pixelRatio), (v) =>
-    Math.max(1, Math.round(v))
-  );
+  const isCanvasReady = useSharedValue(true);
 
   const landscape = useSharedValue<boolean>(false);
   const rotation = useSharedValue<V3d>(zeroV3d); // final GPU offsets
@@ -200,26 +194,12 @@ export default function Content({
     );
   });
 
-  // Render loop
+  //TODO: is this needed here?
+  const effectsCache =
+    JSON.stringify(effects) + JSON.stringify(highlightColors);
+
   useEffect(() => {
-    if (!context) return;
-
-    //this sets the underlying resolution of the canvas to prevent blurriness
-    const canvasElement = context.canvas;
-
-    if (
-      canvasElement.width !== pixelSize.x &&
-      canvasElement.height !== pixelSize.y
-    ) {
-      canvasElement.width = pixelSize.x;
-      canvasElement.height = pixelSize.y;
-    }
-
-    context.configure({
-      device,
-      format: presentationFormat,
-      alphaMode: 'premultiplied',
-    });
+    pipelineCache.pipelinesMap.clear();
     pipelineCache.addPipeline(baseTextureFragment);
 
     effects.forEach(({ name, options }) => {
@@ -246,39 +226,56 @@ export default function Content({
       );
       pipelineCache.addPipeline(colorMaskFragment, [colorMaskBindGroup], blend);
     }
-    const modifyBuffers = () => {
-      pipelineCache.buffersMap
-        .get(rotationSchema)
-        ?.write(d.vec3f(...componentsFromV3d(rotation.value)));
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectsCache, isHighlightInclusive, pipelineCache, root]);
 
-    const renderPipelines = () => {
-      const view = context.getCurrentTexture().createView();
-      pipelineCache.renderPipelines(view);
-    };
+  useEffect(() => {
+    if (!context) {
+      return;
+    }
+    // changing canvas size to prevent blur
+    const pixelRatio = PixelRatio.get();
+    const size = { x: width, y: height };
+    const pixelSize = transformV2d(scaleV2d(size, pixelRatio), (v) =>
+      Math.max(1, Math.round(v))
+    );
 
-    const presentContext = () => context.present();
+    const canvasElement = context.canvas;
 
-    renderRef.current = () => {
-      modifyBuffers();
-      renderPipelines();
-      presentContext();
-    };
-  }, [
-    context,
-    device,
-    effects,
-    highlightColors,
-    isHighlightInclusive,
-    pipelineCache,
-    pixelSize.x,
-    pixelSize.y,
-    presentationFormat,
-    root,
-    rotation.value,
-  ]);
+    if (
+      canvasElement.width !== pixelSize.x &&
+      canvasElement.height !== pixelSize.y
+    ) {
+      canvasElement.width = pixelSize.x;
+      canvasElement.height = pixelSize.y;
+    }
+    //this is a workaround to prevent error logs but it should be handled by webgpu
+    scheduleOnUI(() => {
+      'worklet';
+      context.configure({
+        device,
+        format: presentationFormat,
+        alphaMode: 'premultiplied',
+      });
+      isCanvasReady.value = true;
+    });
+  }, [context, device, height, presentationFormat, width, isCanvasReady]);
 
-  useAnimationFrame(() => renderRef.current?.());
+  const frameCallback = useCallback(() => {
+    if (!context || !isCanvasReady.value) {
+      return;
+    }
+
+    pipelineCache.buffersMap
+      .get(rotationSchema)
+      ?.write(d.vec3f(...componentsFromV3d(rotation.value)));
+
+    const view = context.getCurrentTexture().createView();
+    pipelineCache.renderPipelines(view);
+    context.present();
+  }, [context, pipelineCache, rotation, isCanvasReady]);
+
+  useAnimationFrame(frameCallback);
 
   return (
     <View
