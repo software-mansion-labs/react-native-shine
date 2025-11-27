@@ -3,7 +3,7 @@ import * as d from 'typegpu/data';
 import * as std from 'typegpu/std';
 import {
   precomputeColorMaskBindGroupLayout,
-  textureBindGroupLayout,
+  sharedBindGroupLayout,
 } from './../bindGroupLayouts';
 
 export const precomputeColorMask = tgpu['~unstable'].computeFn({
@@ -20,8 +20,8 @@ export const precomputeColorMask = tgpu['~unstable'].computeFn({
   const uv = d.vec2f(d.f32(x) / d.f32(size.x), d.f32(y) / d.f32(size.y));
 
   const colorSampled = std.textureSample(
-    textureBindGroupLayout.$.texture,
-    textureBindGroupLayout.$.sampler,
+    sharedBindGroupLayout.$.texture,
+    sharedBindGroupLayout.$.sampler,
     uv
   );
 
