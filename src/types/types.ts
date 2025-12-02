@@ -130,9 +130,24 @@ export type EffectDefinition<
   blend?: GPUBlendState;
 };
 
+type ValidateBuffers<T> = {
+  [K in keyof T]: T[K] extends { schema: infer S }
+    ? S extends AnySchema
+      ? {
+          schema: S;
+          defaultOptions: Infer<S>;
+        }
+      : never
+    : never;
+};
+
 export function createEffect<
   const TConfig extends readonly BufferConfig<AnySchema>[],
->(definition: EffectDefinition<TConfig>) {
+>(
+  definition: EffectDefinition<TConfig> & {
+    buffers: ValidateBuffers<TConfig>;
+  }
+) {
   return definition;
 }
 

@@ -8,6 +8,8 @@ import type {
 import { vec3f } from 'typegpu/data';
 import mainVertex from '../vertexShaders/mainVertex';
 import type {
+  AnySchema,
+  BufferConfig,
   ColorAttachment,
   FragmentShaderReturnType,
   FragmentType,
@@ -20,7 +22,7 @@ import {
   maskTextureBindGroupLayout,
 } from '../bindGroupLayouts';
 import { BuffersMap } from './buffersMap';
-import type { PipelineInput } from '../../enums/effectPresets';
+import { Effects } from '../../enums/effectPresets';
 
 type PipelineMap<Key> = Map<Key, TgpuRenderPipeline<FragmentShaderReturnType>>;
 
@@ -92,9 +94,13 @@ export class PipelineManager {
     return pipeline;
   }
 
-  addPipelineWithBuffer(effect: PipelineInput, options?: any) {
-    const { fragment, blend, buffers, bindGroupCreator } = effect;
-    const updatedBuffers = buffers.map(({ schema, defaultOptions }) =>
+  //TODO: fix any typing
+  addPipelineWithBuffer(name: keyof typeof Effects, options?: any) {
+    const { fragment, blend, buffers, bindGroupCreator } = Effects[name];
+
+    const genericBuffers = buffers as readonly BufferConfig<AnySchema>[];
+
+    const updatedBuffers = genericBuffers.map(({ schema, defaultOptions }) =>
       this.buffersMap.syncUniformBuffer(schema, defaultOptions, options)
     );
 

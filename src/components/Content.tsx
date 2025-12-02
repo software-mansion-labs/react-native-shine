@@ -40,7 +40,7 @@ import {
 } from '../utils/vector';
 import { baseTextureFragment } from '../shaders/fragmentShaders/baseTextureFragment';
 import { PipelineManager } from '../shaders/resourceManagement/pipelineMap';
-import { blend, Effects, type Effect } from '../enums/effectPresets';
+import { blend, type Effect } from '../enums/effectPresets';
 import { createColorMasks } from '../types/typeUtils';
 import { createColorMaskBindGroup } from '../shaders/bindGroupUtils';
 import colorMaskFragment from '../shaders/fragmentShaders/colorMaskFragment';
@@ -203,8 +203,7 @@ export default function Content({
     pipelineCache.addPipeline(baseTextureFragment);
 
     effects.forEach(({ name, options }) => {
-      const effect = Effects[name];
-      pipelineCache.addPipelineWithBuffer(effect, options);
+      pipelineCache.addPipelineWithBuffer(name, options);
     });
 
     //TODO: move to effect definition

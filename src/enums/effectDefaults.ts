@@ -31,6 +31,15 @@ export const HOLO_DEFAULTS = {
   holoSaturation: 0.5,
 } as const;
 
+export const GLARE_FLARE_DEFAULTS = {
+  flareIntensity: 0.7, // Overall intensity of the flare
+  spotIntensity: 0.4, // Intensity of the central spot
+  ringIntensity: 0.1, // Intensity of the rings
+  rayIntensity: 0.8, // Intensity of the rays
+  falloff: 8.0, // Falloff factor for rings and spots
+  rayCount: 4.0, // Number of rays
+};
+
 export const COLOR_MASK_DEFAULT_OPTIONS: ColorMaskPreTypedSchema = {
   rgbToleranceRange: {
     upper: [20, 20, 20],
