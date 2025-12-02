@@ -1,4 +1,4 @@
-import type { vec3 } from '../types/types';
+import type { ColorMask, vec3 } from '../types/types';
 
 export const ColorPresets = {
   // --- Primary & Secondary ---
@@ -39,3 +39,61 @@ export const ColorPresets = {
   BEIGE: [245, 245, 220], // #F5F5DC
   POTATO: [222, 184, 135], // #DEB887
 } as const satisfies Record<string, vec3>;
+
+export const HSVColorsPreset = {
+  RED: { hueMin: 330, hueMax: 15 }, // #FF0022
+  ORANGE: { hueMin: 15, hueMax: 45 }, // #FF8000
+  YELLOW: { hueMin: 45, hueMax: 75 }, // #FFFF00
+  GREEN: { hueMin: 75, hueMax: 165 }, // #00FF00
+  BLUE: { hueMin: 165, hueMax: 255 }, // #0080FF
+  VIOLET: { hueMin: 255, hueMax: 285 }, // #8000FF
+  MAGENTA: { hueMin: 285, hueMax: 330 }, // #FF00D5
+
+  TRUE_RED: { hueMin: 345, hueMax: 15 }, // #FF0000
+  CRIMSON: { hueMin: 330, hueMax: 350 }, // #FF0055
+  ROSE: { hueMin: 315, hueMax: 335 }, // #FF0095
+  PINK: { hueMin: 300, hueMax: 330 }, // #FF00BF
+
+  CORAL: { hueMin: 10, hueMax: 30 }, // #FF5500
+  TRUE_ORANGE: { hueMin: 20, hueMax: 45 }, // #FF8C00
+  AMBER: { hueMin: 35, hueMax: 50 }, // #FFB300
+  TRUE_YELLOW: { hueMin: 45, hueMax: 65 }, // #FFD500
+  GOLD: { hueMin: 40, hueMax: 55 }, // #FFCC00
+
+  LIME: { hueMin: 65, hueMax: 90 }, // #BFFF00
+  CHARTREUSE: { hueMin: 70, hueMax: 100 }, // #95FF00
+  TRUE_GREEN: { hueMin: 90, hueMax: 140 }, // #15FF00
+  EMERALD: { hueMin: 130, hueMax: 160 }, // #00FF6A
+  MINT: { hueMin: 140, hueMax: 170 }, // #00FF95
+
+  TEAL: { hueMin: 160, hueMax: 180 }, // #00FFD5
+  CYAN: { hueMin: 170, hueMax: 195 }, // #00F2FF
+  TURQUOISE: { hueMin: 165, hueMax: 190 }, // #00FFF2
+  AZURE: { hueMin: 190, hueMax: 215 }, // #009FFF
+  TRUE_BLUE: { hueMin: 210, hueMax: 240 }, // #0040FF
+  ROYAL_BLUE: { hueMin: 225, hueMax: 250 }, // #0011FF
+  INDIGO: { hueMin: 240, hueMax: 260 }, // #2B00FF
+
+  TRUE_VIOLET: { hueMin: 250, hueMax: 280 }, // #6A00FF
+  PURPLE: { hueMin: 260, hueMax: 290 }, // #9500FF
+  TRUE_MAGENTA: { hueMin: 285, hueMax: 315 }, // #FF00FF
+  FUCHSIA: { hueMin: 295, hueMax: 325 }, // #ff00d5ff
+
+  GRAY: { hueMin: 0, hueMax: 360, saturationMax: 0.2, saturationMin: 0 }, // #738c8cff
+  WHITE: {
+    hueMin: 0,
+    hueMax: 360,
+    saturationMax: 1,
+    saturationMin: 0,
+    lightnessMax: 1,
+    lightnessMin: 0.9,
+  }, // #d9f2f2ff
+  BLACK: {
+    hueMin: 0,
+    hueMax: 360,
+    saturationMax: 1,
+    saturationMin: 0,
+    lightnessMax: 0.2,
+    lightnessMin: 0,
+  }, // #0d2626ff
+} as const satisfies Record<string, ColorMask>;
