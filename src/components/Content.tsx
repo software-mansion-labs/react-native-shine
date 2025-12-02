@@ -22,7 +22,7 @@ import {
 } from '../shaders/bindGroupLayouts';
 import useAnimationFrame from '../hooks/useAnimationFrame';
 import { subscribeToOrientationChange } from '../shaders/utils';
-import type { ColorMask, DeepPartiallyOptional } from '../types/types';
+import type { ColorMask } from '../types/types';
 import type { V2d, V3d } from '../types/vector';
 import {
   addV3d,
@@ -41,14 +41,14 @@ import {
 import { baseTextureFragment } from '../shaders/fragmentShaders/baseTextureFragment';
 import { PipelineManager } from '../shaders/resourceManagement/pipelineMap';
 import { blend, Effects, type Effect } from '../enums/effectPresets';
-import { colorMasksToTyped, createColorMasks } from '../types/typeUtils';
+import { createColorMasks } from '../types/typeUtils';
 import { createColorMaskBindGroup } from '../shaders/bindGroupUtils';
 import colorMaskFragment from '../shaders/fragmentShaders/colorMaskFragment';
 
 export interface SharedProps {
   width: number;
   height: number;
-  highlightColors?: DeepPartiallyOptional<ColorMask, 'baseColor'>[];
+  highlightColors?: ColorMask[];
   isHighlightInclusive?: boolean;
   lightPosition?: SharedValue<V2d>;
   translateViewIn3d?:
@@ -211,14 +211,7 @@ export default function Content({
     if (highlightColors) {
       const colorMaskBuffer = pipelineCache.buffersMap.syncUniformBuffer(
         colorMaskArraySchema,
-        colorMasksToTyped(
-          createColorMasks(
-            highlightColors ?? [{ baseColor: [-20, -20, -20], useHSV: false }]
-          ),
-          highlightColors && highlightColors.length
-            ? isHighlightInclusive
-            : !isHighlightInclusive
-        )
+        createColorMasks(highlightColors, isHighlightInclusive)
       );
       const colorMaskBindGroup = createColorMaskBindGroup(
         root,

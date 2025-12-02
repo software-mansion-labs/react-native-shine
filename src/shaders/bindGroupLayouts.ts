@@ -39,21 +39,17 @@ export const colorMaskSchema = d.struct({
     upper: d.vec3f,
     lower: d.vec3f,
   }),
-  hueToleranceRange: d.struct({
-    upper: d.f32,
-    lower: d.f32,
-  }),
+  hueStart: d.f32,
+  hueRange: d.f32,
   useHSV: d.align(16, d.u32),
-  brightnessTolerance: d.f32,
-  saturationTolerance: d.f32,
-  lowSaturationThreshold: d.f32,
-  lowBrightnessThreshold: d.f32,
+  minLimits: d.vec2f,
+  maxLimits: d.vec2f,
   debugMode: d.u32,
 });
 
-export type ColorMaskSchema = typeof colorMaskSchema;
+export type ColorMaskSchema = d.Infer<typeof colorMaskSchema>;
 
-export const COLOR_MASK_MAX_COUNT = 16;
+export const COLOR_MASK_MAX_COUNT = 8;
 
 export const colorMaskArraySchema = d.struct({
   masks: d.arrayOf(colorMaskSchema, COLOR_MASK_MAX_COUNT),

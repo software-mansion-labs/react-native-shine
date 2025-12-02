@@ -4,7 +4,6 @@ import { useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import {
   addV2d,
   angleToV2d,
-  ColorPresets,
   multiplyV2d,
   Shine,
   ShineGroup,
@@ -13,7 +12,8 @@ import {
   zeroV2d,
 } from 'react-native-shine';
 import { tree_img } from './img';
-import type { ColorMask, DeepPartiallyOptional } from '../../src/types/types';
+import type { ColorMask } from '../../src/types/types';
+import { HSVColorsPreset } from '../../src/enums/colorPresets';
 
 export default function App() {
   const orientation = useOrientation();
@@ -44,23 +44,9 @@ export default function App() {
     blueChannel: -0.4,
   });
 
-  const [colorMaskOptions /*setColorMaskOptions*/] = useState<
-    DeepPartiallyOptional<ColorMask, 'baseColor'>[]
-  >([
-    {
-      baseColor: ColorPresets.NAVY, //[80, 60, 30],
-      useHSV: true,
-      hueToleranceRange: { upper: 30, lower: 30 },
-      lowBrightnessThreshold: 0.1,
-      lowSaturationThreshold: 0.1,
-    },
-    {
-      baseColor: ColorPresets.BEIGE, //[80, 60, 30],
-      useHSV: true,
-      hueToleranceRange: { upper: 50, lower: 15 },
-      lowBrightnessThreshold: 0.1,
-      lowSaturationThreshold: 0.1,
-    },
+  const [colorMaskOptions /*setColorMaskOptions*/] = useState<ColorMask[]>([
+    HSVColorsPreset.YELLOW,
+    HSVColorsPreset.ORANGE,
   ]);
 
   useFrameCallback(() => {
@@ -82,10 +68,8 @@ export default function App() {
         width={734 * nw}
         height={1024 * nh}
         imageURI={tree_img}
-        maskURI={tree_img}
         effects={[
-          // { name: 'glare', options: glareOptions },
-          { name: 'glareFlare' },
+          { name: 'glare', options: glareOptions },
           { name: 'doubleHolo' },
           { name: 'reverseHolo', options: detectionChannelState },
         ]}

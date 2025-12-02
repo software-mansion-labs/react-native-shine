@@ -22,6 +22,11 @@ import {
   holoFragment,
 } from '../shaders/fragmentShaders/holoFragment';
 import { glareFlareFragment } from '../shaders/fragmentShaders/glareFlareFragment';
+import {
+  GLARE_DEFAULTS,
+  HOLO_DEFAULTS,
+  REVERSE_HOLO_DEFAULTS,
+} from './effectDefaults';
 //TODO: move schema to separate object that would match them with corresponding bindGroups, then they would be defined in the effect
 
 export const blend: GPUBlendState = {
@@ -44,6 +49,7 @@ const GLARE = createEffect({
       defaultOptions: {
         glowPower: 0.5,
         glareIntensity: 0.4,
+        dupa: 1,
         lightIntensity: 1.1,
         glareColor: {
           hueBlendPower: 1.0,
@@ -59,17 +65,10 @@ const GLARE = createEffect({
 
 const REVERSE_HOLO = createEffect({
   buffers: [
-    { schema: glareSchema, defaultOptions: GLARE.buffers[0].defaultOptions },
+    { schema: glareSchema, defaultOptions: GLARE_DEFAULTS },
     {
       schema: reverseHoloDetectionChannelFlagsSchema,
-      defaultOptions: {
-        redChannel: 1.0,
-        greenChannel: 0.0,
-        blueChannel: 0.0,
-        hue: 0.0,
-        saturation: 0.0,
-        value: 0.0,
-      },
+      defaultOptions: REVERSE_HOLO_DEFAULTS,
     },
   ],
   fragment: reverseHoloFragment,
@@ -82,16 +81,7 @@ const HOLO = createEffect({
   buffers: [
     {
       schema: holoSchema,
-      defaultOptions: {
-        directionDegree: 45,
-        shift: 0.1,
-        rotationShiftPower: 0.6,
-        holoSize: 0.12,
-        holoMultiplier: 2.5,
-        holoEaseSize: 0.2,
-        holoVisibility: 0.88,
-        holoSaturation: 0.5,
-      },
+      defaultOptions: HOLO_DEFAULTS,
     },
   ],
   bindGroupCreator: createHoloBindGroup,

@@ -9,47 +9,39 @@ import type {
 } from 'typegpu';
 import type { WaveCallbackFn } from '../enums/waveCallback';
 import type { AnyWgslData, Infer, Vec2f, Vec4f } from 'typegpu/data';
-import type { maskTextureBindGroupLayout } from '../shaders/bindGroupLayouts';
+import type {
+  ColorMaskSchema,
+  maskTextureBindGroupLayout,
+} from '../shaders/bindGroupLayouts';
 
 export type vec2 = [number, number];
 export type vec3 = [number, number, number];
 export type vec4 = [number, number, number, number];
 export type quaternion = vec4;
-
-export type ColorMask = {
+type BaseColorMask = { debugMode: boolean };
+export type RGBColorMask = BaseColorMask & {
   baseColor: vec3;
-  useHSV?: boolean;
-  hueToleranceRange: { upper: number; lower: number };
-  brightnessTolerance?: number;
-  saturationTolerance?: number;
-  lowBrightnessThreshold?: number;
-  lowSaturationThreshold?: number;
   rgbToleranceRange: {
     upper: vec3;
     lower: vec3;
   };
-  debugMode?: boolean;
+};
+export type HSLColorMask = BaseColorMask & {
+  hueMin: number;
+  hueMax: number;
+  saturationMin: number;
+  saturationMax: number;
+  lightnessMin: number;
+  lightnessMax: number;
 };
 
-//TODO: figure out how to tell compiler that im sure that it's long enough ;-;
-export type ColorMaskArrayShaderAssert = [
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-];
+export type ColorMask =
+  | DeepPartiallyOptional<RGBColorMask, 'baseColor'>
+  | DeepPartial<HSLColorMask>;
+
+export type ColorMaskPreTypedSchema = HSLColorMask &
+  RGBColorMask &
+  Pick<ColorMaskSchema, 'useHSV'>;
 
 export type HoloOptions = {
   intensity: number;
@@ -76,8 +68,9 @@ export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends Primitive | any[] ? T[P] : DeepPartial<T[P]>;
 };
 
-export type DeepPartiallyOptional<T, K extends keyof T> = Required<Pick<T, K>> &
-  DeepPartial<Omit<T, K>>;
+export type DeepPartiallyOptional<T, K extends keyof T> = T extends any
+  ? Required<Pick<T, K>> & DeepPartial<Omit<T, K>>
+  : never;
 
 export type UnionToIntersection<U> = (
   U extends any ? (k: U) => void : never
