@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useDevice } from 'react-native-wgpu';
-import type { TgpuTexture } from 'typegpu';
+import type { StorageFlag, TgpuTexture } from 'typegpu';
 import { getOrInitRoot } from '../roots';
-import { loadBitmap } from '../shaders/resourceManagement/textures';
+import {
+  createTexture,
+  loadBitmap,
+} from '../shaders/resourceManagement/textures';
 import Content, { type SharedProps } from './Content';
+import getBitmapFromURI from '../shaders/resourceManagement/bitmaps';
 
 export interface ShineProps extends SharedProps {
   imageURI: string;
@@ -15,12 +19,24 @@ export function Shine({ imageURI, maskURI, ...props }: ShineProps) {
   const root = device && getOrInitRoot(device);
   const [imageTexture, setImageTexture] = useState<TgpuTexture>();
   const [maskTexture, setMaskTexture] = useState<TgpuTexture>();
-  // const [colorMaskStorageTexture, colorMaskStorageTexture] =
-  //   useState<TgpuTexture>();
+  const [colorMaskStorageTexture, setColorMaskStorageTexture] = useState<
+    TgpuTexture<any> & StorageFlag
+  >();
   //TODO: complete the work with the compute shader, try out the shader
 
   useEffect(() => {
-    if (root) loadBitmap(root, imageURI, setImageTexture);
+    if (root) {
+      loadBitmap(root, imageURI, setImageTexture);
+      const makeStorage = async () => {
+        const bitmap = await getBitmapFromURI(imageURI);
+        const texture = (await createTexture(root, bitmap)).$usage(
+          'storage',
+          'sampled'
+        );
+        setColorMaskStorageTexture(texture);
+      };
+      makeStorage();
+    }
   }, [root, imageURI]);
 
   useEffect(() => {
@@ -40,6 +56,7 @@ export function Shine({ imageURI, maskURI, ...props }: ShineProps) {
         root={root}
         imageTexture={imageTexture}
         maskTexture={maskTexture}
+        colorMaskStorageTexture={colorMaskStorageTexture}
       />
     )
   );

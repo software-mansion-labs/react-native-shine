@@ -5,6 +5,8 @@ import {
   COLOR_MASK_MAX_COUNT,
   colorMaskBindGroupLayout,
   type ColorMaskSchema,
+  // sharedBindGroupLayout,
+  // precomputeColorMaskOutputBindGroupLayout,
 } from '../bindGroupLayouts';
 import { getPixelColorFromNonReversedVector } from '../tgpuUtils';
 import { RGBToHSL } from '../colorConversions';

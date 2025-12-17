@@ -14,10 +14,18 @@ import {
   type RNCanvasContext,
 } from 'react-native-wgpu';
 import * as d from 'typegpu/data';
-import type { TextureProps, TgpuRoot, TgpuTexture } from 'typegpu';
+import type {
+  SampledFlag,
+  StorageFlag,
+  TextureProps,
+  TgpuRoot,
+  TgpuTexture,
+} from 'typegpu';
 import { scheduleOnUI } from 'react-native-worklets';
 import {
   colorMaskArraySchema,
+  precomputeColorMaskBindGroupLayout,
+  precomputeColorMaskOutputBindGroupLayout,
   rotationSchema,
 } from '../shaders/bindGroupLayouts';
 import useAnimationFrame from '../hooks/useAnimationFrame';
@@ -44,6 +52,7 @@ import { blend, type Effect } from '../enums/effectPresets';
 import { createColorMasks } from '../types/typeUtils';
 import { createColorMaskBindGroup } from '../shaders/bindGroupUtils';
 import colorMaskFragment from '../shaders/fragmentShaders/colorMaskFragment';
+import { precomputeColorMask } from '../shaders/computeShaders/precomputeColorMask';
 
 export interface SharedProps {
   width: number;
@@ -66,6 +75,7 @@ interface ContentProps extends SharedProps {
   root: TgpuRoot;
   imageTexture: TgpuTexture<TextureProps>;
   maskTexture?: TgpuTexture<TextureProps>;
+  colorMaskStorageTexture?: TgpuTexture<any> & StorageFlag;
 }
 
 export default function Content({
@@ -81,6 +91,7 @@ export default function Content({
   translateViewIn3d = false,
   style,
   containerStyle,
+  colorMaskStorageTexture,
 }: ContentProps) {
   const { device } = root;
   // const { ref, context } = useGPUContext();
@@ -199,27 +210,71 @@ export default function Content({
     JSON.stringify(effects) + JSON.stringify(highlightColors);
 
   useEffect(() => {
-    pipelineCache.pipelinesMap.clear();
-    pipelineCache.addPipeline(baseTextureFragment);
+    const initPipelines = async () => {
+      pipelineCache.pipelinesMap.clear();
 
-    effects.forEach(({ name, options }) => {
-      pipelineCache.addPipelineWithBuffer(name, options);
-    });
+      pipelineCache.addPipeline(baseTextureFragment);
 
-    //TODO: move to effect definition
-    if (highlightColors) {
-      const colorMaskBuffer = pipelineCache.buffersMap.syncUniformBuffer(
-        colorMaskArraySchema,
-        createColorMasks(highlightColors, isHighlightInclusive)
-      );
-      const colorMaskBindGroup = createColorMaskBindGroup(
-        root,
-        colorMaskBuffer
-      );
-      pipelineCache.addPipeline(colorMaskFragment, [colorMaskBindGroup], blend);
-    }
+      effects.forEach(({ name, options }) => {
+        pipelineCache.addPipelineWithBuffer(name, options);
+      });
+
+      //TODO: move to effect definition
+      if (highlightColors) {
+        const colorMaskBuffer = pipelineCache.buffersMap.syncUniformBuffer(
+          colorMaskArraySchema,
+          createColorMasks(highlightColors, isHighlightInclusive)
+        );
+        const colorMaskBindGroup = createColorMaskBindGroup(
+          root,
+          colorMaskBuffer
+        );
+
+        if (colorMaskStorageTexture) {
+          const precomputeColorMaskBindGroup = root.createBindGroup(
+            precomputeColorMaskBindGroupLayout,
+            {
+              colorMaskStorage: colorMaskStorageTexture as TgpuTexture<{
+                size: readonly number[];
+                format: 'rgba8unorm';
+              }> &
+                StorageFlag,
+            }
+          );
+          const precomputeColorMaskOutputBindGroup = root.createBindGroup(
+            precomputeColorMaskOutputBindGroupLayout,
+            {
+              colorMaskOutput: colorMaskStorageTexture as TgpuTexture<{
+                size: readonly number[];
+                format: 'rgba8unorm';
+              }> &
+                SampledFlag,
+            }
+          );
+          pipelineCache.addComputePipeline(precomputeColorMask, [
+            colorMaskBindGroup,
+            precomputeColorMaskBindGroup,
+          ]);
+          await pipelineCache.runComputePipeline(precomputeColorMask);
+          // colorMaskOutputTexture.write(colorMaskStorageTexture);
+
+          pipelineCache.addPipeline(
+            colorMaskFragment,
+            [colorMaskBindGroup, precomputeColorMaskOutputBindGroup],
+            blend
+          );
+        }
+      }
+    };
+    initPipelines();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectsCache, isHighlightInclusive, pipelineCache, root]);
+  }, [
+    effectsCache,
+    isHighlightInclusive,
+    pipelineCache,
+    root,
+    colorMaskStorageTexture,
+  ]);
 
   useEffect(() => {
     if (!context) {

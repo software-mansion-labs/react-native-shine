@@ -1,4 +1,10 @@
-import { type TgpuBuffer, type TgpuRoot, type UniformFlag } from 'typegpu';
+import {
+  type StorageFlag,
+  type TgpuBuffer,
+  type TgpuRoot,
+  type TgpuTexture,
+  type UniformFlag,
+} from 'typegpu';
 import {
   colorMaskBindGroupLayout,
   type GlareSchema,
@@ -10,6 +16,7 @@ import {
   type HoloSchema,
   glareFlareSchema,
   glareFlareBindGroupLayout,
+  precomputeColorMaskBindGroupLayout,
 } from './bindGroupLayouts';
 import type {
   BindGroupCreatorArgument,
@@ -67,3 +74,16 @@ export const createGlareFlareBindGroup = (
     glareFlare: buffer,
   }),
 ];
+
+export const createPrecomputeColorMaskBindGroup = (
+  root: TgpuRoot,
+  storageTexture: TgpuTexture<{
+    format: 'rgba8unorm';
+    size: readonly number[];
+  }> &
+    StorageFlag
+) => {
+  return root.createBindGroup(precomputeColorMaskBindGroupLayout, {
+    colorMaskStorage: storageTexture,
+  });
+};

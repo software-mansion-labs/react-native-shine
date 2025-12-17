@@ -13,7 +13,7 @@ export const precomputeColorMask = tgpu['~unstable'].computeFn({
   const x = input.gid.x;
   const y = input.gid.y;
   const colorMaskStorageTexture =
-    precomputeColorMaskBindGroupLayout.$.colorMaskTextureDst;
+    precomputeColorMaskBindGroupLayout.$.colorMaskStorage;
   const size = std.textureDimensions(colorMaskStorageTexture);
 
   if (x >= size.x || y >= size.y) return;

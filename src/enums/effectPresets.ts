@@ -1,4 +1,8 @@
 import {
+  precomputeColorMaskBindGroupLayout,
+  type ColorMaskArraySchema,
+} from './../shaders/bindGroupLayouts';
+import {
   glareFlareSchema,
   glareSchema,
   holoSchema,
@@ -14,6 +18,7 @@ import {
   createEffect,
   type DeepPartial,
   type ExtractEffectOptions,
+  type UnwrapLayout,
 } from '../types/types';
 import { glareFragment } from '../shaders/fragmentShaders/glareFragment';
 import { reverseHoloFragment } from '../shaders/fragmentShaders/reverseHoloFragment';
@@ -22,6 +27,16 @@ import {
   holoFragment,
 } from '../shaders/fragmentShaders/holoFragment';
 import { glareFlareFragment } from '../shaders/fragmentShaders/glareFlareFragment';
+import type {
+  StorageFlag,
+  TgpuBindGroup,
+  TgpuBuffer,
+  TgpuComputeFn,
+  TgpuRoot,
+  TgpuTexture,
+  UniformFlag,
+  ValidateUniformSchema,
+} from 'typegpu';
 import {
   GLARE_DEFAULTS,
   GLARE_FLARE_DEFAULTS,
@@ -106,3 +121,24 @@ export type Effect = {
     options?: DeepPartial<ExtractEffectOptions<(typeof Effects)[K]>>;
   };
 }[keyof typeof Effects];
+export type ComputePipelineInput = {
+  compute: TgpuComputeFn;
+  buffers: {
+    schema: ValidateUniformSchema<any>;
+    defaultOptions: any;
+  }[];
+  storageTexture: TgpuTexture<{
+    format: 'rgba8unorm';
+    size: readonly number[];
+  }> &
+    StorageFlag;
+  bindGroupCreator: (
+    root: TgpuRoot,
+    storageTexture: TgpuTexture<{
+      format: 'rgba8unorm';
+      size: readonly number[];
+    }> &
+      StorageFlag,
+    colorMaskBuffer: TgpuBuffer<ColorMaskArraySchema> & UniformFlag
+  ) => TgpuBindGroup<UnwrapLayout<typeof precomputeColorMaskBindGroupLayout>>;
+};

@@ -113,9 +113,22 @@ export const glareFlareBindGroupLayout = tgpu.bindGroupLayout({
   glareFlare: { uniform: glareFlareSchema },
 });
 
+export const precomputeTextureSchema = d.textureStorage2d(
+  'rgba8unorm',
+  'read-write'
+);
+
+export type PrecomputeTextureSchema = typeof precomputeTextureSchema;
+
 export const precomputeColorMaskBindGroupLayout = tgpu.bindGroupLayout({
-  colorMaskTextureDst: {
-    storageTexture: d.textureStorage2d('rgba8unorm', 'read-write'),
+  colorMaskStorage: {
+    storageTexture: precomputeTextureSchema,
+  },
+});
+
+export const precomputeColorMaskOutputBindGroupLayout = tgpu.bindGroupLayout({
+  colorMaskOutput: {
+    texture: d.texture2d(d.f32),
   },
 });
 

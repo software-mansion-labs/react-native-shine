@@ -37,13 +37,13 @@ export async function loadBitmap(
 ) {
   const bitmap = await getBitmapFromURI(imageURI);
   let texture = await createTexture(root, bitmap);
-  texture = await addTextureUsage(texture, usage);
+  texture = addTextureUsage(texture, usage);
 
   setTexture(texture);
   await loadTexture(root, bitmap, texture);
 }
 
-export async function addTextureUsage(
+function addTextureUsage(
   texture: TgpuTexture,
   usage: ('sampled' | 'render')[]
 ) {

@@ -1,6 +1,8 @@
 import type {
   TextureProps,
   TgpuBindGroup,
+  TgpuComputeFn,
+  TgpuComputePipeline,
   TgpuRenderPipeline,
   TgpuRoot,
   TgpuTexture,
@@ -25,6 +27,7 @@ import { BuffersMap } from './buffersMap';
 import { Effects } from '../../enums/effectPresets';
 
 type PipelineMap<Key> = Map<Key, TgpuRenderPipeline<FragmentShaderReturnType>>;
+type ComputePipelineMap<Key> = Map<Key, TgpuComputePipeline>;
 
 const defaultAttachment = {
   clearValue: [0, 0, 0, 0],
@@ -37,6 +40,7 @@ export class PipelineManager {
   maskBindGroup: TgpuBindGroup<UnwrapLayout<typeof maskTextureBindGroupLayout>>;
   buffersMap: BuffersMap;
   pipelinesMap: PipelineMap<FragmentType>;
+  computePipelinesMap: ComputePipelineMap<TgpuComputeFn>;
   constructor(
     private root: TgpuRoot,
     private presentationFormat: GPUTextureFormat,
@@ -49,6 +53,8 @@ export class PipelineManager {
       rotationSchema,
       vec3f(0.0)
     );
+    this.computePipelinesMap = new Map();
+
     const sampler = root['~unstable'].createSampler({
       magFilter: 'linear',
       minFilter: 'linear',
@@ -94,6 +100,27 @@ export class PipelineManager {
     return pipeline;
   }
 
+  addComputePipeline(compute: TgpuComputeFn, bindGroupProp?: TgpuBindGroup[]) {
+    if (this.computePipelinesMap.has(compute)) {
+      return this.computePipelinesMap.get(compute);
+    }
+
+    let pipeline = this.root['~unstable'].withCompute(compute).createPipeline();
+
+    let bindGroups: TgpuBindGroup<any>[] = [this.sharedBindGroup];
+
+    if (bindGroupProp) {
+      bindGroups = [...bindGroups, ...bindGroupProp];
+    }
+
+    for (const bindGroup of bindGroups) {
+      pipeline = pipeline.with(bindGroup);
+    }
+
+    this.computePipelinesMap.set(compute, pipeline);
+    return pipeline;
+  }
+
   //TODO: fix any typing
   addPipelineWithBuffer(name: keyof typeof Effects, options?: any) {
     const { fragment, blend, buffers, bindGroupCreator } = Effects[name];
@@ -114,6 +141,15 @@ export class PipelineManager {
     );
 
     return this.addPipeline(fragment, bindGroup, blend);
+  }
+
+  async runComputePipeline(compute: TgpuComputeFn) {
+    const pipeline = this.computePipelinesMap.get(compute);
+    if (!pipeline) {
+      throw new Error('Compute pipeline not found');
+    }
+    pipeline.dispatchWorkgroups(1, 1, 1);
+    await this.root.device.queue.onSubmittedWorkDone();
   }
 
   renderPipelines(view: GPUTextureView) {
