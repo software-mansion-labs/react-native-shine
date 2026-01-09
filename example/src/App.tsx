@@ -11,7 +11,7 @@ import {
   type V2d,
   zeroV2d,
 } from 'react-native-shine';
-import { tree_img } from './img';
+import { tree_img, watch_img } from './img';
 import type { ColorMask } from '../../src/types/types';
 import { HSVColorsPreset } from '../../src/enums/colorPresets';
 
@@ -23,7 +23,7 @@ export default function App() {
   const nw = nh;
 
   const [glareOptions /*setGlareOptions*/] = useState({
-    glowPower: 0.7,
+    glowPower: 1.7,
     glareIntensity: 0.6,
     lightIntensity: 0.7,
     glareColor: {
@@ -47,6 +47,8 @@ export default function App() {
   const [colorMaskOptions /*setColorMaskOptions*/] = useState<ColorMask[]>([
     HSVColorsPreset.YELLOW,
     HSVColorsPreset.ORANGE,
+    HSVColorsPreset.CYAN,
+    HSVColorsPreset.BLUE,
   ]);
 
   useFrameCallback(() => {
@@ -67,14 +69,15 @@ export default function App() {
       <Shine
         width={734 * nw}
         height={1024 * nh}
-        imageURI={tree_img}
+        imageURI={watch_img}
         effects={[
           { name: 'glare', options: glareOptions },
-          { name: 'doubleHolo' },
-          { name: 'reverseHolo', options: detectionChannelState },
+          // { name: 'doubleHolo' },
+          // { name: 'reverseHolo', options: detectionChannelState },
         ]}
         lightPosition={lightPosition}
         highlightColors={colorMaskOptions}
+        isHighlightInclusive={false}
         translateViewIn3d
       />
       <ShineGroup

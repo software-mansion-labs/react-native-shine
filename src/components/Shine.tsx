@@ -19,6 +19,11 @@ export function Shine({ imageURI, maskURI, ...props }: ShineProps) {
   const root = device && getOrInitRoot(device);
   const [imageTexture, setImageTexture] = useState<TgpuTexture>();
   const [maskTexture, setMaskTexture] = useState<TgpuTexture>();
+  const [colorMaskStorageTextureSize, setColorMaskStorageTextureSize] =
+    useState<{
+      width: number;
+      height: number;
+    }>();
   const [colorMaskStorageTexture, setColorMaskStorageTexture] = useState<
     TgpuTexture<any> & StorageFlag
   >();
@@ -34,6 +39,10 @@ export function Shine({ imageURI, maskURI, ...props }: ShineProps) {
           'sampled'
         );
         setColorMaskStorageTexture(texture);
+        setColorMaskStorageTextureSize({
+          width: bitmap.width,
+          height: bitmap.height,
+        });
       };
       makeStorage();
     }
@@ -42,11 +51,6 @@ export function Shine({ imageURI, maskURI, ...props }: ShineProps) {
   useEffect(() => {
     if (root && maskURI) loadBitmap(root, maskURI, setMaskTexture);
   }, [root, imageURI, maskURI]);
-
-  // useEffect(() => {
-  //   //TODO: write the logic for allocating the storage texture for the precomputed colorMask
-  //   if (root)
-  // }, [root, imageURI]);
 
   return (
     root &&
@@ -57,6 +61,7 @@ export function Shine({ imageURI, maskURI, ...props }: ShineProps) {
         imageTexture={imageTexture}
         maskTexture={maskTexture}
         colorMaskStorageTexture={colorMaskStorageTexture}
+        colorMaskStorageTextureSize={colorMaskStorageTextureSize}
       />
     )
   );

@@ -106,9 +106,7 @@ export class PipelineManager {
     }
 
     let pipeline = this.root['~unstable'].withCompute(compute).createPipeline();
-
     let bindGroups: TgpuBindGroup<any>[] = [this.sharedBindGroup];
-
     if (bindGroupProp) {
       bindGroups = [...bindGroups, ...bindGroupProp];
     }
@@ -143,13 +141,21 @@ export class PipelineManager {
     return this.addPipeline(fragment, bindGroup, blend);
   }
 
-  async runComputePipeline(compute: TgpuComputeFn) {
+  runComputePipeline(
+    compute: TgpuComputeFn,
+    textureSize: { width: number; height: number }
+  ) {
     const pipeline = this.computePipelinesMap.get(compute);
     if (!pipeline) {
       throw new Error('Compute pipeline not found');
     }
-    pipeline.dispatchWorkgroups(1, 1, 1);
-    await this.root.device.queue.onSubmittedWorkDone();
+
+    console.log('Running compute pipeline with size:', textureSize);
+    pipeline.dispatchWorkgroups(
+      Math.ceil(textureSize.width / 8),
+      Math.ceil(textureSize.height / 8),
+      1
+    );
   }
 
   renderPipelines(view: GPUTextureView) {

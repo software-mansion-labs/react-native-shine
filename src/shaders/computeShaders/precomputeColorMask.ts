@@ -16,6 +16,7 @@ export const precomputeColorMask = tgpu['~unstable'].computeFn({
     precomputeColorMaskBindGroupLayout.$.colorMaskStorage;
   const size = std.textureDimensions(colorMaskStorageTexture);
 
+  console.log('precomputing color mask at', x, y);
   if (x >= size.x || y >= size.y) return;
   const uv = d.vec2f(d.f32(x) / d.f32(size.x), d.f32(y) / d.f32(size.y));
 
@@ -25,5 +26,9 @@ export const precomputeColorMask = tgpu['~unstable'].computeFn({
     uv
   );
 
-  std.textureStore(colorMaskStorageTexture, d.vec2u(x, y), colorSampled);
+  std.textureStore(
+    precomputeColorMaskBindGroupLayout.$.colorMaskStorage,
+    d.vec2u(x, y),
+    d.vec4f(colorSampled)
+  );
 });
