@@ -76,6 +76,10 @@ interface ContentProps extends SharedProps {
   imageTexture: TgpuTexture<TextureProps>;
   maskTexture?: TgpuTexture<TextureProps>;
   colorMaskStorageTexture?: TgpuTexture<any> & StorageFlag;
+  colorMaskStorageTextureSize?: {
+    width: number;
+    height: number;
+  };
 }
 
 export default function Content({
@@ -92,6 +96,7 @@ export default function Content({
   style,
   containerStyle,
   colorMaskStorageTexture,
+  colorMaskStorageTextureSize,
 }: ContentProps) {
   const { device } = root;
   // const { ref, context } = useGPUContext();
@@ -230,7 +235,7 @@ export default function Content({
           colorMaskBuffer
         );
 
-        if (colorMaskStorageTexture) {
+        if (colorMaskStorageTexture && colorMaskStorageTextureSize) {
           const precomputeColorMaskBindGroup = root.createBindGroup(
             precomputeColorMaskBindGroupLayout,
             {
@@ -255,8 +260,10 @@ export default function Content({
             colorMaskBindGroup,
             precomputeColorMaskBindGroup,
           ]);
-          await pipelineCache.runComputePipeline(precomputeColorMask);
-          // colorMaskOutputTexture.write(colorMaskStorageTexture);
+          pipelineCache.runComputePipeline(
+            precomputeColorMask,
+            colorMaskStorageTextureSize
+          );
 
           pipelineCache.addPipeline(
             colorMaskFragment,

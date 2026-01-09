@@ -115,7 +115,7 @@ export const glareFlareBindGroupLayout = tgpu.bindGroupLayout({
 
 export const precomputeTextureSchema = d.textureStorage2d(
   'rgba8unorm',
-  'read-write'
+  'write-only'
 );
 
 export type PrecomputeTextureSchema = typeof precomputeTextureSchema;
