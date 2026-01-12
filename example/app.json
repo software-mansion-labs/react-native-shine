@@ -14,7 +14,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "shine.example"
+      "bundleIdentifier": "shine.example",
+      "appleTeamId": "J5FM626PE2"
     },
     "android": {
       "adaptiveIcon": {

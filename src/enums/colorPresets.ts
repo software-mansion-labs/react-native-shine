@@ -80,6 +80,14 @@ export const HSVColorsPreset = {
   FUCHSIA: { hueMin: 295, hueMax: 325 }, // #ff00d5ff
 
   GRAY: { hueMin: 0, hueMax: 360, saturationMax: 0.2, saturationMin: 0 }, // #738c8cff
+  BEIGE: {
+    hueMin: 330,
+    hueMax: 300,
+    saturationMin: 0,
+    saturationMax: 0.3,
+    lightnessMax: 0.95,
+    lightnessMin: 0.4,
+  },
   WHITE: {
     hueMin: 0,
     hueMax: 360,
