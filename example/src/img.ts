@@ -32,3 +32,5 @@ const card2_source = require('../assets/card2.png');
 export const card2_img = Image.resolveAssetSource(card2_source).uri;
 const card3_source = require('../assets/card3.png');
 export const card3_img = Image.resolveAssetSource(card3_source).uri;
+const back_source = require('../assets/back.jpg');
+export const back_img = Image.resolveAssetSource(back_source).uri;

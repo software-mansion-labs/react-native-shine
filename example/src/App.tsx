@@ -7,11 +7,13 @@ import {
   ScrollView,
   Platform,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useFrameCallback,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 import {
   addV2d,
@@ -30,18 +32,19 @@ import {
   card2_img,
   card3_img,
   tree_img,
+  back_img,
 } from './img';
-import type { ColorMask } from '../../src/types/types';
 import { HSVColorsPreset } from '../../src/enums/colorPresets';
+
+const nh = 0.45;
+const nw = nh;
 
 export default function App() {
   const orientation = useOrientation();
   const lightPosition = useSharedValue<V2d>(zeroV2d);
   const rotation = useRef<number>(0);
-  const nh = 0.45;
-  const nw = nh;
 
-  const [glareOptions /*setGlareOptions*/] = useState({
+  const [glareOptions] = useState({
     glowPower: 0.8,
     glareIntensity: 0.6,
     lightIntensity: 0.7,
@@ -52,13 +55,8 @@ export default function App() {
     },
   });
 
-  //bigger values make the channels less reflective
-  //smaller values make the channels more reflective
-  const [detectionChannelState /*setDetectionChannelState*/] = useState({
-    // redChannel: -0.2, //reflect more on red
-    // greenChannel: 0.5, //reflect less on green
-    // blueChannel: 1.0,
-    redChannel: 1.5, //reflect more on red
+  const [detectionChannelState] = useState({
+    redChannel: 1.5,
     greenChannel: -1.0,
     blueChannel: -0.4,
   });
@@ -157,34 +155,60 @@ export default function App() {
 }
 
 const Card = ({ shineProps }: { shineProps?: ShineProps }) => {
-  const rotate = useSharedValue(0);
+  const rotation = useSharedValue(0);
 
   const style = useAnimatedStyle(() => {
     return {
-      transform: [{ perspective: 400 }, { rotateY: `${rotate.value}deg` }],
+      transform: [{ perspective: 400 }, { rotateY: `${rotation.value}deg` }],
     };
   });
 
+  const cardElevation = useAnimatedStyle(() => {
+    return {
+      zIndex: rotation.value > 90 ? 3 : 1,
+    };
+  });
+
+  const rotateCard = () => {
+    rotation.value = withTiming(rotation.value === 0 ? 180 : 0);
+  };
+
   return (
-    <Animated.View
-      style={[
-        {
-          width: Dimensions.get('window').width,
-          height: Dimensions.get('window').height,
-        },
-        styles.cardWrapper,
-        style,
-      ]}
-    >
-      <Shine
-        style={styles.shineImage}
-        width={300}
-        height={400}
-        imageURI={tree_img}
-        translateViewIn3d
-        {...shineProps}
-      />
-    </Animated.View>
+    <TouchableOpacity onPress={rotateCard} activeOpacity={0.9}>
+      <Animated.View
+        style={[
+          {
+            width: Dimensions.get('window').width,
+            height: Dimensions.get('window').height,
+          },
+          styles.cardWrapper,
+          style,
+        ]}
+      >
+        <Animated.View
+          style={[{ position: 'absolute', zIndex: 3 }, cardElevation]}
+        >
+          <Shine
+            style={styles.shineImage}
+            width={734 * nw}
+            height={1024 * nh}
+            imageURI={back_img}
+
+            translateViewIn3d
+          />
+        </Animated.View>
+        <Animated.View style={{ position: 'absolute', zIndex: 2 }}>
+          <Shine
+            style={styles.shineImage}
+            width={300}
+            height={400}
+            imageURI={tree_img}
+            translateViewIn3d
+            {...shineProps}
+          />
+        </Animated.View>
+      </Animated.View>
+    </TouchableOpacity>
   );
 };
 
