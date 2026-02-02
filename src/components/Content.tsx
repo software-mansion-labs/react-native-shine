@@ -6,6 +6,7 @@ import Animated, {
   useAnimatedSensor,
   useAnimatedStyle,
   useDerivedValue,
+  useFrameCallback,
   useSharedValue,
 } from 'react-native-reanimated';
 import {
@@ -21,14 +22,13 @@ import type {
   TgpuRoot,
   TgpuTexture,
 } from 'typegpu';
-import { scheduleOnUI } from 'react-native-worklets';
+import { scheduleOnRN, scheduleOnUI } from 'react-native-worklets';
 import {
   colorMaskArraySchema,
   precomputeColorMaskBindGroupLayout,
   precomputeColorMaskOutputBindGroupLayout,
   rotationSchema,
 } from '../shaders/bindGroupLayouts';
-import useAnimationFrame from '../hooks/useAnimationFrame';
 import { subscribeToOrientationChange } from '../shaders/utils';
 import type { ColorMask } from '../types/types';
 import type { V2d, V3d } from '../types/vector';
@@ -322,7 +322,9 @@ export default function Content({
     context.present();
   }, [context, pipelineCache, rotation, isCanvasReady]);
 
-  useAnimationFrame(frameCallback);
+  useFrameCallback(() => {
+    scheduleOnRN(frameCallback);
+  });
 
   return (
     <View
