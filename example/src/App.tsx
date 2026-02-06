@@ -82,7 +82,7 @@ export default function App() {
         effects={[
           { name: 'glare', options: glareOptions },
           {
-            name: 'glareFlare',
+            name: 'glareFlareParabolic',
             options: {
               ringIntensity: 0.1,
               rayCount: 0.0,

@@ -26,7 +26,10 @@ import {
   doubleHoloFragment,
   holoFragment,
 } from '../shaders/fragmentShaders/holoFragment';
-import { glareFlareFragment } from '../shaders/fragmentShaders/glareFlareFragment';
+import {
+  glareFlareFragment,
+  glareFlareParabolicFragment,
+} from '../shaders/fragmentShaders/glareFlareFragment';
 import type {
   StorageFlag,
   TgpuBindGroup,
@@ -113,6 +116,10 @@ export const Effects = {
   holo: HOLO,
   doubleHolo: DOUBLE_HOLO,
   glareFlare: GLARE_FLARE,
+  glareFlareParabolic: {
+    ...GLARE_FLARE,
+    fragment: glareFlareParabolicFragment,
+  },
 } as const; //todo: add forced typings
 
 export type Effect = {
