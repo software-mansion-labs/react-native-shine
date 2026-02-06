@@ -11,7 +11,7 @@ import {
   type V2d,
   zeroV2d,
 } from 'react-native-shine';
-import { tree_img, watch_img } from './img';
+import { watch_img } from './img';
 import type { ColorMask } from '../../src/types/types';
 import { HSVColorsPreset } from '../../src/enums/colorPresets';
 
@@ -35,20 +35,29 @@ export default function App() {
 
   //bigger values make the channels less reflective
   //smaller values make the channels more reflective
-  const [detectionChannelState /*setDetectionChannelState*/] = useState({
-    // redChannel: -0.2, //reflect more on red
-    // greenChannel: 0.5, //reflect less on green
-    // blueChannel: 1.0,
-    redChannel: 1.5, //reflect more on red
-    greenChannel: -1.0,
-    blueChannel: -0.4,
-  });
+  // const [detectionChannelState /*setDetectionChannelState*/] = useState({
+  //   // redChannel: -0.2, //reflect more on red
+  //   // greenChannel: 0.5, //reflect less on green
+  //   // blueChannel: 1.0,
+  //   redChannel: 1.5, //reflect more on red
+  //   greenChannel: -1.0,
+  //   blueChannel: -0.4,
+  // });
 
   const [colorMaskOptions /*setColorMaskOptions*/] = useState<ColorMask[]>([
-    HSVColorsPreset.YELLOW,
-    HSVColorsPreset.ORANGE,
+    // HSVColorsPreset.YELLOW,
+    // HSVColorsPreset.ORANGE,
     HSVColorsPreset.CYAN,
     HSVColorsPreset.BLUE,
+    HSVColorsPreset.TRUE_BLUE,
+    HSVColorsPreset.ROYAL_BLUE,
+    HSVColorsPreset.INDIGO,
+    {
+      hueMin: 180,
+      hueMax: 290,
+      saturationMin: 0.2,
+      lightnessMin: 0.0,
+    },
   ]);
 
   useFrameCallback(() => {
@@ -72,12 +81,23 @@ export default function App() {
         imageURI={watch_img}
         effects={[
           { name: 'glare', options: glareOptions },
+          {
+            name: 'glareFlare',
+            options: {
+              ringIntensity: 0.1,
+              rayCount: 0.0,
+              spotIntensity: 0.0,
+              falloff: 1.0,
+              flareIntensity: 0.3,
+              rayIntensity: 1.0,
+            },
+          },
           // { name: 'doubleHolo' },
           // { name: 'reverseHolo', options: detectionChannelState },
         ]}
         lightPosition={lightPosition}
         highlightColors={colorMaskOptions}
-        isHighlightInclusive={false}
+        isHighlightInclusive={true}
         translateViewIn3d
       />
       <ShineGroup

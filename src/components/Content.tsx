@@ -260,6 +260,7 @@ export default function Content({
             colorMaskBindGroup,
             precomputeColorMaskBindGroup,
           ]);
+
           pipelineCache.runComputePipeline(
             precomputeColorMask,
             colorMaskStorageTextureSize
