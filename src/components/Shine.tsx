@@ -14,6 +14,13 @@ export interface ShineProps extends SharedProps {
   maskURI?: string;
 }
 
+export type SetStorageTexture = React.Dispatch<
+  React.SetStateAction<(TgpuTexture<any> & StorageFlag) | undefined>
+>;
+export type SetSize = React.Dispatch<
+  React.SetStateAction<{ width: number; height: number } | undefined>
+>;
+
 export function Shine({ imageURI, maskURI, ...props }: ShineProps) {
   const { device } = useDevice();
   const root = device && getOrInitRoot(device);
@@ -27,24 +34,43 @@ export function Shine({ imageURI, maskURI, ...props }: ShineProps) {
   const [colorMaskStorageTexture, setColorMaskStorageTexture] = useState<
     TgpuTexture<any> & StorageFlag
   >();
-  //TODO: complete the work with the compute shader, try out the shader
+
+  const [gaussianBlurStorageTextureSize, setGaussianBlurStorageTextureSize] =
+    useState<{
+      width: number;
+      height: number;
+    }>();
+  // Two textures for ping-pong blur passes
+  const [gaussianBlurStorageTextureA, setGaussianBlurStorageTextureA] =
+    useState<TgpuTexture<any> & StorageFlag>();
+  const [gaussianBlurStorageTextureB, setGaussianBlurStorageTextureB] =
+    useState<TgpuTexture<any> & StorageFlag>();
 
   useEffect(() => {
     if (root) {
       loadBitmap(root, imageURI, setImageTexture);
-      const makeStorage = async () => {
+      const makeStorage = async (
+        setTexture: SetStorageTexture,
+        setSize: SetSize
+      ) => {
         const bitmap = await getBitmapFromURI(imageURI);
         const texture = (await createTexture(root, bitmap)).$usage(
           'storage',
           'sampled'
         );
-        setColorMaskStorageTexture(texture);
-        setColorMaskStorageTextureSize({
+        setTexture(texture);
+        setSize({
           width: bitmap.width,
           height: bitmap.height,
         });
       };
-      makeStorage();
+      makeStorage(setColorMaskStorageTexture, setColorMaskStorageTextureSize);
+      // Create two textures for ping-pong blur
+      makeStorage(
+        setGaussianBlurStorageTextureA,
+        setGaussianBlurStorageTextureSize
+      );
+      makeStorage(setGaussianBlurStorageTextureB, () => {});
     }
   }, [root, imageURI]);
 
@@ -62,6 +88,9 @@ export function Shine({ imageURI, maskURI, ...props }: ShineProps) {
         maskTexture={maskTexture}
         colorMaskStorageTexture={colorMaskStorageTexture}
         colorMaskStorageTextureSize={colorMaskStorageTextureSize}
+        gaussianBlurStorageTextureA={gaussianBlurStorageTextureA}
+        gaussianBlurStorageTextureB={gaussianBlurStorageTextureB}
+        gaussianBlurStorageTextureSize={gaussianBlurStorageTextureSize}
       />
     )
   );

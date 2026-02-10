@@ -15,22 +15,24 @@ import {
   type RNCanvasContext,
 } from 'react-native-wgpu';
 import * as d from 'typegpu/data';
-import type {
-  SampledFlag,
-  StorageFlag,
-  TextureProps,
-  TgpuRoot,
-  TgpuTexture,
-} from 'typegpu';
+import type { StorageFlag, TextureProps, TgpuRoot, TgpuTexture } from 'typegpu';
 import { scheduleOnRN, scheduleOnUI } from 'react-native-worklets';
 import {
   colorMaskArraySchema,
+  gaussianBlurBindGroupLayout,
+  gaussianBlurInputTextureLayout,
+  gaussianBlurOutputTextureLayout,
+  gaussianBlurParamsSchema,
   precomputeColorMaskBindGroupLayout,
   precomputeColorMaskOutputBindGroupLayout,
   rotationSchema,
 } from '../shaders/bindGroupLayouts';
 import { subscribeToOrientationChange } from '../shaders/utils';
-import type { ColorMask } from '../types/types';
+import type {
+  ColorMask,
+  Rgba8SampledTexture,
+  Rgba8StorageTexture,
+} from '../types/types';
 import type { V2d, V3d } from '../types/vector';
 import {
   addV3d,
@@ -53,6 +55,7 @@ import { createColorMasks } from '../types/typeUtils';
 import { createColorMaskBindGroup } from '../shaders/bindGroupUtils';
 import colorMaskFragment from '../shaders/fragmentShaders/colorMaskFragment';
 import { precomputeColorMask } from '../shaders/computeShaders/precomputeColorMask';
+import { gaussianBlur } from '../shaders/computeShaders/gaussianBlur';
 
 export interface SharedProps {
   width: number;
@@ -69,6 +72,11 @@ export interface SharedProps {
   style?: ViewStyle;
   containerStyle?: ViewStyle;
   effects?: Effect[];
+  blur?: {
+    passes?: number;
+    radius?: number;
+    sigma?: number;
+  };
 }
 
 interface ContentProps extends SharedProps {
@@ -77,6 +85,13 @@ interface ContentProps extends SharedProps {
   maskTexture?: TgpuTexture<TextureProps>;
   colorMaskStorageTexture?: TgpuTexture<any> & StorageFlag;
   colorMaskStorageTextureSize?: {
+    width: number;
+    height: number;
+  };
+  // Two textures for ping-pong blur passes
+  gaussianBlurStorageTextureA?: TgpuTexture<any> & StorageFlag;
+  gaussianBlurStorageTextureB?: TgpuTexture<any> & StorageFlag;
+  gaussianBlurStorageTextureSize?: {
     width: number;
     height: number;
   };
@@ -97,6 +112,10 @@ export default function Content({
   containerStyle,
   colorMaskStorageTexture,
   colorMaskStorageTextureSize,
+  gaussianBlurStorageTextureA,
+  gaussianBlurStorageTextureB,
+  gaussianBlurStorageTextureSize,
+  blur,
 }: ContentProps) {
   const { device } = root;
   // const { ref, context } = useGPUContext();
@@ -217,11 +236,165 @@ export default function Content({
   useEffect(() => {
     const initPipelines = async () => {
       pipelineCache.pipelinesMap.clear();
-
       pipelineCache.addPipeline(baseTextureFragment);
 
+      //#region - gaussian blur pipeline setup (ping-pong multi-pass)
+      /**
+       * Runs multiple passes of Gaussian blur using ping-pong textures.
+       * Each pass consists of a horizontal and vertical blur.
+       * @param passes - Number of blur passes (each pass = horizontal + vertical)
+       * @param radius - Blur radius (number of samples on each side)
+       * @param sigma - Sigma value for Gaussian distribution
+       * @returns The final output bind group for reading the blurred result
+       */
+      const runGaussianBlur = (
+        passes: number,
+        radius: number = 3.0,
+        sigma: number = 2.0
+      ) => {
+        // Skip blur if passes is 0 or negative
+        if (passes <= 0) {
+          return undefined;
+        }
+
+        if (
+          !gaussianBlurStorageTextureA ||
+          !gaussianBlurStorageTextureB ||
+          !gaussianBlurStorageTextureSize
+        ) {
+          return undefined;
+        }
+
+        const sampler = root['~unstable'].createSampler({
+          magFilter: 'linear',
+          minFilter: 'linear',
+          mipmapFilter: 'linear',
+        });
+
+        // We've already checked these are defined in the outer if
+        const textures = [
+          gaussianBlurStorageTextureA!,
+          gaussianBlurStorageTextureB!,
+        ];
+
+        let currentInputIsOriginal = true;
+        let currentOutputIndex = 0; // Start writing to texture A
+
+        for (let pass = 0; pass < passes; pass++) {
+          const horizontalParamsBuffer =
+            pipelineCache.buffersMap.syncUniformBuffer(
+              gaussianBlurParamsSchema,
+              {
+                direction: d.vec2f(1, 0),
+                radius,
+                sigma,
+              }
+            );
+
+          const horizontalInputBindGroup = root.createBindGroup(
+            gaussianBlurInputTextureLayout,
+            {
+              inputTexture: currentInputIsOriginal
+                ? root.unwrap(imageTexture).createView()
+                : root.unwrap(textures[1 - currentOutputIndex]!).createView(),
+              inputSampler: sampler,
+            }
+          );
+
+          const horizontalOutputBindGroup = root.createBindGroup(
+            gaussianBlurBindGroupLayout,
+            {
+              blurParams: horizontalParamsBuffer,
+              outputTexture: textures[
+                currentOutputIndex
+              ] as Rgba8StorageTexture,
+            }
+          );
+
+          pipelineCache.addComputePipelineWithoutShared(gaussianBlur, [
+            horizontalInputBindGroup,
+            horizontalOutputBindGroup,
+          ]);
+          pipelineCache.runComputePipeline(
+            gaussianBlur,
+            gaussianBlurStorageTextureSize
+          );
+
+          // After first horizontal pass, we're no longer reading from original
+          currentInputIsOriginal = false;
+          // Swap: the output becomes the next input
+          const horizontalOutputIndex = currentOutputIndex;
+          currentOutputIndex = 1 - currentOutputIndex;
+
+          const verticalParamsBuffer =
+            pipelineCache.buffersMap.syncUniformBuffer(
+              gaussianBlurParamsSchema,
+              {
+                direction: d.vec2f(0, 1),
+                radius,
+                sigma,
+              }
+            );
+
+          const verticalInputBindGroup = root.createBindGroup(
+            gaussianBlurInputTextureLayout,
+            {
+              inputTexture: root
+                .unwrap(textures[horizontalOutputIndex]!)
+                .createView(),
+              inputSampler: sampler,
+            }
+          );
+
+          const verticalOutputBindGroup = root.createBindGroup(
+            gaussianBlurBindGroupLayout,
+            {
+              blurParams: verticalParamsBuffer,
+              outputTexture: textures[
+                currentOutputIndex
+              ] as Rgba8StorageTexture,
+            }
+          );
+
+          pipelineCache.addComputePipelineWithoutShared(gaussianBlur, [
+            verticalInputBindGroup,
+            verticalOutputBindGroup,
+          ]);
+          pipelineCache.runComputePipeline(
+            gaussianBlur,
+            gaussianBlurStorageTextureSize
+          );
+
+          // Swap for next pass
+          currentOutputIndex = 1 - currentOutputIndex;
+        }
+
+        // The final result is in textures[1 - currentOutputIndex]
+        // (because we swapped after the last vertical pass)
+        const finalTextureIndex = 1 - currentOutputIndex;
+        return root.createBindGroup(gaussianBlurOutputTextureLayout, {
+          blurredTexture: textures[finalTextureIndex] as Rgba8SampledTexture,
+        });
+      };
+
+      // Create blur output bind group, or use original image texture when blur is disabled
+      const blurPasses = blur?.passes ?? 0;
+      const gaussianBlurOutputBindGroup =
+        blurPasses > 0
+          ? runGaussianBlur(blurPasses, blur?.radius ?? 3.0, blur?.sigma ?? 2.0)
+          : root.createBindGroup(gaussianBlurOutputTextureLayout, {
+              blurredTexture: imageTexture as Rgba8SampledTexture,
+            });
+      //#endregion
+
       effects.forEach(({ name, options }) => {
-        pipelineCache.addPipelineWithBuffer(name, options);
+        //getting any extra effect related bind groups dynamically
+        const extraBindGroups = gaussianBlurOutputBindGroup
+          ? [gaussianBlurOutputBindGroup]
+          : undefined;
+        if (name === 'glare')
+          pipelineCache.addPipelineWithBuffer(name, options, extraBindGroups);
+        else pipelineCache.addPipelineWithBuffer(name, options);
       });
 
       //TODO: move to effect definition
@@ -239,21 +412,13 @@ export default function Content({
           const precomputeColorMaskBindGroup = root.createBindGroup(
             precomputeColorMaskBindGroupLayout,
             {
-              colorMaskStorage: colorMaskStorageTexture as TgpuTexture<{
-                size: readonly number[];
-                format: 'rgba8unorm';
-              }> &
-                StorageFlag,
+              colorMaskStorage: colorMaskStorageTexture as Rgba8StorageTexture,
             }
           );
           const precomputeColorMaskOutputBindGroup = root.createBindGroup(
             precomputeColorMaskOutputBindGroupLayout,
             {
-              colorMaskOutput: colorMaskStorageTexture as TgpuTexture<{
-                size: readonly number[];
-                format: 'rgba8unorm';
-              }> &
-                SampledFlag,
+              colorMaskOutput: colorMaskStorageTexture as Rgba8SampledTexture,
             }
           );
           pipelineCache.addComputePipeline(precomputeColorMask, [
@@ -282,6 +447,10 @@ export default function Content({
     pipelineCache,
     root,
     colorMaskStorageTexture,
+    gaussianBlurStorageTextureA,
+    gaussianBlurStorageTextureB,
+    imageTexture,
+    blur,
   ]);
 
   useEffect(() => {

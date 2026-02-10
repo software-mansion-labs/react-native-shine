@@ -132,6 +132,35 @@ export const precomputeColorMaskOutputBindGroupLayout = tgpu.bindGroupLayout({
   },
 });
 
+export const gaussianBlurParamsSchema = d.struct({
+  // Direction: (1, 0) for horizontal pass, (0, 1) for vertical pass
+  direction: d.vec2f,
+  // Blur radius (number of samples on each side)
+  radius: d.f32,
+  // Sigma value for Gaussian distribution
+  sigma: d.f32,
+});
+
+export type GaussianBlurParamsSchema = typeof gaussianBlurParamsSchema;
+
+export const gaussianBlurBindGroupLayout = tgpu.bindGroupLayout({
+  blurParams: { uniform: gaussianBlurParamsSchema },
+  outputTexture: {
+    storageTexture: precomputeTextureSchema,
+  },
+});
+
+export const gaussianBlurInputTextureLayout = tgpu.bindGroupLayout({
+  inputTexture: { texture: d.texture2d(d.f32) },
+  inputSampler: { sampler: 'filtering' },
+});
+
+export const gaussianBlurOutputTextureLayout = tgpu.bindGroupLayout({
+  blurredTexture: {
+    texture: d.texture2d(d.f32),
+  },
+});
+
 export type BufferSchemas =
   | d.Vec3f
   | ReverseHoloDetectionChannelFlagsSchema

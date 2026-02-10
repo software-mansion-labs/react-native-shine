@@ -61,12 +61,13 @@ export const hsvToRGB = tgpu.fn(
   const q = v * (d.f32(1) - s * f);
   const t = v * (d.f32(1) - s * (d.f32(1) - f));
 
-  const i1 = d.f32(i === 1);
-  const i2 = d.f32(i === 2);
-  const i3 = d.f32(i === 3);
-  const i4 = d.f32(i === 4);
-  const i5 = d.f32(i === 5);
-  const i0 = d.f32(d.u32(i5 + i1 + i2 + i3 + i4) === d.u32(0)); //doesnt work, clamps on 300
+  // GPU-compatible sector selection using step functions
+  const i0 = std.step(0.0, i) - std.step(1.0, i);
+  const i1 = std.step(1.0, i) - std.step(2.0, i);
+  const i2 = std.step(2.0, i) - std.step(3.0, i);
+  const i3 = std.step(3.0, i) - std.step(4.0, i);
+  const i4 = std.step(4.0, i) - std.step(5.0, i);
+  const i5 = std.step(5.0, i) - std.step(6.0, i);
 
   const r = i0 * v + i1 * q + i2 * p + i3 * p + i4 * t + i5 * v;
   const g = i0 * t + i1 * v + i2 * v + i3 * q + i4 * p + i5 * p;

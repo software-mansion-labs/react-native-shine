@@ -1,9 +1,12 @@
 import type {
+  SampledFlag,
+  StorageFlag,
   TgpuBindGroup,
   TgpuBindGroupLayout,
   TgpuFragmentFn,
   TgpuRenderPipeline,
   TgpuRoot,
+  TgpuTexture,
   TgpuUniform,
   ValidateBufferSchema,
 } from 'typegpu';
@@ -13,6 +16,18 @@ import type {
   ColorMaskSchema,
   maskTextureBindGroupLayout,
 } from '../shaders/bindGroupLayouts';
+
+export type Rgba8StorageTexture = TgpuTexture<{
+  size: readonly number[];
+  format: 'rgba8unorm';
+}> &
+  StorageFlag;
+
+export type Rgba8SampledTexture = TgpuTexture<{
+  size: readonly number[];
+  format: 'rgba8unorm';
+}> &
+  SampledFlag;
 
 export type vec2 = [number, number];
 export type vec3 = [number, number, number];

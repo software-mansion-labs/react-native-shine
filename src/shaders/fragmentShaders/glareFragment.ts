@@ -4,6 +4,7 @@ import * as std from 'typegpu/std';
 import {
   sharedBindGroupLayout,
   glareBindGroupLayout,
+  gaussianBlurOutputTextureLayout,
 } from '../bindGroupLayouts';
 import {
   getPixelColorFromVector,
@@ -32,7 +33,14 @@ export const glareFragment = tgpu['~unstable'].fragmentFn({
   const hueShiftAngleMin = glareColor.hueShiftAngleMin; // degrees
   const hueShiftAngleMax = glareColor.hueShiftAngleMax; // degrees
 
-  let color = getPixelColorFromVector(uv);
+  // Sharp texture for final display
+  const color = getPixelColorFromVector(uv);
+  // Blurred texture for glare calculations (removes JPEG compression artifacts)
+  const blurredColor = std.textureSample(
+    gaussianBlurOutputTextureLayout.$.blurredTexture,
+    sharedBindGroupLayout.$.sampler,
+    uv
+  );
 
   const dist = std.distance(center, centeredCoords);
   const radial = std.exp(-dist); // (0,1], steeper near center
@@ -44,8 +52,9 @@ export const glareFragment = tgpu['~unstable'].fragmentFn({
   const curveExp = std.clamp(glowPower, 0.05, 64.0);
   const glowMask = std.pow(influenceRaw, std.div(1.0, curveExp)); // 0..1
 
-  const maskedGlow = std.mul(glowMask, color.w); // 0..1
-  const boostedRGB = glareColorShift(color.xyz, maskedGlow);
+  // Use blurred texture for all glare calculations to avoid artifacts
+  const maskedGlow = std.mul(glowMask, blurredColor.w); // 0..1
+  const boostedRGB = glareColorShift(blurredColor.xyz, maskedGlow);
 
   const hueT = std.clamp(maskedGlow, 0.0, 1.0);
   const hueAngle = std.mix(hueShiftAngleMin, hueShiftAngleMax, hueT);
@@ -56,6 +65,7 @@ export const glareFragment = tgpu['~unstable'].fragmentFn({
     0.0,
     1.0
   );
+  // Mix sharp color with hue-shifted blurred color
   const chromaMixed = std.mix(color.xyz, hueShifted, hueMixWeight);
 
   const glareStrength = std.clamp(lightIntensity, 0.0, 100.0);

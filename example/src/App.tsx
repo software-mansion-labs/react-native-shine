@@ -81,20 +81,31 @@ export default function App() {
         imageURI={watch_img}
         effects={[
           { name: 'glare', options: glareOptions },
-          {
-            name: 'glareFlareParabolic',
-            options: {
-              ringIntensity: 0.1,
-              rayCount: 0.0,
-              spotIntensity: 0.0,
-              falloff: 1.0,
-              flareIntensity: 0.3,
-              rayIntensity: 1.0,
-            },
-          },
+          // {
+          //   name: 'glare',
+          //   options: {
+          //     glareIntensity: 0.3,
+          //     lightIntensity: 0.2,
+          //     glareColor: {
+          //       hueBlendPower: 1.0,
+          //     },
+          //   },
+          // },
+          // {
+          //   name: 'glareFlareParabolic',
+          //   options: {
+          //     ringIntensity: 0.1,
+          //     rayCount: 0.0,
+          //     spotIntensity: 0.0,
+          //     falloff: 1.0,
+          //     flareIntensity: 0.3,
+          //     rayIntensity: 1.0,
+          //   },
+          // },
           // { name: 'doubleHolo' },
           // { name: 'reverseHolo', options: detectionChannelState },
         ]}
+        blur={{ passes: 0, radius: 7.0, sigma: 10.0 }}
         lightPosition={lightPosition}
         highlightColors={colorMaskOptions}
         isHighlightInclusive={true}

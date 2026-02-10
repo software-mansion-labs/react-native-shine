@@ -119,8 +119,28 @@ export class PipelineManager {
     return pipeline;
   }
 
+  // For compute pipelines that don't use the shared bind group (e.g., ping-pong blur)
+  addComputePipelineWithoutShared(
+    compute: TgpuComputeFn,
+    bindGroups: TgpuBindGroup[]
+  ) {
+    // Always recreate to allow different bind groups for each pass
+    let pipeline = this.root['~unstable'].withCompute(compute).createPipeline();
+
+    for (const bindGroup of bindGroups) {
+      pipeline = pipeline.with(bindGroup);
+    }
+
+    this.computePipelinesMap.set(compute, pipeline);
+    return pipeline;
+  }
+
   //TODO: fix any typing
-  addPipelineWithBuffer(name: keyof typeof Effects, options?: any) {
+  addPipelineWithBuffer(
+    name: keyof typeof Effects,
+    options?: any,
+    extraBindGroups?: TgpuBindGroup[]
+  ) {
     const { fragment, blend, buffers, bindGroupCreator } = Effects[name];
 
     const genericBuffers = buffers as readonly BufferConfig<AnySchema>[];
@@ -138,7 +158,11 @@ export class PipelineManager {
       updatedBuffers as any
     );
 
-    return this.addPipeline(fragment, bindGroup, blend);
+    const allBindGroups = extraBindGroups
+      ? [...bindGroup, ...extraBindGroups]
+      : bindGroup;
+
+    return this.addPipeline(fragment, allBindGroups, blend);
   }
 
   runComputePipeline(
