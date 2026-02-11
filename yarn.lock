@@ -11688,18 +11688,18 @@ __metadata:
     react-native-reanimated: ^4.1.3
     react-native-view-shot: ^4.0.3
     react-native-wgpu: ^0.3.1
-    react-native-worklets: 0.7.2
+    react-native-worklets: ~0.7.2
     release-it: ^17.10.0
-    typegpu: ^0.9.0
+    typegpu: ~0.9.0
     typescript: ^5.8.3
-    unplugin-typegpu: ^0.9.0
+    unplugin-typegpu: ~0.9.0
   peerDependencies:
     react: "*"
     react-native: "*"
-    react-native-reanimated: ^4.1.3
+    react-native-reanimated: ~4.1.3
     react-native-wgpu: ^0.3.1
-    react-native-worklets: ^0.7.2
-    typegpu: ^0.9.0
+    react-native-worklets: ~0.7.2
+    typegpu: ~0.9.0
   languageName: unknown
   linkType: soft
 
@@ -11744,7 +11744,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-worklets@npm:0.7.2, react-native-worklets@npm:^0.7.2":
+"react-native-worklets@npm:^0.7.2":
   version: 0.7.2
   resolution: "react-native-worklets@npm:0.7.2"
   dependencies:
@@ -11764,6 +11764,29 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: a1d220499c40e44286b4b5f97e6e0483ec6f84cda7f87db56e4c5c49b0991d749b9087d03915a7dfb8d5aa892308d9ba8661403e48a5fad8396e91b7b35228a2
+  languageName: node
+  linkType: hard
+
+"react-native-worklets@npm:~0.7.2":
+  version: 0.7.3
+  resolution: "react-native-worklets@npm:0.7.3"
+  dependencies:
+    "@babel/plugin-transform-arrow-functions": 7.27.1
+    "@babel/plugin-transform-class-properties": 7.27.1
+    "@babel/plugin-transform-classes": 7.28.4
+    "@babel/plugin-transform-nullish-coalescing-operator": 7.27.1
+    "@babel/plugin-transform-optional-chaining": 7.27.1
+    "@babel/plugin-transform-shorthand-properties": 7.27.1
+    "@babel/plugin-transform-template-literals": 7.27.1
+    "@babel/plugin-transform-unicode-regex": 7.27.1
+    "@babel/preset-typescript": 7.27.1
+    convert-source-map: 2.0.0
+    semver: 7.7.3
+  peerDependencies:
+    "@babel/core": "*"
+    react: "*"
+    react-native: "*"
+  checksum: 5b3f39e99f52d3b20c648570c25cc8403b3e17d7cf919d571e39044cff05fb6bcac97a6c4819e828fe2290546f2c01ca04716860610b73faa24a989fda4cb1ba
   languageName: node
   linkType: hard
 
@@ -13568,7 +13591,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typegpu@npm:^0.9.0":
+"typegpu@npm:^0.9.0, typegpu@npm:~0.9.0":
   version: 0.9.0
   resolution: "typegpu@npm:0.9.0"
   dependencies:
@@ -13735,7 +13758,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unplugin-typegpu@npm:^0.9.0":
+"unplugin-typegpu@npm:~0.9.0":
   version: 0.9.0
   resolution: "unplugin-typegpu@npm:0.9.0"
   dependencies:
