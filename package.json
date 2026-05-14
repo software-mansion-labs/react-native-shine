@@ -50,14 +50,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wojtus7/react-native-shine.git.git"
+    "url": "git+https://github.com/software-mansion-labs/react-native-shine.git"
   },
   "author": "VoidFrog <shadownn0000@gmail.com> (https://github.com/VoidFrog)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wojtus7/react-native-shine.git/issues"
+    "url": "https://github.com/software-mansion-labs/react-native-shine/issues"
   },
-  "homepage": "https://github.com/wojtus7/react-native-shine.git#readme",
+  "homepage": "https://github.com/software-mansion-labs/react-native-shine#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
@@ -122,7 +122,8 @@
   "release-it": {
     "git": {
       "commitMessage": "chore: release ${version}",
-      "tagName": "v${version}"
+      "tagName": "v${version}",
+      "pushRepo": "main"
     },
     "npm": {
       "publish": true,
