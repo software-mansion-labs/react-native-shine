@@ -1,4 +1,7 @@
 ![image](./cover.png)
+[![Ad](https://swm-delivery.com/www/images/zone-gh-react-native-shine-1?n=1)](https://swm-delivery.com/www/delivery/ck-slug.php?zoneid=zone-gh-react-native-shine-1&n=1)
+[![Ad](https://swm-delivery.com/www/images/zone-gh-react-native-shine-2?n=1)](https://swm-delivery.com/www/delivery/ck-slug.php?zoneid=zone-gh-react-native-shine-2&n=1)
+[![Ad](https://swm-delivery.com/www/images/zone-gh-react-native-shine-3?n=1)](https://swm-delivery.com/www/delivery/ck-slug.php?zoneid=zone-gh-react-native-shine-3&n=1)
 
 Fast and efficient way to add interactive GPU-based shader effects to your React Native apps using [TypeGPU](https://github.com/software-mansion/TypeGPU) and [WebGPU](https://github.com/wcandillon/react-native-webgpu).
 
